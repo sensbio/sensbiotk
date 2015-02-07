@@ -15,6 +15,10 @@ Sources can be found on github:
 
     http://github.com/sensbio/sensbiotk
 
+Documentation can be found on github.io:
+
+    http://sensbio.github.io/sensbiotk
+
 Mailing Lists
 =============
 
