@@ -1,0 +1,20 @@
+# FOX calibration parameters (IMU file)
+# (c) INRIA 2011-2014
+# Offset for accelerometers
+0.0;0.0;0.0
+# Scale for accelerometers
+1.000000;0.000000;0.000000
+0.000000;1.000000;0.000000
+0.000000;0.000000;1.000000
+# Offset for magnetometers
+-0.438443;0.221688;-1.24422
+# Scale for magnetometers
+2.18603;0.000000;0.000000
+0.000000;2.11197;0.000000
+0.000000;0.000000;1.91288
+# Offset for gyrometers
+0.0;0.0;0.0
+# Scale for gyrometers
+1.000000;0.000000;0.000000
+0.000000;1.000000;0.000000
+0.000000;0.000000;1.000000

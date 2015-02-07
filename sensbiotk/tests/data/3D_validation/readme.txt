@@ -1,0 +1,5 @@
+- Enregistrement de 3 sessions IMU + VICON + VIDEO avec export des angles et des quaternions (calculés par Vicon TRACKER).
+- IMU et Vicon synchronisés manuellement
+- Fichier de calib magneto/accelero dans CALIB_ACCEL_MAGNETO
+- Frame VICON et IMU similaires, fichier image "mire+imu.jpg", sur l'image : X vers la droite, -Y vers le haut. 
+- Données VICON échantillonnées à 100Hz, 200Hz pour l'IMU.

@@ -1,0 +1,1 @@
+simple 90° clockwise rotation on the desk, without Vicon

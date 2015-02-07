@@ -1,0 +1,1 @@
+90° suivant X, puis 90° suivant Z puis -90 suivant X, et inversement jusqu'à position initiale

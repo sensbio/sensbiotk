@@ -1,0 +1,8 @@
+include MANIFEST.in
+include COPYING
+include AUTHORS
+include COPYING
+include README.rst
+include makefile
+include doc/conf.py doc/*.rst doc/sensbio.png doc/_build/html
+
