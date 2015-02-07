@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.io.viz &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.io.viz</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.io.viz</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.io.viz</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8; -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbiotk@inria.fr</span>
+<span class="c"># Copyright (C) 2015  INRIA</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Plot for sensors data</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># pylint:disable= I0011, E1101, R0913</span>
+<span class="c"># E1101 no-member false positif</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<div class="viewcode-block" id="plot_imu"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.viz.plot_imu">[docs]</a><span class="k">def</span> <span class="nf">plot_imu</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot IMU datas</span>
+
+<span class="sd">    @param id   : plot number, negative for automatic numbering</span>
+<span class="sd">    @param title: title of the plot</span>
+<span class="sd">    @param time :</span>
+<span class="sd">    @param acc  :</span>
+<span class="sd">    @param mag  :</span>
+<span class="sd">    @param gyr  :</span>
+
+<span class="sd">    @return: none</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">num</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+
+    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">acc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">((</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="s">&#39;z&#39;</span><span class="p">),</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+              <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">borderaxespad</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;ACC (m/s^2)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">mag</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;MAG (gauss)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">gyr</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;GYR (rad/s)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;time (s)&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="plot_show"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.viz.plot_show">[docs]</a><span class="k">def</span> <span class="nf">plot_show</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    plt.show()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="test1"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.viz.test1">[docs]</a><span class="k">def</span> <span class="nf">test1</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test  plot_imu</span>
+
+<span class="sd">    @param : none</span>
+
+<span class="sd">    @return: OK/ERROR</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">sensbiotk.io.iofox_deprec</span> <span class="kn">as</span> <span class="nn">iofox</span>
+
+    <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">]</span> <span class="o">=</span> \
+        <span class="n">iofox</span><span class="o">.</span><span class="n">load_foximu_csvfile</span><span class="p">(</span><span class="s">&quot;../tests/data/output_imu.csv&quot;</span><span class="p">)</span>
+
+    <span class="n">plot_imu</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;FOX IMU&quot;</span><span class="p">,</span> <span class="n">time</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">)</span>
+
+    <span class="c">#[time, acc, mag, gyr] = fox.load_foximu_csvfile(&quot;imuf.txt&quot;)</span>
+    <span class="c">#plot_imu(2, &quot;FOX IMU&quot;, time[:, 1], acc, mag, gyr)</span>
+
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="test2"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.viz.test2">[docs]</a><span class="k">def</span> <span class="nf">test2</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test  samples time</span>
+
+<span class="sd">    @param : none</span>
+
+<span class="sd">    @return: OK/ERROR</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">sensbiotk.io.iofox_deprec</span> <span class="kn">as</span> <span class="nn">iofox</span>
+
+    <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">]</span> <span class="o">=</span> \
+        <span class="n">iofox</span><span class="o">.</span><span class="n">load_foximu_csvfile</span><span class="p">(</span><span class="s">&quot;../tests/data/output_imu.csv&quot;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&quot;FOX IMU samples verification&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">2</span><span class="p">])</span>
+
+    <span class="k">print</span> <span class="s">&quot;DT Min (ms) =&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="mi">1000</span><span class="p">,</span> <span class="s">&quot;DT Max (ms) =&quot;</span><span class="p">,</span>\
+        <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="k">print</span> <span class="s">&quot;DT Mean(ms) =&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="mi">1000</span><span class="p">,</span> <span class="s">&quot;DT Std (ms) =&quot;</span><span class="p">,</span>\
+        <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mi">1000</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="s">&quot;OK&quot;</span>
+
+</div>
+<div class="viewcode-block" id="test3"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.viz.test3">[docs]</a><span class="k">def</span> <span class="nf">test3</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test  plot_imu</span>
+
+<span class="sd">    @param : none</span>
+
+<span class="sd">    @return: OK/ERROR</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">sensbiotk.io.iofox</span> <span class="kn">as</span> <span class="nn">iofox</span>
+
+    <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">]</span> <span class="o">=</span> <span class="n">iofox</span><span class="o">.</span><span class="n">load_foximu_csvfile</span><span class="p">(</span>
+        <span class="s">&quot;../tests/data/HKB1_01_acc.csv&quot;</span><span class="p">,</span> <span class="s">&quot;../tests/data/HKB1_01_mag.csv&quot;</span><span class="p">,</span>
+        <span class="s">&quot;../tests/data/HKB1_01_gyr.csv&quot;</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">)</span>
+    <span class="n">plot_imu</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;FOX IMU&quot;</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">)</span>
+
+    <span class="k">return</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&quot;TEST 1&quot;</span>
+    <span class="n">test1</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">&quot;TEST 2&quot;</span>
+    <span class="n">test2</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">&quot;TEST 3&quot;</span>
+    <span class="n">test3</span><span class="p">()</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

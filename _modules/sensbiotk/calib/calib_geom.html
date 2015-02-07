@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.calib.calib_geom &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.calib.calib_geom</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.calib.calib_geom</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.calib.calib_geom</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Thu Dec 11 11:25:46 2014</span>
+
+<span class="sd">@author: bsijober</span>
+
+<span class="sd">Calib for IMU sensors data</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.transforms3d</span> <span class="kn">import</span> <span class="n">quaternions</span> <span class="k">as</span> <span class="n">nq</span>
+<span class="kn">import</span> <span class="nn">sensbiotk.algorithms.madgwick_ahrs</span> <span class="kn">as</span> <span class="nn">madgwick</span>
+<span class="kn">import</span> <span class="nn">sensbiotk.algorithms.martin_ahrs</span> <span class="kn">as</span> <span class="nn">martin</span>
+
+<div class="viewcode-block" id="compute"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_geom.compute">[docs]</a><span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="n">data_imu0</span><span class="p">,</span> <span class="n">data_imu1</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot; Compute an &quot;offset&quot; quaternion between two supposed aligned quaternions</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    data_imu0  : numpy array of float</span>
+<span class="sd">                 the IMU column stacked reference position data [ACC MAG GYR]</span>
+<span class="sd">    data_imu1 : numpy array of float</span>
+<span class="sd">                 the IMU column stacked reference position data [ACC MAG GYR]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    q_offset : quaternion [w, x, y, z]</span>
+<span class="sd">                 the offset quaternion between IMU0 and IMU1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Averages the data on the reference position</span>
+    <span class="n">data_ref_imu0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_imu0</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">],</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">data_ref_imu1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_imu1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">],</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c"># madgwick calculation</span>
+<span class="c">#    q_init=[1, 0, 0, 0]</span>
+<span class="c">#    q0 = madgwick.update(q_init, data_ref_imu0)</span>
+<span class="c">#    q1 = madgwick.update(q_init, data_ref_imu1)   </span>
+
+    <span class="c"># Uses martin salaun for calculating the two quaternions</span>
+    <span class="n">init0</span> <span class="o">=</span> <span class="n">martin</span><span class="o">.</span><span class="n">martin_ahrs</span><span class="p">()</span>
+    <span class="n">init1</span> <span class="o">=</span> <span class="n">martin</span><span class="o">.</span><span class="n">martin_ahrs</span><span class="p">()</span>
+    <span class="n">q0</span> <span class="o">=</span> <span class="n">init0</span><span class="o">.</span><span class="n">init_observer</span><span class="p">(</span><span class="n">data_ref_imu0</span><span class="p">)</span>
+    <span class="n">q1</span> <span class="o">=</span> <span class="n">init1</span><span class="o">.</span><span class="n">init_observer</span><span class="p">(</span><span class="n">data_ref_imu1</span><span class="p">)</span>        
+    
+    <span class="n">q_offset</span><span class="o">=</span><span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">nq</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">q0</span><span class="p">)),</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">q1</span><span class="p">))</span> <span class="c"># q_offset = conj(q0) x q1</span>
+    
+    <span class="k">return</span> <span class="n">q_offset</span></div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

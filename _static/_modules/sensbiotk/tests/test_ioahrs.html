@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.tests.test_ioahrs &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.tests.test_ioahrs</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.tests.test_ioahrs</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.tests.test_ioahrs</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8; -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbio@inria.fr</span>
+<span class="c"># Copyright (C) 2014  INRIA (Contact: sensbiotk@inria.fr)</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tests Unit for io ahrs module</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># pylint:disable= I0011, E1101, E0611</span>
+<span class="c"># E1101 no-member false positif</span>
+<span class="c"># E0611 no-name false positif</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.io.ahrs</span> <span class="kn">import</span> <span class="n">save_ahrs_csvfile</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.io.ahrs</span> <span class="kn">import</span> <span class="n">load_ahrs_csvfile</span>
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+
+
+<div class="viewcode-block" id="test_loadsave"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_ioahrs.test_loadsave">[docs]</a><span class="k">def</span> <span class="nf">test_loadsave</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Test functions load_ahrs_csvfile and save_ahrs_csvfile</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">timu</span><span class="p">,</span> <span class="n">quat</span><span class="p">,</span> <span class="n">euler</span> <span class="o">=</span> <span class="n">load_ahrs_csvfile</span><span class="p">(</span><span class="s">&quot;data/output_ahrs.csv&quot;</span><span class="p">)</span>
+    <span class="n">save_ahrs_csvfile</span><span class="p">(</span><span class="s">&quot;tmpdata/output_ahrs_copy.csv&quot;</span><span class="p">,</span> <span class="n">timu</span><span class="p">,</span> <span class="n">quat</span><span class="p">,</span> <span class="n">euler</span><span class="p">)</span>
+    <span class="n">timu_copy</span><span class="p">,</span> <span class="n">quat_copy</span><span class="p">,</span> <span class="n">euler_copy</span> <span class="o">=</span> \
+        <span class="n">load_ahrs_csvfile</span><span class="p">(</span><span class="s">&quot;tmpdata/output_ahrs_copy.csv&quot;</span><span class="p">)</span>
+
+    <span class="n">timu_cmp</span> <span class="o">=</span> <span class="n">timu</span> <span class="o">-</span> <span class="n">timu_copy</span>
+    <span class="n">quat_cmp</span> <span class="o">=</span> <span class="n">quat</span> <span class="o">-</span> <span class="n">quat_copy</span>
+    <span class="n">euler_cmp</span> <span class="o">=</span> <span class="n">euler</span> <span class="o">-</span> <span class="n">euler_copy</span>
+
+    <span class="k">yield</span> <span class="n">assert_equal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">timu_cmp</span><span class="p">),</span> <span class="mi">0</span>
+    <span class="k">yield</span> <span class="n">assert_equal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">quat_cmp</span><span class="p">),</span> <span class="mi">0</span>
+    <span class="k">yield</span> <span class="n">assert_equal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">euler_cmp</span><span class="p">),</span> <span class="mi">0</span></div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

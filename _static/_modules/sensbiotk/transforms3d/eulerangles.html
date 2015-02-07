@@ -1,0 +1,492 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.transforms3d.eulerangles &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.transforms3d.eulerangles</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.transforms3d.eulerangles</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.transforms3d.eulerangles</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39; Module implementing Euler angle rotations and their conversions</span>
+
+<span class="sd">See:</span>
+
+<span class="sd">* http://en.wikipedia.org/wiki/Rotation_matrix</span>
+<span class="sd">* http://en.wikipedia.org/wiki/Euler_angles</span>
+<span class="sd">* http://mathworld.wolfram.com/EulerAngles.html</span>
+
+<span class="sd">See also: *Representing Attitude with Euler Angles and Quaternions: A</span>
+<span class="sd">Reference* (2006) by James Diebel. A cached PDF link last found here:</span>
+
+<span class="sd">http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.110.5134</span>
+
+<span class="sd">Euler&#39;s rotation theorem tells us that any rotation in 3D can be</span>
+<span class="sd">described by 3 angles.  Let&#39;s call the 3 angles the *Euler angle vector*</span>
+<span class="sd">and call the angles in the vector :math:`alpha`, :math:`beta` and</span>
+<span class="sd">:math:`gamma`.  The vector is [ :math:`alpha`,</span>
+<span class="sd">:math:`beta`. :math:`gamma` ] and, in this description, the order of the</span>
+<span class="sd">parameters specifies the order in which the rotations occur (so the</span>
+<span class="sd">rotation corresponding to :math:`alpha` is applied first).</span>
+
+<span class="sd">In order to specify the meaning of an *Euler angle vector* we need to</span>
+<span class="sd">specify the axes around which each of the rotations corresponding to</span>
+<span class="sd">:math:`alpha`, :math:`beta` and :math:`gamma` will occur.</span>
+
+<span class="sd">There are therefore three axes for the rotations :math:`alpha`,</span>
+<span class="sd">:math:`beta` and :math:`gamma`; let&#39;s call them :math:`i` :math:`j`,</span>
+<span class="sd">:math:`k`.</span>
+
+<span class="sd">Let us express the rotation :math:`alpha` around axis `i` as a 3 by 3</span>
+<span class="sd">rotation matrix `A`.  Similarly :math:`beta` around `j` becomes 3 x 3</span>
+<span class="sd">matrix `B` and :math:`gamma` around `k` becomes matrix `G`.  Then the</span>
+<span class="sd">whole rotation expressed by the Euler angle vector [ :math:`alpha`,</span>
+<span class="sd">:math:`beta`. :math:`gamma` ], `R` is given by::</span>
+
+<span class="sd">   R = np.dot(G, np.dot(B, A))</span>
+
+<span class="sd">See http://mathworld.wolfram.com/EulerAngles.html</span>
+
+<span class="sd">The order :math:`G B A` expresses the fact that the rotations are</span>
+<span class="sd">performed in the order of the vector (:math:`alpha` around axis `i` =</span>
+<span class="sd">`A` first).</span>
+
+<span class="sd">To convert a given Euler angle vector to a meaningful rotation, and a</span>
+<span class="sd">rotation matrix, we need to define:</span>
+
+<span class="sd">* the axes `i`, `j`, `k`</span>
+<span class="sd">* whether a rotation matrix should be applied on the left of a vector to</span>
+<span class="sd">  be transformed (vectors are column vectors) or on the right (vectors</span>
+<span class="sd">  are row vectors).</span>
+<span class="sd">* whether the rotations move the axes as they are applied (intrinsic</span>
+<span class="sd">  rotations) - compared the situation where the axes stay fixed and the</span>
+<span class="sd">  vectors move within the axis frame (extrinsic)</span>
+<span class="sd">* the handedness of the coordinate system</span>
+
+<span class="sd">See: http://en.wikipedia.org/wiki/Rotation_matrix#Ambiguities</span>
+
+<span class="sd">We are using the following conventions:</span>
+
+<span class="sd">* axes `i`, `j`, `k` are the `z`, `y`, and `x` axes respectively.  Thus</span>
+<span class="sd">  an Euler angle vector [ :math:`alpha`, :math:`beta`. :math:`gamma` ]</span>
+<span class="sd">  in our convention implies a :math:`alpha` radian rotation around the</span>
+<span class="sd">  `z` axis, followed by a :math:`beta` rotation around the `y` axis,</span>
+<span class="sd">  followed by a :math:`gamma` rotation around the `x` axis.</span>
+<span class="sd">* the rotation matrix applies on the left, to column vectors on the</span>
+<span class="sd">  right, so if `R` is the rotation matrix, and `v` is a 3 x N matrix</span>
+<span class="sd">  with N column vectors, the transformed vector set `vdash` is given by</span>
+<span class="sd">  ``vdash = np.dot(R, v)``.</span>
+<span class="sd">* extrinsic rotations - the axes are fixed, and do not move with the</span>
+<span class="sd">  rotations.</span>
+<span class="sd">* a right-handed coordinate system</span>
+
+<span class="sd">The convention of rotation around ``z``, followed by rotation around</span>
+<span class="sd">``y``, followed by rotation around ``x``, is known (confusingly) as</span>
+<span class="sd">&quot;xyz&quot;, pitch-roll-yaw, Cardan angles, or Tait-Bryan angles.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">reduce</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+
+<span class="n">_FLOAT_EPS_4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">*</span> <span class="mf">4.0</span>
+
+
+<div class="viewcode-block" id="euler2mat"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.eulerangles.euler2mat">[docs]</a><span class="k">def</span> <span class="nf">euler2mat</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return matrix for rotations around z, y and x axes</span>
+
+<span class="sd">    Uses the z, then y, then x convention above</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    z : scalar</span>
+<span class="sd">       Rotation angle in radians around z-axis (performed first)</span>
+<span class="sd">    y : scalar</span>
+<span class="sd">       Rotation angle in radians around y-axis</span>
+<span class="sd">    x : scalar</span>
+<span class="sd">       Rotation angle in radians around x-axis (performed last)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    M : array shape (3,3)</span>
+<span class="sd">       Rotation matrix giving same rotation as for given angles</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; zrot = 1.3 # radians</span>
+<span class="sd">    &gt;&gt;&gt; yrot = -0.1</span>
+<span class="sd">    &gt;&gt;&gt; xrot = 0.2</span>
+<span class="sd">    &gt;&gt;&gt; M = euler2mat(zrot, yrot, xrot)</span>
+<span class="sd">    &gt;&gt;&gt; M.shape == (3, 3)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    The output rotation matrix is equal to the composition of the</span>
+<span class="sd">    individual rotations</span>
+
+<span class="sd">    &gt;&gt;&gt; M1 = euler2mat(zrot)</span>
+<span class="sd">    &gt;&gt;&gt; M2 = euler2mat(0, yrot)</span>
+<span class="sd">    &gt;&gt;&gt; M3 = euler2mat(0, 0, xrot)</span>
+<span class="sd">    &gt;&gt;&gt; composed_M = np.dot(M3, np.dot(M2, M1))</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(M, composed_M)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    You can specify rotations by named arguments</span>
+
+<span class="sd">    &gt;&gt;&gt; np.all(M3 == euler2mat(x=xrot))</span>
+<span class="sd">    True</span>
+
+<span class="sd">    When applying M to a vector, the vector should column vector to the</span>
+<span class="sd">    right of M.  If the right hand side is a 2D array rather than a</span>
+<span class="sd">    vector, then each column of the 2D array represents a vector.</span>
+
+<span class="sd">    &gt;&gt;&gt; vec = np.array([1, 0, 0]).reshape((3,1))</span>
+<span class="sd">    &gt;&gt;&gt; v2 = np.dot(M, vec)</span>
+<span class="sd">    &gt;&gt;&gt; vecs = np.array([[1, 0, 0],[0, 1, 0]]).T # giving 3x2 array</span>
+<span class="sd">    &gt;&gt;&gt; vecs2 = np.dot(M, vecs)</span>
+
+<span class="sd">    Rotations are counter-clockwise.</span>
+
+<span class="sd">    &gt;&gt;&gt; zred = np.dot(euler2mat(z=np.pi/2), np.eye(3))</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(zred, [[0, -1, 0],[1, 0, 0], [0, 0, 1]])</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; yred = np.dot(euler2mat(y=np.pi/2), np.eye(3))</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(yred, [[0, 0, 1],[0, 1, 0], [-1, 0, 0]])</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; xred = np.dot(euler2mat(x=np.pi/2), np.eye(3))</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(xred, [[1, 0, 0],[0, 0, -1], [0, 1, 0]])</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The direction of rotation is given by the right-hand rule (orient</span>
+<span class="sd">    the thumb of the right hand along the axis around which the rotation</span>
+<span class="sd">    occurs, with the end of the thumb at the positive end of the axis;</span>
+<span class="sd">    curl your fingers; the direction your fingers curl is the direction</span>
+<span class="sd">    of rotation).  Therefore, the rotations are counterclockwise if</span>
+<span class="sd">    looking along the axis of rotation from positive to negative.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">Ms</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">z</span><span class="p">:</span>
+        <span class="n">cosz</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">sinz</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">Ms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="n">cosz</span><span class="p">,</span> <span class="o">-</span><span class="n">sinz</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="n">sinz</span><span class="p">,</span> <span class="n">cosz</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]))</span>
+    <span class="k">if</span> <span class="n">y</span><span class="p">:</span>
+        <span class="n">cosy</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">siny</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">Ms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="n">cosy</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">siny</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="o">-</span><span class="n">siny</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cosy</span><span class="p">]]))</span>
+    <span class="k">if</span> <span class="n">x</span><span class="p">:</span>
+        <span class="n">cosx</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">sinx</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">Ms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">cosx</span><span class="p">,</span> <span class="o">-</span><span class="n">sinx</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sinx</span><span class="p">,</span> <span class="n">cosx</span><span class="p">]]))</span>
+    <span class="k">if</span> <span class="n">Ms</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="n">Ms</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="mat2euler"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.eulerangles.mat2euler">[docs]</a><span class="k">def</span> <span class="nf">mat2euler</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">cy_thresh</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Discover Euler angle vector from 3x3 matrix</span>
+
+<span class="sd">    Uses the conventions above.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M : array-like, shape (3,3)</span>
+<span class="sd">    cy_thresh : None or scalar, optional</span>
+<span class="sd">       threshold below which to give up on straightforward arctan for</span>
+<span class="sd">       estimating x rotation.  If None (default), estimate from</span>
+<span class="sd">       precision of input.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    z : scalar</span>
+<span class="sd">    y : scalar</span>
+<span class="sd">    x : scalar</span>
+<span class="sd">       Rotations in radians around z, y, x axes, respectively</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If there was no numerical error, the routine could be derived using</span>
+<span class="sd">    Sympy expression for z then y then x rotation matrix, which is::</span>
+
+<span class="sd">      [                       cos(y)*cos(z),                       -cos(y)*sin(z),         sin(y)],</span>
+<span class="sd">      [cos(x)*sin(z) + cos(z)*sin(x)*sin(y), cos(x)*cos(z) - sin(x)*sin(y)*sin(z), -cos(y)*sin(x)],</span>
+<span class="sd">      [sin(x)*sin(z) - cos(x)*cos(z)*sin(y), cos(z)*sin(x) + cos(x)*sin(y)*sin(z),  cos(x)*cos(y)]</span>
+
+<span class="sd">    with the obvious derivations for z, y, and x</span>
+
+<span class="sd">       z = atan2(-r12, r11)</span>
+<span class="sd">       y = asin(r13)</span>
+<span class="sd">       x = atan2(-r23, r33)</span>
+
+<span class="sd">    Problems arise when cos(y) is close to zero, because both of::</span>
+
+<span class="sd">       z = atan2(cos(y)*sin(z), cos(y)*cos(z))</span>
+<span class="sd">       x = atan2(cos(y)*sin(x), cos(x)*cos(y))</span>
+
+<span class="sd">    will be close to atan2(0, 0), and highly unstable.</span>
+
+<span class="sd">    The ``cy`` fix for numerical instability below is from: *Graphics</span>
+<span class="sd">    Gems IV*, Paul Heckbert (editor), Academic Press, 1994, ISBN:</span>
+<span class="sd">    0123361559.  Specifically it comes from EulerAngles.c by Ken</span>
+<span class="sd">    Shoemake, and deals with the case where cos(y) is close to zero:</span>
+
+<span class="sd">    See: http://www.graphicsgems.org/</span>
+
+<span class="sd">    The code appears to be licensed (from the website) as &quot;can be used</span>
+<span class="sd">    without restrictions&quot;.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cy_thresh</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cy_thresh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">cy_thresh</span> <span class="o">=</span> <span class="n">_FLOAT_EPS_4</span>
+    <span class="n">r11</span><span class="p">,</span> <span class="n">r12</span><span class="p">,</span> <span class="n">r13</span><span class="p">,</span> <span class="n">r21</span><span class="p">,</span> <span class="n">r22</span><span class="p">,</span> <span class="n">r23</span><span class="p">,</span> <span class="n">r31</span><span class="p">,</span> <span class="n">r32</span><span class="p">,</span> <span class="n">r33</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">flat</span>
+    <span class="c"># cy: sqrt((cos(y)*cos(z))**2 + (cos(x)*cos(y))**2)</span>
+    <span class="n">cy</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r33</span><span class="o">*</span><span class="n">r33</span> <span class="o">+</span> <span class="n">r23</span><span class="o">*</span><span class="n">r23</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cy</span> <span class="o">&gt;</span> <span class="n">cy_thresh</span><span class="p">:</span> <span class="c"># cos(y) not close to zero, standard form</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="o">-</span><span class="n">r12</span><span class="p">,</span>  <span class="n">r11</span><span class="p">)</span> <span class="c"># atan2(cos(y)*sin(z), cos(y)*cos(z))</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">r13</span><span class="p">,</span>  <span class="n">cy</span><span class="p">)</span> <span class="c"># atan2(sin(y), cy)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="o">-</span><span class="n">r23</span><span class="p">,</span> <span class="n">r33</span><span class="p">)</span> <span class="c"># atan2(cos(y)*sin(x), cos(x)*cos(y))</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c"># cos(y) (close to) zero, so x -&gt; 0.0 (see above)</span>
+        <span class="c"># so r21 -&gt; sin(z), r22 -&gt; cos(z) and</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">r21</span><span class="p">,</span>  <span class="n">r22</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">r13</span><span class="p">,</span>  <span class="n">cy</span><span class="p">)</span> <span class="c"># atan2(sin(y), cy)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span>
+
+</div>
+<div class="viewcode-block" id="euler2quat"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.eulerangles.euler2quat">[docs]</a><span class="k">def</span> <span class="nf">euler2quat</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return quaternion corresponding to these Euler angles</span>
+
+<span class="sd">    Uses the z, then y, then x convention above</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    z : scalar</span>
+<span class="sd">       Rotation angle in radians around z-axis (performed first)</span>
+<span class="sd">    y : scalar</span>
+<span class="sd">       Rotation angle in radians around y-axis</span>
+<span class="sd">    x : scalar</span>
+<span class="sd">       Rotation angle in radians around x-axis (performed last)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    quat : array shape (4,)</span>
+<span class="sd">       Quaternion in w, x, y z (real, then vector) format</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    We can derive this formula in Sympy using:</span>
+
+<span class="sd">    1. Formula giving quaternion corresponding to rotation of theta radians</span>
+<span class="sd">       about arbitrary axis:</span>
+<span class="sd">       http://mathworld.wolfram.com/EulerParameters.html</span>
+<span class="sd">    2. Generated formulae from 1.) for quaternions corresponding to</span>
+<span class="sd">       theta radians rotations about ``x, y, z`` axes</span>
+<span class="sd">    3. Apply quaternion multiplication formula -</span>
+<span class="sd">       http://en.wikipedia.org/wiki/Quaternions#Hamilton_product - to</span>
+<span class="sd">       formulae from 2.) to give formula for combined rotations.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">/</span><span class="mf">2.0</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">/</span><span class="mf">2.0</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">/</span><span class="mf">2.0</span>
+    <span class="n">cz</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">sz</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">cy</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">sy</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">cx</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">sx</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+             <span class="n">cx</span><span class="o">*</span><span class="n">cy</span><span class="o">*</span><span class="n">cz</span> <span class="o">-</span> <span class="n">sx</span><span class="o">*</span><span class="n">sy</span><span class="o">*</span><span class="n">sz</span><span class="p">,</span>
+             <span class="n">cx</span><span class="o">*</span><span class="n">sy</span><span class="o">*</span><span class="n">sz</span> <span class="o">+</span> <span class="n">cy</span><span class="o">*</span><span class="n">cz</span><span class="o">*</span><span class="n">sx</span><span class="p">,</span>
+             <span class="n">cx</span><span class="o">*</span><span class="n">cz</span><span class="o">*</span><span class="n">sy</span> <span class="o">-</span> <span class="n">sx</span><span class="o">*</span><span class="n">cy</span><span class="o">*</span><span class="n">sz</span><span class="p">,</span>
+             <span class="n">cx</span><span class="o">*</span><span class="n">cy</span><span class="o">*</span><span class="n">sz</span> <span class="o">+</span> <span class="n">sx</span><span class="o">*</span><span class="n">cz</span><span class="o">*</span><span class="n">sy</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="quat2euler"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.eulerangles.quat2euler">[docs]</a><span class="k">def</span> <span class="nf">quat2euler</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return Euler angles corresponding to quaternion `q`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q : 4 element sequence</span>
+<span class="sd">       w, x, y, z of quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    z : scalar</span>
+<span class="sd">       Rotation angle in radians around z-axis (performed first)</span>
+<span class="sd">    y : scalar</span>
+<span class="sd">       Rotation angle in radians around y-axis</span>
+<span class="sd">    x : scalar</span>
+<span class="sd">       Rotation angle in radians around x-axis (performed last)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    It&#39;s possible to reduce the amount of calculation a little, by</span>
+<span class="sd">    combining parts of the ``quat2mat`` and ``mat2euler`` functions, but</span>
+<span class="sd">    the reduction in computation is small, and the code repetition is</span>
+<span class="sd">    large.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># delayed import to avoid cyclic dependencies</span>
+    <span class="kn">import</span> <span class="nn">sensbiotk.transforms3d.quaternions</span> <span class="kn">as</span> <span class="nn">nq</span>
+    <span class="k">return</span> <span class="n">mat2euler</span><span class="p">(</span><span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="quat2euler2"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.eulerangles.quat2euler2">[docs]</a><span class="k">def</span> <span class="nf">quat2euler2</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return Euler angles corresponding to quaternion `q`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q : 4 element sequence</span>
+<span class="sd">       w, x, y, z of quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    z : scalar</span>
+<span class="sd">       Rotation angle in radians around z-axis (performed first)</span>
+<span class="sd">    y : scalar</span>
+<span class="sd">       Rotation angle in radians around y-axis</span>
+<span class="sd">    x : scalar</span>
+<span class="sd">       Rotation angle in radians around x-axis (performed last)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Simple implementation using :</span>
+<span class="sd">    http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span> <span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>\
+                         <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">psi</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>\
+                         <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+    
+    <span class="k">return</span> <span class="p">[</span><span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">psi</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="euler2angle_axis"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.eulerangles.euler2angle_axis">[docs]</a><span class="k">def</span> <span class="nf">euler2angle_axis</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return angle, axis corresponding to these Euler angles</span>
+
+<span class="sd">    Uses the z, then y, then x convention above</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    z : scalar</span>
+<span class="sd">       Rotation angle in radians around z-axis (performed first)</span>
+<span class="sd">    y : scalar</span>
+<span class="sd">       Rotation angle in radians around y-axis</span>
+<span class="sd">    x : scalar</span>
+<span class="sd">       Rotation angle in radians around x-axis (performed last)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    theta : scalar</span>
+<span class="sd">       angle of rotation</span>
+<span class="sd">    vector : array shape (3,)</span>
+<span class="sd">       axis around which rotation occurs</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; theta, vec = euler2angle_axis(0, 1.5, 0)</span>
+<span class="sd">    &gt;&gt;&gt; print(theta)</span>
+<span class="sd">    1.5</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(vec, [0, 1, 0])</span>
+<span class="sd">    True</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># delayed import to avoid cyclic dependencies</span>
+    <span class="kn">import</span> <span class="nn">nibabel.quaternions</span> <span class="kn">as</span> <span class="nn">nq</span>
+    <span class="k">return</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2angle_axis</span><span class="p">(</span><span class="n">euler2quat</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="angle_axis2euler"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.eulerangles.angle_axis2euler">[docs]</a><span class="k">def</span> <span class="nf">angle_axis2euler</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">is_normalized</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Convert angle, axis pair to Euler angles</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : scalar</span>
+<span class="sd">       angle of rotation</span>
+<span class="sd">    vector : 3 element sequence</span>
+<span class="sd">       vector specifying axis for rotation.</span>
+<span class="sd">    is_normalized : bool, optional</span>
+<span class="sd">       True if vector is already normalized (has norm of 1).  Default</span>
+<span class="sd">       False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    z : scalar</span>
+<span class="sd">    y : scalar</span>
+<span class="sd">    x : scalar</span>
+<span class="sd">       Rotations in radians around z, y, x axes, respectively</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; z, y, x = angle_axis2euler(0, [1, 0, 0])</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose((z, y, x), 0)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    It&#39;s possible to reduce the amount of calculation a little, by</span>
+<span class="sd">    combining parts of the ``angle_axis2mat`` and ``mat2euler``</span>
+<span class="sd">    functions, but the reduction in computation is small, and the code</span>
+<span class="sd">    repetition is large.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># delayed import to avoid cyclic dependencies</span>
+    <span class="kn">import</span> <span class="nn">nibabel.quaternions</span> <span class="kn">as</span> <span class="nn">nq</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">angle_axis2mat</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">is_normalized</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mat2euler</span><span class="p">(</span><span class="n">M</span><span class="p">)</span></div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.driver.fox_sink &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.driver.fox_sink</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.driver.fox_sink</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.driver.fox_sink</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">serial</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">serial.tools</span> <span class="kn">import</span> <span class="n">list_ports</span>
+
+<div class="viewcode-block" id="FoxSink"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.FoxSink">[docs]</a><span class="k">class</span> <span class="nc">FoxSink</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Class to manage sink node data reading &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class Initialization&quot;&quot;&quot;</span>
+        <span class="c"># Flag/Control of data acquisition thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="c"># sink node id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># sink node time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># sample time count imu node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># pyserial serial link</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ser</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># linux name of the serial link</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linename</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="c"># sensors data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="s">&#39; &#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_scale</span> <span class="o">=</span> <span class="mf">4e-3</span> <span class="o">*</span> <span class="mf">9.81</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_scale_xy</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">670.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_scale_z</span>  <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">600.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_scale</span> <span class="o">=</span> <span class="mf">1.75e-2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+        <span class="c"># Thread identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_task</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_task_exception</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="c"># User callback called</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="FoxSink.connect_serial"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.FoxSink.connect_serial">[docs]</a>    <span class="k">def</span> <span class="nf">connect_serial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Search the right USB serial line</span>
+<span class="sd">        if line found self.ser and self.line  are set and</span>
+<span class="sd">        the connection is established</span>
+
+<span class="sd">        Returns :</span>
+<span class="sd">        ---------</span>
+<span class="sd">        found : boolean</span>
+<span class="sd">                line found (True) or not (False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">timeout</span> <span class="o">=</span> <span class="mi">2</span> <span class="c">#sec</span>
+
+        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">list_ports</span><span class="o">.</span><span class="n">comports</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&#39;COM5&#39;</span> <span class="ow">in</span> <span class="n">port</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">baudrate</span> <span class="o">=</span> <span class="mi">500000</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ser</span> <span class="o">=</span> <span class="n">serial</span><span class="o">.</span><span class="n">Serial</span><span class="p">(</span><span class="n">port</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">baudrate</span> <span class="o">=</span> <span class="n">baudrate</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span><span class="p">)</span>
+                    <span class="c"># Send a init/reset cmd to found the fox on the serial line</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fox_init</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ser</span> <span class="o">=</span> <span class="n">serial</span><span class="o">.</span><span class="n">Serial</span><span class="p">(</span><span class="n">port</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">baudrate</span> <span class="o">=</span> <span class="n">baudrate</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">return</span> <span class="bp">True</span> <span class="c"># line found</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="bp">False</span> <span class="c"># not found</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__fox_write_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write a Fox command on serial. Check response.</span>
+
+<span class="sd">        Returns :</span>
+<span class="sd">        ---------</span>
+<span class="sd">        cmd_ok : boolean, True if command succeed. else False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span> <span class="c"># ok</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+
+<div class="viewcode-block" id="FoxSink.fox_init"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.FoxSink.fox_init">[docs]</a>    <span class="k">def</span> <span class="nf">fox_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Init the Fox</span>
+
+<span class="sd">        Returns :</span>
+<span class="sd">        ---------</span>
+<span class="sd">        cmd_ok : boolean</span>
+<span class="sd">                 The init of the fox pedometer is launched (True)</span>
+<span class="sd">                 or failed (False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+        <span class="c">#return self.__fox_write_command(&quot;FI\n&quot;, &quot;FOX_BANET:init_ok&quot;)</span>
+
+    </div>
+<div class="viewcode-block" id="FoxSink.fox_run"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.FoxSink.fox_run">[docs]</a>    <span class="k">def</span> <span class="nf">fox_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run the data measure on Fox</span>
+
+<span class="sd">        Returns :</span>
+<span class="sd">        ---------</span>
+<span class="sd">        cmd_ok : boolean</span>
+<span class="sd">                 The run on fox pedometer is launched (True)</span>
+<span class="sd">                 or failed (False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+        <span class="c">#return self.__fox_write_command(&quot;FR\n&quot;, &quot;FOX_BANET:run_ok&quot;)</span>
+
+</div>
+<div class="viewcode-block" id="FoxSink.fox_close"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.FoxSink.fox_close">[docs]</a>    <span class="k">def</span> <span class="nf">fox_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset the Fox</span>
+
+<span class="sd">        Returns :</span>
+<span class="sd">        ---------</span>
+<span class="sd">        cmd_ok : boolean</span>
+<span class="sd">                 The close fox pedometer is ok (True) or failed (False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c">#cmd_ok = self.__fox_write_command(&quot;FI\n&quot;, &quot;FOX_BANET:init_ok&quot;)</span>
+
+        <span class="c"># **close** serial line</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+        <span class="c">#return cmd_ok</span>
+
+    </div>
+<div class="viewcode-block" id="FoxSink.analyse"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.FoxSink.analyse">[docs]</a>    <span class="k">def</span> <span class="nf">analyse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set criteria values by analysing sink node message&quot;&quot;&quot;</span>
+
+	<span class="c"># data read from the serial line has the following format:</span>
+        <span class="c"># node_id:time count ax ay az mx my my gz gx gy gz</span>
+	<span class="c"># C1CA:30 9 0 0 0 0 0 0 0 0 0 </span>
+        
+	<span class="n">ptn</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;(?P&lt;node_id&gt;[0-9A-F]+):(?P&lt;sink_time&gt;[0-9]+)</span><span class="se">\t</span><span class="s">(?P&lt;sens_count&gt;[0-9]+)</span><span class="se">\t</span><span class="s">(?P&lt;ax&gt;[\-0-9]+)</span><span class="se">\t</span><span class="s">(?P&lt;ay&gt;[\-0-9]+)</span><span class="se">\t</span><span class="s">(?P&lt;az&gt;[\-0-9]+)</span><span class="se">\t</span><span class="s">(?P&lt;mx&gt;[\-0-9]+)</span><span class="se">\t</span><span class="s">(?P&lt;my&gt;[\-0-9]+)</span><span class="se">\t</span><span class="s">(?P&lt;mz&gt;[\-0-9]+)</span><span class="se">\t</span><span class="s">(?P&lt;gx&gt;[\-0-9]+)</span><span class="se">\t</span><span class="s">(?P&lt;gy&gt;[\-0-9]+)</span><span class="se">\t</span><span class="s">(?P&lt;gz&gt;[\-0-9]+)&#39;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ptn</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeid</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;node_id&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;sink_time&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">count</span>  <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;sens_count&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_scale</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;ax&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_scale</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;ay&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_scale</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;az&#39;</span><span class="p">))</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_scale_xy</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;mx&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_scale_xy</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;my&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_scale_z</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;mz&#39;</span><span class="p">))</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_scale</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;gx&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_scale</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;gy&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_scale</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;gz&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;ERROR: Bad format sink node message&#39;</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;line=&quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">n&#39;</span><span class="p">)))</span>
+
+                </div>
+<div class="viewcode-block" id="FoxSink.set_callback"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.FoxSink.set_callback">[docs]</a>    <span class="k">def</span> <span class="nf">set_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set function callback to be called during reading&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">funcname</span>
+
+</div>
+<div class="viewcode-block" id="FoxSink.read_serial"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.FoxSink.read_serial">[docs]</a>    <span class="k">def</span> <span class="nf">read_serial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loop reading the rs232/usb line sink node</span>
+<span class="sd">           put the message in self.line and update sensor data</span>
+<span class="sd">           values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_task_exception</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="n">end_ix</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">end_ix</span><span class="p">]</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">end_ix</span><span class="p">:]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">analyse</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t_task_exception</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;&gt;&gt;&gt; thread terminated&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="FoxSink.start_read"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.FoxSink.start_read">[docs]</a>    <span class="k">def</span> <span class="nf">start_read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Launch a thread for read_usb &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t_task</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_serial</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t_task</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;OK: thread started&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;ERROR: Thread sink node starting failed&#39;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="FoxSink.stop_read"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.FoxSink.stop_read">[docs]</a>    <span class="k">def</span> <span class="nf">stop_read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Stop the reading thread &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t_task</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;OK: thread stopped&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;ERROR: Thread sink node stopping failed&#39;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="test3"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_sink.test3">[docs]</a><span class="k">def</span> <span class="nf">test3</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Read directly the sink node without GUI</span>
+<span class="sd">        launching a thread</span>
+<span class="sd">        stop with ctl-C</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">read_callback</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot; acq. function callback&quot;&quot;&quot;</span>
+        <span class="k">print</span> <span class="s">&#39;&gt;&#39;</span><span class="p">,</span> <span class="n">sinknode</span><span class="o">.</span><span class="n">sensor</span>
+
+    <span class="n">sinknode</span> <span class="o">=</span> <span class="n">FoxSink</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s">&#39;Enter acquisition loop (type ^C to stop).&#39;</span>
+
+    <span class="n">connected</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">connected</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sinknode</span><span class="o">.</span><span class="n">connect_serial</span><span class="p">():</span>
+                    <span class="n">connected</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">print</span> <span class="s">&quot;Line connected at </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sinknode</span><span class="o">.</span><span class="n">line</span><span class="p">)</span>
+                    <span class="n">sinknode</span><span class="o">.</span><span class="n">fox_run</span><span class="p">()</span>
+                    <span class="n">sinknode</span><span class="o">.</span><span class="n">set_callback</span><span class="p">(</span><span class="n">read_callback</span><span class="p">)</span>
+                    <span class="n">sinknode</span><span class="o">.</span><span class="n">start_read</span><span class="p">()</span>
+                    <span class="k">print</span> <span class="s">&#39;Read started.&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">connected</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sinknode</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sinknode</span><span class="o">.</span><span class="n">stop_read</span><span class="p">()</span>
+                    <span class="n">connected</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">print</span> <span class="s">&#39;Line disconnected (</span><span class="si">%s</span><span class="s">).</span><span class="se">\n</span><span class="s">Read stopped.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sinknode</span><span class="o">.</span><span class="n">t_task_exception</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Stopped.&quot;</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;exception reached:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+    <span class="n">sinknode</span><span class="o">.</span><span class="n">stop_read</span><span class="p">()</span>
+
+<span class="c">##</span></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">test3</span><span class="p">()</span>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

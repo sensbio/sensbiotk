@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.io.scripts.fox_raw &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.io.scripts.fox_raw</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.io.scripts.fox_raw</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.io.scripts.fox_raw</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbiotk@inria.fr</span>
+<span class="c"># Copyright (C) 2015  INRIA</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c"># pylint:disable= I0011, E1101, R0912, R0913, R0914, R0915</span>
+<span class="c"># E1101 no-member false positif</span>
+
+<span class="sd">&quot;&quot;&quot; fox_raw.py</span>
+<span class="sd">convert/plot raw Fox filename [-cdbvtfpamgh] -i &lt;raw_foxfilename or path&gt;</span>
+<span class="sd">                                      or --input=&lt;raw_foxfilename or path&gt;</span>
+
+<span class="sd">for the output directory --dir&lt;dirname&gt; or -d&lt;dirname&gt;</span>
+<span class="sd">for a new basename output --basename&lt;basename&gt; or -b&lt;basename&gt;</span>
+<span class="sd">for time verification --verif or -v</span>
+<span class="sd">for sample time  --time=&lt;sample_time(sec)&gt; or -t &lt;sample_time(sec)&gt;</span>
+<span class="sd">for sample frequency --frequency=&lt;frequency(Hz)&gt; or -s &lt;frequency(Hz)&gt;</span>
+<span class="sd">for plot IMU raw data --plot or -p</span>
+<span class="sd">for plot accelero raw data --acc or -a</span>
+<span class="sd">for plot magneto raw data --mag or -m</span>
+<span class="sd">for plot gyro raw data --gyr or -g</span>
+<span class="sd">for help use --help or -h</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">getopt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.io</span> <span class="kn">import</span> <span class="n">iofox</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.io</span> <span class="kn">import</span> <span class="n">viz</span>
+
+
+<div class="viewcode-block" id="getnamefiles"><a class="viewcode-back" href="../../../../generated/sensbiotk.io.scripts.html#sensbiotk.io.scripts.fox_raw.getnamefiles">[docs]</a><span class="k">def</span> <span class="nf">getnamefiles</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">newbasename</span><span class="p">,</span> <span class="n">diroutput</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; getnamefiles</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">usage</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c"># Compute output namefile</span>
+    <span class="n">basefile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">basefile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">basefile</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">newbasename</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">basename</span> <span class="o">=</span> <span class="n">basefile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c">#        print &quot;BASE&quot;, basefile, basename</span>
+        <span class="k">if</span> <span class="n">basename</span> <span class="o">!=</span> <span class="n">basefile</span><span class="p">:</span>
+            <span class="n">basefile</span> <span class="o">=</span> <span class="n">basefile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">newbasename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">basefile</span> <span class="o">=</span> <span class="n">newbasename</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">diroutput</span><span class="p">):</span>
+        <span class="n">facc</span> <span class="o">=</span> <span class="n">diroutput</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="n">basefile</span> <span class="o">+</span> <span class="s">&quot;_acc.csv&quot;</span>
+        <span class="n">fmag</span> <span class="o">=</span> <span class="n">diroutput</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="n">basefile</span> <span class="o">+</span> <span class="s">&quot;_mag.csv&quot;</span>
+        <span class="n">fgyr</span> <span class="o">=</span> <span class="n">diroutput</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="n">basefile</span> <span class="o">+</span> <span class="s">&quot;_gyr.csv&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;error: bad output directory&quot;</span>
+        <span class="n">usage</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">basefile</span><span class="p">,</span> <span class="n">facc</span><span class="p">,</span> <span class="n">fmag</span><span class="p">,</span> <span class="n">fgyr</span>
+
+</div>
+<div class="viewcode-block" id="plotsig"><a class="viewcode-back" href="../../../../generated/sensbiotk.io.scripts.html#sensbiotk.io.scripts.fox_raw.plotsig">[docs]</a><span class="k">def</span> <span class="nf">plotsig</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">labely</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Plot one signal &quot;&quot;&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">labely</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;time (s)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">((</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="s">&#39;z&#39;</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="veriftime"><a class="viewcode-back" href="../../../../generated/sensbiotk.io.scripts.html#sensbiotk.io.scripts.fox_raw.veriftime">[docs]</a><span class="k">def</span> <span class="nf">veriftime</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">ptime</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Clock verification</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    ------------</span>
+<span class="sd">    ptime: numpy array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">clock</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ptime</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">clock</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&#39;NB Points      =&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptime</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&#39;Duration    (s)=&#39;</span><span class="p">,</span> <span class="n">ptime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ptime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&#39;Steptime    (ms)=&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">ptime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ptime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptime</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&#39;Time to&#39;</span><span class="p">,</span> <span class="n">ptime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&#39;From&#39;</span><span class="p">,</span> <span class="n">ptime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&#39;Clock mean (ms)=&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">clock</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&#39;Clock std  (ms)=&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">clock</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&#39;Clock max  (ms)=&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">clock</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&#39;Clock min  (ms)=&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">clock</span><span class="p">)</span>
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="usage"><a class="viewcode-back" href="../../../../generated/sensbiotk.io.scripts.html#sensbiotk.io.scripts.fox_raw.usage">[docs]</a><span class="k">def</span> <span class="nf">usage</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Usage command print</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Usage&quot;</span>
+    <span class="k">print</span> <span class="n">__doc__</span>
+
+</div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../generated/sensbiotk.io.scripts.html#sensbiotk.io.scripts.fox_raw.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Main command</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">opts</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">getopt</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="s">&quot;i:d:b:vt:f:pamgh&quot;</span><span class="p">,</span>
+                                <span class="p">[</span><span class="s">&quot;input=&quot;</span><span class="p">,</span> <span class="s">&quot;dir=&quot;</span><span class="p">,</span> <span class="s">&quot;basename&quot;</span><span class="p">,</span>
+                                 <span class="s">&quot;verif&quot;</span><span class="p">,</span> <span class="s">&quot;time=&quot;</span><span class="p">,</span> <span class="s">&quot;frequency=&quot;</span><span class="p">,</span>
+                                 <span class="s">&quot;plot&quot;</span><span class="p">,</span> <span class="s">&quot;acc&quot;</span><span class="p">,</span> <span class="s">&quot;mag&quot;</span><span class="p">,</span> <span class="s">&quot;gyr&quot;</span><span class="p">,</span> <span class="s">&quot;help&quot;</span><span class="p">])</span>
+
+    <span class="k">except</span> <span class="n">getopt</span><span class="o">.</span><span class="n">GetoptError</span><span class="p">:</span>
+        <span class="n">usage</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">period</span> <span class="o">=</span> <span class="mf">0.005</span>
+    <span class="n">diroutput</span> <span class="o">=</span> <span class="s">&quot;.&quot;</span>
+    <span class="n">newbasename</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="n">filenames</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">opt</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-h&quot;</span><span class="p">,</span> <span class="s">&quot;--help&quot;</span><span class="p">):</span>
+            <span class="n">usage</span><span class="p">()</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-i&quot;</span><span class="p">,</span> <span class="s">&quot;--input&quot;</span><span class="p">):</span>
+            <span class="n">fnames</span> <span class="o">=</span> <span class="n">arg</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fnames</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">fnames</span><span class="p">):</span>
+                    <span class="k">print</span> <span class="s">&quot;error: input file/dir does not exist&quot;</span>
+                    <span class="n">usage</span><span class="p">()</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># directory input specified</span>
+                    <span class="n">filenames</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">fnames</span><span class="p">)</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">onefile</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+                        <span class="n">filenames</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">fnames</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="n">onefile</span>
+                        <span class="c">#filenames[idx] = fnames + &quot;/&quot; + filenames[idx]</span>
+                        <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># filename input specified</span>
+                <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">fnames</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-d&quot;</span><span class="p">,</span> <span class="s">&quot;--dir&quot;</span><span class="p">):</span>
+            <span class="n">diroutput</span> <span class="o">=</span> <span class="n">arg</span>
+        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-b&quot;</span><span class="p">,</span> <span class="s">&quot;--basename&quot;</span><span class="p">):</span>
+            <span class="n">newbasename</span> <span class="o">=</span> <span class="n">arg</span>
+        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-v&quot;</span><span class="p">,</span> <span class="s">&quot;--verif&quot;</span><span class="p">):</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;-v&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-t&quot;</span><span class="p">,</span> <span class="s">&quot;--time&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">usage</span><span class="p">()</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">period</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">usage</span><span class="p">()</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-f&quot;</span><span class="p">,</span> <span class="s">&quot;--frequency&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">usage</span><span class="p">()</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">period</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">usage</span><span class="p">()</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">period</span>
+        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-p&quot;</span><span class="p">,</span> <span class="s">&quot;--plot&quot;</span><span class="p">):</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;-p&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-a&quot;</span><span class="p">,</span> <span class="s">&quot;--acc&quot;</span><span class="p">):</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;-a&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-m&quot;</span><span class="p">,</span> <span class="s">&quot;--mag&quot;</span><span class="p">):</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;-m&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-g&quot;</span><span class="p">,</span> <span class="s">&quot;--gyr&quot;</span><span class="p">):</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;-g&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">usage</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Conversion:&quot;</span><span class="p">,</span> <span class="n">filename</span>
+        <span class="c"># Get names file</span>
+        <span class="n">basefile</span><span class="p">,</span> <span class="n">fileacc</span><span class="p">,</span> <span class="n">filemag</span><span class="p">,</span> <span class="n">filegyr</span> <span class="o">=</span>\
+            <span class="n">getnamefiles</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">newbasename</span><span class="p">,</span> <span class="n">diroutput</span><span class="p">)</span>
+        <span class="c"># Read and convert file</span>
+        <span class="n">answer</span> <span class="o">=</span> <span class="n">iofox</span><span class="o">.</span><span class="n">convert_sensors_rawfile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span>
+                                               <span class="n">fileacc</span><span class="p">,</span>
+                                               <span class="n">filemag</span><span class="p">,</span>
+                                               <span class="n">filegyr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">answer</span> <span class="o">!=</span> <span class="s">&quot;OK&quot;</span><span class="p">:</span>
+            <span class="n">usage</span><span class="p">()</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c"># Load ascii files converted</span>
+        <span class="p">[</span><span class="n">myt</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">iofox</span><span class="o">.</span><span class="n">load_foximu_csvfile</span><span class="p">(</span><span class="n">fileacc</span><span class="p">,</span> <span class="n">filemag</span><span class="p">,</span> <span class="n">filegyr</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c"># Plot if necessary</span>
+        <span class="k">if</span> <span class="s">&quot;-p&quot;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">basefile</span> <span class="o">+</span> <span class="s">&quot; IMU&quot;</span>
+            <span class="n">viz</span><span class="o">.</span><span class="n">plot_imu</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">myt</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;-a&quot;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">basefile</span> <span class="o">+</span> <span class="s">&quot; Acc&quot;</span>
+            <span class="n">plotsig</span><span class="p">(</span><span class="n">myt</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="s">&quot;ACC (m/s^2&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;-m&quot;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">basefile</span> <span class="o">+</span> <span class="s">&quot; Mag&quot;</span>
+            <span class="n">plotsig</span><span class="p">(</span><span class="n">myt</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="s">&quot;MAG (gauss)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;-g&quot;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">basefile</span> <span class="o">+</span> <span class="s">&quot; Gyr&quot;</span>
+            <span class="n">plotsig</span><span class="p">(</span><span class="n">myt</span><span class="p">,</span> <span class="n">gyr</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="s">&quot;GYR (rad/s)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;-v&quot;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">myt</span><span class="p">,</span> <span class="n">acc</span><span class="p">]</span> <span class="o">=</span> <span class="n">iofox</span><span class="o">.</span><span class="n">load_foxacc_csvfile</span><span class="p">(</span><span class="n">fileacc</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">basefile</span> <span class="o">+</span> <span class="s">&quot; time verif.&quot;</span>
+            <span class="n">veriftime</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">myt</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

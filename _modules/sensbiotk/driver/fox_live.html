@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.driver.fox_live &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.driver.fox_live</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.driver.fox_live</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.driver.fox_live</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.animation</span> <span class="kn">as</span> <span class="nn">animation</span>
+<span class="kn">import</span> <span class="nn">fox_dongle</span>
+
+
+<div class="viewcode-block" id="test_acq_callback"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_live.test_acq_callback">[docs]</a><span class="k">def</span> <span class="nf">test_acq_callback</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Fake function to test callback&quot;&quot;&quot;</span>
+<span class="c">#    print &quot;Nb of sample&quot;, len(obj.data)</span>
+
+</div>
+<div class="viewcode-block" id="update"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_live.update">[docs]</a><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">fdongle</span><span class="p">,</span> <span class="n">aaxes</span><span class="p">,</span> <span class="n">maxes</span><span class="p">,</span> <span class="n">gaxes</span><span class="p">):</span>
+<span class="c">#    print index, len(fdongle.data)</span>
+    <span class="k">if</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="p">[]</span> <span class="p">:</span>
+        <span class="n">aaxes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">aaxes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">aaxes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">maxes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">5</span><span class="p">])</span>
+        <span class="n">maxes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">6</span><span class="p">])</span>
+        <span class="n">maxes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">7</span><span class="p">])</span>
+        <span class="n">gaxes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">8</span><span class="p">])</span>
+        <span class="n">gaxes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">9</span><span class="p">])</span>
+        <span class="n">gaxes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span><span class="mi">10</span><span class="p">])</span>
+        
+    <span class="n">aaxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">relim</span><span class="p">()</span>
+    <span class="n">aaxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span> 
+    <span class="n">maxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">relim</span><span class="p">()</span>
+    <span class="n">maxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span> 
+    <span class="n">gaxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">relim</span><span class="p">()</span>
+    <span class="n">gaxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="fplot"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_live.fplot">[docs]</a><span class="k">def</span> <span class="nf">fplot</span><span class="p">(</span><span class="n">fdongle</span><span class="p">):</span> 
+    <span class="c"># set up animation</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&quot;Fox live&quot;</span><span class="p">)</span>
+    <span class="n">aaxes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="n">axa</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span>
+    <span class="n">aaxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">axa</span>
+    <span class="n">aaxes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">=</span> <span class="n">axa</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[])</span>
+    <span class="n">aaxes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">=</span> <span class="n">axa</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[])</span>
+    <span class="n">aaxes</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="o">=</span> <span class="n">axa</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;ACC (m/s^2)&#39;</span><span class="p">)</span>
+    <span class="n">maxes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="n">axm</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">)</span>
+    <span class="n">maxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">axm</span>
+    <span class="n">maxes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">=</span> <span class="n">axm</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[])</span>
+    <span class="n">maxes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">=</span> <span class="n">axm</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[])</span>
+    <span class="n">maxes</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="o">=</span> <span class="n">axm</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;MAG (gauss)&#39;</span><span class="p">)</span>
+    <span class="n">gaxes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="n">axg</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">)</span>
+    <span class="n">gaxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">axg</span>
+    <span class="n">gaxes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">=</span> <span class="n">axg</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[])</span>
+    <span class="n">gaxes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">=</span> <span class="n">axg</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[])</span>
+    <span class="n">gaxes</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="o">=</span> <span class="n">axg</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Gyr (rad/s)&#39;</span><span class="p">)</span>
+
+    <span class="n">anim</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span>
+                                   <span class="n">fargs</span><span class="o">=</span><span class="p">(</span><span class="n">fdongle</span><span class="p">,</span> <span class="n">aaxes</span><span class="p">,</span> <span class="n">maxes</span><span class="p">,</span> <span class="n">gaxes</span> <span class="p">),</span>
+                                   <span class="n">interval</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">close</span><span class="p">(</span><span class="n">fdongle</span><span class="p">)</span>
+    <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="close"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_live.close">[docs]</a><span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="n">fdongle</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io</span> <span class="kn">import</span> <span class="n">iofox</span> <span class="k">as</span> <span class="n">fox</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Stopped and Record in tmp_imu.csv.&quot;</span>
+    <span class="k">if</span> <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="p">[]</span> <span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">fox</span><span class="o">.</span><span class="n">save_foxsignals_csvfile</span><span class="p">(</span><span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> 
+                                           <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span>
+                                           <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span>
+                                           <span class="n">fdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">],</span>
+                                           <span class="s">&quot;tmp_imu.csv&quot;</span><span class="p">)</span>
+    <span class="n">fdongle</span><span class="o">.</span><span class="n">close_dongle</span><span class="p">()</span>
+    <span class="k">return</span>
+
+    </div>
+<div class="viewcode-block" id="live"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_live.live">[docs]</a><span class="k">def</span> <span class="nf">live</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Example of use of the Fox Sink dongle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io</span> <span class="kn">import</span> <span class="n">iofox</span> <span class="k">as</span> <span class="n">fox</span>
+
+    <span class="c"># instanciate dongle</span>
+    <span class="n">foxdongle</span> <span class="o">=</span> <span class="n">fox_dongle</span><span class="o">.</span><span class="n">FoxDongle</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s">&#39;Enter acquisition loop (type ^C to stop and save tmp_imu.csv).&#39;</span>
+
+    <span class="n">init</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">plotinit</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># handle dongle initialization</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">init</span> <span class="ow">and</span> <span class="n">foxdongle</span><span class="o">.</span><span class="n">init_dongle</span><span class="p">(</span><span class="n">test_acq_callback</span><span class="p">):</span>
+                <span class="n">init</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">print</span> <span class="s">&#39;Device is connected to </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">foxdongle</span><span class="o">.</span><span class="n">line</span><span class="p">())</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">plotinit</span><span class="p">:</span>
+                <span class="n">fplot</span><span class="p">(</span><span class="n">foxdongle</span><span class="p">)</span>
+                <span class="n">plotinit</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Stopped and Record in tmp_imu.csv.&quot;</span>
+            <span class="k">if</span> <span class="n">foxdongle</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="p">[]</span> <span class="p">:</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">fox</span><span class="o">.</span><span class="n">save_foxsignals_csvfile</span><span class="p">(</span><span class="n">foxdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> 
+                                                   <span class="n">foxdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span>\
+                                                   <span class="n">foxdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span>\
+                                                   <span class="n">foxdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">],</span>
+                                                   <span class="s">&quot;tmp_imu.csv&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;exception reached:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+           
+
+    <span class="c"># must close to kill read thread (fox_sink)</span>
+    <span class="n">foxdongle</span><span class="o">.</span><span class="n">close_dongle</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">&#39;Done&#39;</span>
+    <span class="k">return</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">live</span><span class="p">()</span>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

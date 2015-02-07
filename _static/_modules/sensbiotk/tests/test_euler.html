@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.tests.test_euler &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.tests.test_euler</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.tests.test_euler</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.tests.test_euler</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39; Tests for Euler angles &#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">pi</span>
+
+<span class="kn">from</span> <span class="nn">sensbiotk.transforms3d</span> <span class="kn">import</span> <span class="n">quaternions</span> <span class="k">as</span> <span class="n">nq</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.transforms3d</span> <span class="kn">import</span> <span class="n">eulerangles</span> <span class="k">as</span> <span class="n">nea</span>
+
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">assert_false</span><span class="p">,</span> <span class="n">assert_equal</span>
+
+<span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_array_equal</span><span class="p">,</span> <span class="n">assert_array_almost_equal</span>
+
+<span class="n">FLOAT_EPS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+
+<span class="c"># Example rotations &#39;&#39;&#39;</span>
+<span class="n">eg_rots</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">pi</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="n">pi</span><span class="o">*</span><span class="mf">2.5</span><span class="p">,</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">eg_rots</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="x_only"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.x_only">[docs]</a><span class="k">def</span> <span class="nf">x_only</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">cosx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">sinx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">cosx</span><span class="p">,</span> <span class="o">-</span><span class="n">sinx</span><span class="p">],</span>
+         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sinx</span><span class="p">,</span> <span class="n">cosx</span><span class="p">]])</span>
+
+</div>
+<div class="viewcode-block" id="y_only"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.y_only">[docs]</a><span class="k">def</span> <span class="nf">y_only</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+    <span class="n">cosy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">siny</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[[</span><span class="n">cosy</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">siny</span><span class="p">],</span>
+         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+         <span class="p">[</span><span class="o">-</span><span class="n">siny</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cosy</span><span class="p">]])</span>
+
+</div>
+<div class="viewcode-block" id="z_only"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.z_only">[docs]</a><span class="k">def</span> <span class="nf">z_only</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">cosz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">sinz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="n">cosz</span><span class="p">,</span> <span class="o">-</span><span class="n">sinz</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="n">sinz</span><span class="p">,</span> <span class="n">cosz</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+
+</div>
+<div class="viewcode-block" id="sympy_euler"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.sympy_euler">[docs]</a><span class="k">def</span> <span class="nf">sympy_euler</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c"># The whole matrix formula for z,y,x rotations from Sympy</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span>
+    <span class="n">sin</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span>
+    <span class="c"># the following copy / pasted from Sympy - see derivations subdirectory</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="p">[</span>                       <span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">),</span>                       <span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">),</span>         <span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">)],</span>
+        <span class="p">[</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span>
+        <span class="p">[</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">),</span>  <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)]</span>
+        <span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="is_valid_rotation"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.is_valid_rotation">[docs]</a><span class="k">def</span> <span class="nf">is_valid_rotation</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">M</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="test_basic_euler"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.test_basic_euler">[docs]</a><span class="k">def</span> <span class="nf">test_basic_euler</span><span class="p">():</span>
+    <span class="c"># some example rotations, in radians</span>
+    <span class="n">zr</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">yr</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.4</span>
+    <span class="n">xr</span> <span class="o">=</span> <span class="mf">0.2</span>
+    <span class="c"># Rotation matrix composing the three rotations</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">zr</span><span class="p">,</span> <span class="n">yr</span><span class="p">,</span> <span class="n">xr</span><span class="p">)</span>
+    <span class="c"># Corresponding individual rotation matrices</span>
+    <span class="n">M1</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">zr</span><span class="p">)</span>
+    <span class="n">M2</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">yr</span><span class="p">)</span>
+    <span class="n">M3</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xr</span><span class="p">)</span>
+    <span class="c"># which are all valid rotation matrices</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">is_valid_rotation</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">is_valid_rotation</span><span class="p">(</span><span class="n">M1</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">is_valid_rotation</span><span class="p">(</span><span class="n">M2</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">is_valid_rotation</span><span class="p">(</span><span class="n">M3</span><span class="p">)</span>
+    <span class="c"># Full matrix is composition of three individual matrices</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M2</span><span class="p">,</span> <span class="n">M1</span><span class="p">)))</span>
+    <span class="c"># Rotations can be specified with named args, default 0</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">zr</span><span class="p">)</span> <span class="o">==</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">zr</span><span class="p">))</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">yr</span><span class="p">)</span> <span class="o">==</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">yr</span><span class="p">))</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xr</span><span class="p">)</span> <span class="o">==</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xr</span><span class="p">))</span>
+    <span class="c"># Applying an opposite rotation same as inverse (the inverse is</span>
+    <span class="c"># the same as the transpose, but just for clarity)</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">x</span><span class="o">=-</span><span class="n">xr</span><span class="p">),</span>
+                       <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xr</span><span class="p">)))</span>
+
+        </div>
+<div class="viewcode-block" id="test_euler_mat"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.test_euler_mat">[docs]</a><span class="k">def</span> <span class="nf">test_euler_mat</span><span class="p">():</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">()</span>
+    <span class="k">yield</span> <span class="n">assert_array_equal</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">eg_rots</span><span class="p">:</span>
+        <span class="n">M1</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">M2</span> <span class="o">=</span> <span class="n">sympy_euler</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">M1</span><span class="p">,</span> <span class="n">M2</span>
+        <span class="n">M3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x_only</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y_only</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">z_only</span><span class="p">(</span><span class="n">z</span><span class="p">)))</span>
+        <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">M1</span><span class="p">,</span> <span class="n">M3</span>
+        <span class="n">zp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">xp</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">mat2euler</span><span class="p">(</span><span class="n">M1</span><span class="p">)</span>
+        <span class="c"># The parameters may not be the same as input, but they give the</span>
+        <span class="c"># same rotation matrix</span>
+        <span class="n">M4</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">zp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">xp</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">M1</span><span class="p">,</span> <span class="n">M4</span>
+
+</div>
+<div class="viewcode-block" id="sympy_euler2quat"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.sympy_euler2quat">[docs]</a><span class="k">def</span> <span class="nf">sympy_euler2quat</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="c"># direct formula for z,y,x quaternion rotations using sympy</span>
+    <span class="c"># see derivations subfolder</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span>
+    <span class="n">sin</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span>
+    <span class="c"># the following copy / pasted from Sympy output</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">z</span><span class="p">),</span>
+            <span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">x</span><span class="p">),</span>
+            <span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">z</span><span class="p">),</span>
+            <span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">y</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="crude_mat2euler"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.crude_mat2euler">[docs]</a><span class="k">def</span> <span class="nf">crude_mat2euler</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; The simplest possible - ignoring atan2 instability &#39;&#39;&#39;</span>
+    <span class="n">r11</span><span class="p">,</span> <span class="n">r12</span><span class="p">,</span> <span class="n">r13</span><span class="p">,</span> <span class="n">r21</span><span class="p">,</span> <span class="n">r22</span><span class="p">,</span> <span class="n">r23</span><span class="p">,</span> <span class="n">r31</span><span class="p">,</span> <span class="n">r32</span><span class="p">,</span> <span class="n">r33</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">flat</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="o">-</span><span class="n">r12</span><span class="p">,</span> <span class="n">r11</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">r13</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="o">-</span><span class="n">r23</span><span class="p">,</span> <span class="n">r33</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="test_euler_instability"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.test_euler_instability">[docs]</a><span class="k">def</span> <span class="nf">test_euler_instability</span><span class="p">():</span>
+    <span class="c"># Test for numerical errors in mat2euler</span>
+    <span class="c"># problems arise for cos(y) near 0</span>
+    <span class="n">po2</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">zyx</span> <span class="o">=</span> <span class="n">po2</span><span class="p">,</span> <span class="n">po2</span><span class="p">,</span> <span class="n">po2</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="o">*</span><span class="n">zyx</span><span class="p">)</span>
+    <span class="c"># Round trip</span>
+    <span class="n">M_back</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="o">*</span><span class="n">nea</span><span class="o">.</span><span class="n">mat2euler</span><span class="p">(</span><span class="n">M</span><span class="p">))</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">M_back</span><span class="p">)</span>
+    <span class="c"># disturb matrix slightly</span>
+    <span class="n">M_e</span> <span class="o">=</span> <span class="n">M</span> <span class="o">-</span> <span class="n">FLOAT_EPS</span>
+    <span class="c"># round trip to test - OK</span>
+    <span class="n">M_e_back</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="o">*</span><span class="n">nea</span><span class="o">.</span><span class="n">mat2euler</span><span class="p">(</span><span class="n">M_e</span><span class="p">))</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">M_e</span><span class="p">,</span> <span class="n">M_e_back</span><span class="p">)</span>
+    <span class="c"># not so with crude routine</span>
+    <span class="n">M_e_back</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="o">*</span><span class="n">crude_mat2euler</span><span class="p">(</span><span class="n">M_e</span><span class="p">))</span>
+    <span class="k">yield</span> <span class="n">assert_false</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">M_e</span><span class="p">,</span> <span class="n">M_e_back</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="test_quats"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_euler.test_quats">[docs]</a><span class="k">def</span> <span class="nf">test_quats</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">eg_rots</span><span class="p">:</span>
+        <span class="n">M1</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">quatM</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mat2quat</span><span class="p">(</span><span class="n">M1</span><span class="p">)</span>
+        <span class="n">quat</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2quat</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">nq</span><span class="o">.</span><span class="n">nearly_equivalent</span><span class="p">,</span> <span class="n">quatM</span><span class="p">,</span> <span class="n">quat</span>
+        <span class="n">quatS</span> <span class="o">=</span> <span class="n">sympy_euler2quat</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">nq</span><span class="o">.</span><span class="n">nearly_equivalent</span><span class="p">,</span> <span class="n">quat</span><span class="p">,</span> <span class="n">quatS</span>
+        <span class="n">zp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">xp</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">quat2euler</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span>
+        <span class="c"># The parameters may not be the same as input, but they give the</span>
+        <span class="c"># same rotation matrix</span>
+        <span class="n">M2</span> <span class="o">=</span> <span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">zp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">xp</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">M1</span><span class="p">,</span> <span class="n">M2</span>
+        </div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

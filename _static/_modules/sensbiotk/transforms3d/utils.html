@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.transforms3d.utils &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.transforms3d.utils</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.transforms3d.utils</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.transforms3d.utils</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39; Utilities for transforms3d &#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="normalized_vector"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.utils.normalized_vector">[docs]</a><span class="k">def</span> <span class="nf">normalized_vector</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return vector divided by Euclidean (L2) norm</span>
+
+<span class="sd">    See :term:`unit vector` and :term:`Euclidean norm`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vec : array-like shape (3,)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nvec : array shape (3,)</span>
+<span class="sd">       vector divided by L2 norm</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; vec = [1, 2, 3]</span>
+<span class="sd">    &gt;&gt;&gt; l2n = np.sqrt(np.dot(vec, vec))</span>
+<span class="sd">    &gt;&gt;&gt; nvec = normalized_vector(vec)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(np.array(vec) / l2n, nvec)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; vec = np.array([[1, 2, 3]])</span>
+<span class="sd">    &gt;&gt;&gt; vec.shape</span>
+<span class="sd">    (1, 3)</span>
+<span class="sd">    &gt;&gt;&gt; normalized_vector(vec).shape</span>
+<span class="sd">    (3,)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">vec</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">vec</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="vector_norm"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.utils.vector_norm">[docs]</a><span class="k">def</span> <span class="nf">vector_norm</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return vector Euclidaan (L2) norm</span>
+
+<span class="sd">    See :term:`unit vector` and :term:`Euclidean norm`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vec : array-like shape (3,)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    norm : scalar</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; vec = [1, 2, 3]</span>
+<span class="sd">    &gt;&gt;&gt; l2n = np.sqrt(np.dot(vec, vec))</span>
+<span class="sd">    &gt;&gt;&gt; nvec = vector_norm(vec)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(nvec, np.sqrt(np.dot(vec, vec)))</span>
+<span class="sd">    True</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">vec</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="permutations"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.utils.permutations">[docs]</a><span class="k">def</span> <span class="nf">permutations</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Generate all permutations of `iterable`, of length `r`</span>
+
+<span class="sd">    From Python docs, expressing 2.6 ``itertools.permutations``</span>
+<span class="sd">    algorithm.</span>
+
+<span class="sd">    If the elements are unique, then the resulting permutations will</span>
+<span class="sd">    also be unique.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    iterable : iterable</span>
+<span class="sd">       returning elements that will be permuted</span>
+<span class="sd">    r : None or int</span>
+<span class="sd">       length of sequence to return, if None (default) use length of</span>
+<span class="sd">       `iterable`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gen : generator</span>
+<span class="sd">       generator that yields permutations</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; tuple(permutations(range(3)))</span>
+<span class="sd">    ((0, 1, 2), (0, 2, 1), (1, 0, 2), (1, 2, 0), (2, 0, 1), (2, 1, 0))</span>
+<span class="sd">    &gt;&gt;&gt; tuple(permutations(range(3), 2))</span>
+<span class="sd">    ((0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1))</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">n</span> <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">r</span>
+    <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">cycles</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="o">-</span><span class="n">r</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pool</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">[:</span><span class="n">r</span><span class="p">])</span>
+    <span class="k">while</span> <span class="n">n</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">r</span><span class="p">)):</span>
+            <span class="n">cycles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">cycles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">cycles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">i</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">cycles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="n">j</span><span class="p">],</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pool</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">[:</span><span class="n">r</span><span class="p">])</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="inique"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.utils.inique">[docs]</a><span class="k">def</span> <span class="nf">inique</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Generate unique elements from `iterable`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    iterable : iterable</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gen : generator</span>
+<span class="sd">       generator that yields unique elements from `iterable`</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; tuple(inique([0, 1, 2, 0, 2, 3]))</span>
+<span class="sd">    (0, 1, 2, 3)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
+            <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="permuted_signs"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.utils.permuted_signs">[docs]</a><span class="k">def</span> <span class="nf">permuted_signs</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Generate permuted signs for sequence `seq`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    seq : sequence</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gen : generator</span>
+<span class="sd">       generator returning `seq` with signs permuted</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; tuple(permuted_signs([1, -2, 0]))</span>
+<span class="sd">    ((1, -2, 0), (1, -2, 0), (1, 2, 0), (1, 2, 0), (-1, -2, 0), (-1, -2, 0), (-1, 2, 0), (-1, 2, 0))</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">seq</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">fs</span> <span class="ow">in</span> <span class="n">inique</span><span class="p">(</span><span class="n">permutations</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)):</span>
+        <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">e</span> <span class="o">*</span> <span class="n">f</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">fs</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="permuted_with_signs"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.utils.permuted_with_signs">[docs]</a><span class="k">def</span> <span class="nf">permuted_with_signs</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return all permutations of `seq` with all sign permutations</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    seq : sequence</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gen : generator</span>
+<span class="sd">       generator returning permutations and sign permutations</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; tuple(permuted_with_signs((1,2)))</span>
+<span class="sd">    ((1, 2), (1, -2), (-1, 2), (-1, -2), (2, 1), (2, -1), (-2, 1), (-2, -1))</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">pseq</span> <span class="ow">in</span> <span class="n">permutations</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">sseq</span> <span class="ow">in</span> <span class="n">permuted_signs</span><span class="p">(</span><span class="n">pseq</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">sseq</span></div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

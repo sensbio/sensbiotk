@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.algorithms.goniometer &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.algorithms.goniometer</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.algorithms.goniometer</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.algorithms.goniometer</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbio@inria.fr</span>
+<span class="c"># Copyright (C) 2014  INRIA (Contact: sensbiotk@inria.fr)</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Computes rotation angle between two quaternions</span>
+
+<span class="sd">@author: bsijober</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.transforms3d</span> <span class="kn">import</span> <span class="n">quaternions</span> <span class="k">as</span> <span class="n">nq</span>
+
+<span class="c"># disabling pylint errors &#39;E1101&#39; no-member, false positive from pylint</span>
+<span class="c"># disabling pylint errors &#39;C0103&#39; invalid variable name, for variables : a,b</span>
+<span class="c"># pylint:disable=I0011,E1101,C0103</span>
+
+<div class="viewcode-block" id="compute"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.goniometer.compute">[docs]</a><span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="n">q_0</span><span class="p">,</span> <span class="n">q_1</span><span class="p">,</span> <span class="n">q_offset</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
+
+    <span class="sd">&quot;&quot;&quot; Computes rotation angle between two quaternions</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    q_0  : numpy array of float</span>
+<span class="sd">                 the first quaternion (w, x, y, z)</span>
+<span class="sd">    q_1 : numpy array of float</span>
+<span class="sd">                 the second quaternion (w, x, y, z)</span>
+<span class="sd">    q_offset : numpy array of float</span>
+<span class="sd">                 the initial quaternion corresponding to the offset</span>
+<span class="sd">                 between q_0 and q_1 at an initial position</span>
+<span class="sd">                 (can be generated using sensbiotk.calib.calib_geom)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">     angle : float</span>
+<span class="sd">             the angle of rotation between q_0 and q_1 (rad)</span>
+<span class="sd">     rot_axis : numpy array of float</span>
+<span class="sd">             the axis of rotation</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">q_corr</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span>
+        <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">nq</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">q_0</span><span class="p">)),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">q_1</span><span class="p">)),</span> <span class="n">nq</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span>
+                <span class="n">q_offset</span><span class="p">))</span> <span class="c"># q_corr = conj(q_0) x q_1 x conj(q_offset)</span>
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">q_corr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="mi">2</span> <span class="c"># angle = acos(q_corr(w)) x 2</span>
+    <span class="n">rot_axis</span> <span class="o">=</span> <span class="n">q_corr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="c"># the axis of rotation between</span>
+    <span class="c"># the two quaternions (ex: if along Z, should be close to [0, 0, 1])</span>
+
+    <span class="k">return</span> <span class="n">angle</span><span class="p">,</span> <span class="n">rot_axis</span>
+</pre></div></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

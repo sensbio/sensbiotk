@@ -1,0 +1,775 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.io package &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../index.html" />
+    <link rel="up" title="sensbiotk package" href="sensbiotk.html" />
+    <link rel="next" title="sensbiotk.io.scripts package" href="sensbiotk.io.scripts.html" />
+    <link rel="prev" title="sensbiotk.driver package" href="sensbiotk.driver.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../index.html"
+          title="back to the documentation overview"><span>sensbiotk.io package</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="sensbiotk.driver.html">&laquo; sensbiotk.driver package</a> |
+        <a href="#">sensbiotk.io package</a>
+        | <a href="sensbiotk.io.scripts.html">sensbiotk.io.scripts package &raquo;</a>
+      </div>
+      <div id="contentwrapper">
+        <div id="toc">
+          <h3>Table Of Contents</h3>
+          <ul>
+<li><a class="reference internal" href="#">sensbiotk.io package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.io.ahrs">sensbiotk.io.ahrs module</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.io.iofox">sensbiotk.io.iofox module</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.io.iofox_deprec">sensbiotk.io.iofox_deprec module</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.io.uigetfile">sensbiotk.io.uigetfile module</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.io.viz">sensbiotk.io.viz module</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.io">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+        
+  <div class="section" id="sensbiotk-io-package">
+<h1>sensbiotk.io package<a class="headerlink" href="#sensbiotk-io-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sensbiotk.io.scripts.html">sensbiotk.io.scripts package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sensbiotk.io.scripts.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sensbiotk.io.scripts.html#module-sensbiotk.io.scripts.fox_multiple_raw_folder_to_CSV">sensbiotk.io.scripts.fox_multiple_raw_folder_to_CSV module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sensbiotk.io.scripts.html#module-sensbiotk.io.scripts.fox_multiple_raw_to_csv">sensbiotk.io.scripts.fox_multiple_raw_to_csv module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sensbiotk.io.scripts.html#module-sensbiotk.io.scripts.fox_raw">sensbiotk.io.scripts.fox_raw module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sensbiotk.io.scripts.html#module-sensbiotk.io.scripts">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-sensbiotk.io.ahrs">
+<span id="sensbiotk-io-ahrs-module"></span><h2>sensbiotk.io.ahrs module<a class="headerlink" href="#module-sensbiotk.io.ahrs" title="Permalink to this headline">¶</a></h2>
+<p>Loader/Saver for attitude and heading reference system (ahrs)</p>
+<dl class="function">
+<dt id="sensbiotk.io.ahrs.load_ahrs_csvfile">
+<tt class="descclassname">sensbiotk.io.ahrs.</tt><tt class="descname">load_ahrs_csvfile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/ahrs.html#load_ahrs_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.ahrs.load_ahrs_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Ahrs data from a CSV file version with the format line :</p>
+<p>t   qw    qx    qy    qz    roll    pitch    yaw</p>
+<p>The colon separation is a tab</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>Name of the CSV file containing ahrs  data</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>time</strong> : numpy.array</p>
+<blockquote>
+<div><p>time in sec</p>
+</div></blockquote>
+<p><strong>quat</strong> : numpy.array</p>
+<blockquote>
+<div><p>[qw, qx, qy, qz]</p>
+</div></blockquote>
+<p><strong>euler</strong> : numpy.array</p>
+<blockquote class="last">
+<div><p>angles in radians
+[roll, pitch, yaw]</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">timu</span><span class="p">,</span> <span class="n">quat</span><span class="p">,</span> <span class="n">euler</span> <span class="o">=</span> <span class="n">load_ahrs_csvfile</span><span class="p">(</span><span class="s">&quot;data/output_ahrs.csv&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">quat</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.ahrs.save_ahrs_csvfile">
+<tt class="descclassname">sensbiotk.io.ahrs.</tt><tt class="descname">save_ahrs_csvfile</tt><big>(</big><em>filename</em>, <em>time</em>, <em>quat</em>, <em>ang_euler</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/ahrs.html#save_ahrs_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.ahrs.save_ahrs_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>save a ascii csv ahrs file with the format line :</p>
+<p>t qw qx qy qz roll pitch yaw</p>
+<p>The colon separation is a tab</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>time</strong> : numpy.array</p>
+<blockquote>
+<div><p>in second</p>
+</div></blockquote>
+<p><strong>quat</strong> : numpy array</p>
+<blockquote>
+<div><p>[qw, qx qy qz]</p>
+</div></blockquote>
+<p><strong>ang_euler</strong> : numpy array</p>
+<blockquote>
+<div><p>angles in radians
+[roll pitch yaw]</p>
+</div></blockquote>
+<p><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>The ouput .csv file name</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>status</strong> : str</p>
+<blockquote class="last">
+<div><p>&#8216;OK&#8217; / &#8216;ERROR&#8217;</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">timu</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">euler</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">save_ahrs_csvfile</span><span class="p">(</span><span class="s">&quot;data/ahrs.csv&quot;</span><span class="p">,</span> <span class="n">timu</span><span class="p">,</span> <span class="n">quat</span><span class="p">,</span> <span class="n">euler</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sensbiotk.io.iofox">
+<span id="sensbiotk-io-iofox-module"></span><h2>sensbiotk.io.iofox module<a class="headerlink" href="#module-sensbiotk.io.iofox" title="Permalink to this headline">¶</a></h2>
+<p>Loader for HikoB Fox Node format</p>
+<dl class="function">
+<dt id="sensbiotk.io.iofox.convert_sensors_rawfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">convert_sensors_rawfile</tt><big>(</big><em>binfilename</em>, <em>accfilename='output_acc.csv'</em>, <em>magfilename='output_mag.csv'</em>, <em>gyrfilename='output_gyr.csv'</em>, <em>presstfilename='output_presst.csv'</em>, <em>gpiofilename='output_gpio.csv'</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#convert_sensors_rawfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.convert_sensors_rawfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a raw bin HikoB Fox sensors file into an ascii csv files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>binfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the raw file to load and convert.</p>
+</div></blockquote>
+<p><strong>accfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the csv accelerometers imu file</p>
+</div></blockquote>
+<p><strong>magfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the csv magnetometers imu file</p>
+</div></blockquote>
+<p><strong>gyrfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the csv gyrometers imu file</p>
+</div></blockquote>
+<p><strong>presstfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the csv pressure &amp; temperature sensors file</p>
+</div></blockquote>
+<p><strong>gpiofilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the csv gpio file</p>
+</div></blockquote>
+<p><strong>Returns</strong> :</p>
+<p><strong>&#8212;&#8212;-</strong> :</p>
+<p><strong>status</strong> : str</p>
+<blockquote class="last">
+<div><p>&#8216;OK&#8217; / &#8216;ERROR&#8217;</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.load_foxacc_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">load_foxacc_csvfile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#load_foxacc_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.load_foxacc_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Acceleration IMU HikoB Fox Node from a CSV file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>Name of the CSV file to load.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>two numpy array which contains [t,dt] and [accx,accy,accz]</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.load_foxcsvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">load_foxcsvfile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#load_foxcsvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.load_foxcsvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load IMU HikoB Fox Node data from a CSV file version 2</p>
+<p>id    t    dt    ax    ay    az    mx    my    mz    gx    gy    gz</p>
+<p>columns are separated by a tab</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<p class="last"><strong>Name of the CSV file containing inertial data</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.load_foxgpio_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">load_foxgpio_csvfile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#load_foxgpio_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.load_foxgpio_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Gpio HikoB Fox Node from a CSV file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>Name of the CSV file to load.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>[time, gpio]</strong> : np.array</p>
+<blockquote class="last">
+<div><p>The matrix contains time [time,dt],
+gpio1 (0/1), gpio2 (0/1)
+gpio3 (0/1), gpio4 (0/1), gpio5 (0/1)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.load_foxgyr_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">load_foxgyr_csvfile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#load_foxgyr_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.load_foxgyr_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Gyrometers IMU HikoB Fox Node from a CSV file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>Name of the CSV file to load.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>two numpy array which contains [t,dt] and [gyrx,gyry,gyrz]</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.load_foximu_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">load_foximu_csvfile</tt><big>(</big><em>filename_acc</em>, <em>filename_mag</em>, <em>filename_gyr</em>, <em>dtime</em>, <em>deg_s=1</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#load_foximu_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.load_foximu_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load IMU HikoB Fox Node from a CSV file version 2</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename_acc</strong> : str</p>
+<blockquote>
+<div><p>Name of the CSV files to load accelerometers</p>
+</div></blockquote>
+<p><strong>filename_mag</strong> : str</p>
+<blockquote>
+<div><p>Name of the CSV files to load magnetometers</p>
+</div></blockquote>
+<p><strong>filename_gyr</strong> : str</p>
+<blockquote>
+<div><p>Name of the CSV files to load gyrometers</p>
+</div></blockquote>
+<p><strong>dtime: float</strong> :</p>
+<blockquote>
+<div><p>sampling period in seconds</p>
+</div></blockquote>
+<p><strong>deg_s</strong> : int</p>
+<blockquote>
+<div><p>the order of the spline fit used for signal resampling.  1 &lt;= k &lt;= 5</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>[t_interp, acc_interp, mag_interp, gyr_interp]</strong> : numpy.array</p>
+<p><strong>for numpy array which contains t_interp, acc_interp = [accx,accy,accz],</strong> :</p>
+<p class="last"><strong>mag_interp = [magx,magy,magz], gyr_interp = [gyrx,gyry,gyrz]</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.load_foxmag_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">load_foxmag_csvfile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#load_foxmag_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.load_foxmag_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Magnetometers IMU HikoB Fox Node from a CSV file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>Name of the CSV file to load.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>two numpy array which contains [t,dt] and [magx,magy,magz]</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.load_foxpresst_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">load_foxpresst_csvfile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#load_foxpresst_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.load_foxpresst_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Pression/Temperature HikoB Fox Node from a CSV file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename: str</strong> :</p>
+<blockquote>
+<div><p>Name of the CSV file to load.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>time</strong> : np.array</p>
+<blockquote class="last">
+<div><p>The matrix contains time [time,dt],  pression (bar)
+and temperature (degree). id is an int and time,dt,bar
+and degree are float values.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.save_foxacc_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">save_foxacc_csvfile</tt><big>(</big><em>accfilename</em>, <em>time</em>, <em>acc</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#save_foxacc_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.save_foxacc_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>save a ascii csv file accelerometers IMU HikoB Fox file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>accfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the csv imu file</p>
+</div></blockquote>
+<p><strong>time</strong> : numpy array</p>
+<blockquote>
+<div><p>[t, dt]</p>
+</div></blockquote>
+<p><strong>acc</strong> : numpy array</p>
+<blockquote>
+<div><p>[ax ay az]</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>status</strong> : str</p>
+<blockquote class="last">
+<div><p>&#8216;OK&#8217; or &#8216;ERROR&#8217;</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.save_foxgyr_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">save_foxgyr_csvfile</tt><big>(</big><em>gyrfilename</em>, <em>time</em>, <em>gyr</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#save_foxgyr_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.save_foxgyr_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>save a ascii csv file gyrometers IMU HikoB Fox file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>accfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the csv imu file</p>
+</div></blockquote>
+<p><strong>time</strong> : numpy array</p>
+<blockquote>
+<div><p>[t, dt]</p>
+</div></blockquote>
+<p><strong>gyr</strong> : numpy array</p>
+<blockquote>
+<div><p>[mx my mz]</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>status</strong> : str</p>
+<blockquote class="last">
+<div><p>&#8216;OK&#8217; / &#8216;ERROR&#8217;</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.save_foxmag_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">save_foxmag_csvfile</tt><big>(</big><em>magfilename</em>, <em>time</em>, <em>mag</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#save_foxmag_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.save_foxmag_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>save a ascii csv file magnetometers IMU HikoB Fox file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>accfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the csv imu file</p>
+</div></blockquote>
+<p><strong>time</strong> : numpy array</p>
+<blockquote>
+<div><p>[t, dt]</p>
+</div></blockquote>
+<p><strong>mag</strong> : numpy array</p>
+<blockquote>
+<div><p>[mx my mz]</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>status</strong> : str</p>
+<blockquote class="last">
+<div><p>&#8216;OK&#8217; or &#8216;ERROR&#8217;</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox.save_foxsignals_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox.</tt><tt class="descname">save_foxsignals_csvfile</tt><big>(</big><em>time</em>, <em>acc</em>, <em>mag</em>, <em>gyr</em>, <em>filename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox.html#save_foxsignals_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox.save_foxsignals_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>save a ascii csv file with the following structure using</dt>
+<dd>time, acc, mag and gyr numpy arrays:</dd>
+</dl>
+<p># id    t    dt    ax    ay    az    mx    my    mz    gx    gy    gz</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>time signal</strong> : numpy array [t, dt]</p>
+<p><strong>acc</strong> : numpy array</p>
+<blockquote>
+<div><p>[ax ay az]</p>
+</div></blockquote>
+<p><strong>mag</strong> : numpy array</p>
+<blockquote>
+<div><p>[mx my mz]</p>
+</div></blockquote>
+<p><strong>gyr</strong> : numpy array</p>
+<blockquote>
+<div><p>[gx gy gz]</p>
+</div></blockquote>
+<p><strong>gpio</strong> : numpy array</p>
+<blockquote>
+<div><p>[gpio0 gpio1 gpio2 gpio3 gpio4]</p>
+</div></blockquote>
+<p><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>The ouput .csv file name</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>status</strong> : str</p>
+<blockquote class="last">
+<div><p>&#8216;OK&#8217; or &#8216;ERROR&#8217;</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sensbiotk.io.iofox_deprec">
+<span id="sensbiotk-io-iofox-deprec-module"></span><h2>sensbiotk.io.iofox_deprec module<a class="headerlink" href="#module-sensbiotk.io.iofox_deprec" title="Permalink to this headline">¶</a></h2>
+<p>Loader for HikoB Fox Node format - deprecated data format</p>
+<dl class="function">
+<dt id="sensbiotk.io.iofox_deprec.convert_fox_rawfile">
+<tt class="descclassname">sensbiotk.io.iofox_deprec.</tt><tt class="descname">convert_fox_rawfile</tt><big>(</big><em>binfilename</em>, <em>imufilename</em>, <em>presstfilename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox_deprec.html#convert_fox_rawfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox_deprec.convert_fox_rawfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a raw bin HikoB Fox file into an ascii csv files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>binfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the raw file to load and convert.</p>
+</div></blockquote>
+<p><strong>imufilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the csv imu file</p>
+</div></blockquote>
+<p><strong>presstfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the presst file</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>status</strong> : str</p>
+<blockquote class="last">
+<div><p>&#8220;OK&#8221; or &#8220;ERROR&#8221;</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox_deprec.info_fox_rawfile">
+<tt class="descclassname">sensbiotk.io.iofox_deprec.</tt><tt class="descname">info_fox_rawfile</tt><big>(</big><em>binfilename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox_deprec.html#info_fox_rawfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox_deprec.info_fox_rawfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract info. HikoB Fox Node from a raw bin file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote class="last">
+<div><p>Name of the bin file to load.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox_deprec.load_foximu_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox_deprec.</tt><tt class="descname">load_foximu_csvfile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox_deprec.html#load_foximu_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox_deprec.load_foximu_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load IMU HikoB Fox Node from a CSV file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename: str</strong> :</p>
+<blockquote>
+<div><p>Name of the CSV file to load.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>tabA numpy array which contains id</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox_deprec.load_foxpresst_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox_deprec.</tt><tt class="descname">load_foxpresst_csvfile</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox_deprec.html#load_foxpresst_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox_deprec.load_foxpresst_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Pression/Temperature HikoB Fox Node from a CSV file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename: str</strong> :</p>
+<blockquote>
+<div><p>Name of the CSV file to load.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>time</strong> : np.array</p>
+<blockquote class="last">
+<div><p>The matrix contains time [id,time,dt],  pression (bar)
+and temperature (degree). id is an int and time,dt,bar
+and degree are float values.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.iofox_deprec.save_foximu_csvfile">
+<tt class="descclassname">sensbiotk.io.iofox_deprec.</tt><tt class="descname">save_foximu_csvfile</tt><big>(</big><em>accfilename</em>, <em>time</em>, <em>acc</em>, <em>mag</em>, <em>gyr</em>, <em>separator='\t'</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/iofox_deprec.html#save_foximu_csvfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.iofox_deprec.save_foximu_csvfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>save a ascii csv file accelerometers IMU HikoB Fox file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>accfilename</strong> : str</p>
+<blockquote>
+<div><p>Name of the csv imu file</p>
+</div></blockquote>
+<p><strong>time</strong> : numpy array</p>
+<blockquote>
+<div><p>[t, dt]</p>
+</div></blockquote>
+<p><strong>acc</strong> : numpy array</p>
+<blockquote>
+<div><p>[ax ay az]</p>
+</div></blockquote>
+<p><strong>mag</strong> : numpy array</p>
+<blockquote>
+<div><p>[mx my mz]</p>
+</div></blockquote>
+<p><strong>gyr</strong> : numpy array</p>
+<blockquote>
+<div><p>[gx gy gz]</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>status</strong> : str</p>
+<blockquote class="last">
+<div><p>&#8220;OK&#8221; or &#8220;ERROR&#8221;</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sensbiotk.io.uigetfile">
+<span id="sensbiotk-io-uigetfile-module"></span><h2>sensbiotk.io.uigetfile module<a class="headerlink" href="#module-sensbiotk.io.uigetfile" title="Permalink to this headline">¶</a></h2>
+<p>MATLAB-like &#8220;uigetfile&#8221; function.
+&#64;author: bsijober</p>
+<dl class="function">
+<dt id="sensbiotk.io.uigetfile.uigetfile">
+<tt class="descclassname">sensbiotk.io.uigetfile.</tt><tt class="descname">uigetfile</tt><big>(</big><em>title=None, filetypes=[('All files', '*.*')], initialdir=None</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/uigetfile.html#uigetfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.uigetfile.uigetfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>MATLAB-like &#8220;uigetfile&#8221; function. Enables the user to
+graphically choose a file and get its absolute path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>title</strong> : string</p>
+<blockquote>
+<div><p>The displayed GUI title</p>
+</div></blockquote>
+<p><strong>filetypes</strong> : tuple</p>
+<blockquote>
+<div><p>ex : filetypes = [(&#8220;All files&#8221;, &#8220;<em>.</em>&#8221;)]</p>
+</div></blockquote>
+<p><strong>initialdir</strong> : string</p>
+<blockquote>
+<div><p>Specifies that the files in directory should be displayed
+when the dialog pops up</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>file_path</strong> : string</p>
+<blockquote class="last">
+<div><p>The GUI selected file path</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sensbiotk.io.viz">
+<span id="sensbiotk-io-viz-module"></span><h2>sensbiotk.io.viz module<a class="headerlink" href="#module-sensbiotk.io.viz" title="Permalink to this headline">¶</a></h2>
+<p>Plot for sensors data</p>
+<dl class="function">
+<dt id="sensbiotk.io.viz.plot_imu">
+<tt class="descclassname">sensbiotk.io.viz.</tt><tt class="descname">plot_imu</tt><big>(</big><em>num</em>, <em>title</em>, <em>time</em>, <em>acc</em>, <em>mag</em>, <em>gyr</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/viz.html#plot_imu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.viz.plot_imu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot IMU datas</p>
+<p>&#64;param id   : plot number, negative for automatic numbering
+&#64;param title: title of the plot
+&#64;param time :
+&#64;param acc  :
+&#64;param mag  :
+&#64;param gyr  :</p>
+<p>&#64;return: none</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.viz.plot_show">
+<tt class="descclassname">sensbiotk.io.viz.</tt><tt class="descname">plot_show</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/viz.html#plot_show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.viz.plot_show" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.viz.test1">
+<tt class="descclassname">sensbiotk.io.viz.</tt><tt class="descname">test1</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/viz.html#test1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.viz.test1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test  plot_imu</p>
+<p>&#64;param : none</p>
+<p>&#64;return: OK/ERROR</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.viz.test2">
+<tt class="descclassname">sensbiotk.io.viz.</tt><tt class="descname">test2</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/viz.html#test2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.viz.test2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test  samples time</p>
+<p>&#64;param : none</p>
+<p>&#64;return: OK/ERROR</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.io.viz.test3">
+<tt class="descclassname">sensbiotk.io.viz.</tt><tt class="descname">test3</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/sensbiotk/io/viz.html#test3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.io.viz.test3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test  plot_imu</p>
+<p>&#64;param : none</p>
+<p>&#64;return: OK/ERROR</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sensbiotk.io">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sensbiotk.io" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

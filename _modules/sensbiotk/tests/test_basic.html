@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.tests.test_basic &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.tests.test_basic</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.tests.test_basic</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.tests.test_basic</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tests Unit for algorithms/basic</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sensbiotk.algorithms.basic</span> <span class="kn">as</span> <span class="nn">algo</span>
+
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+
+<span class="c"># pylint:disable= I0011, E1101</span>
+<span class="c"># E1101 no-member false positif</span>
+
+
+<div class="viewcode-block" id="test_static_period"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_basic.test_static_period">[docs]</a><span class="k">def</span> <span class="nf">test_static_period</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Test: static period</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io.uigetfile</span> <span class="kn">import</span> <span class="n">uigetfile</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io.iofox</span> <span class="kn">import</span> <span class="n">load_foxcsvfile</span>
+
+    <span class="c"># Load the recording with motionless periods</span>
+    <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">gyrz</span><span class="p">]</span> <span class="o">=</span> \
+        <span class="n">load_foxcsvfile</span><span class="p">(</span><span class="s">&quot;data/calib_accelerometer/IMU4/HKB0_02.csv&quot;</span><span class="p">)</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">algo</span><span class="o">.</span><span class="n">find_static_periods</span><span class="p">(</span><span class="n">gyrz</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">start</span><span class="p">)):</span>
+        <span class="c"># The standard deviation of the gyrz signal must be small</span>
+        <span class="n">std_static</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">gyrz</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">])])</span>
+        <span class="k">if</span> <span class="n">std_static</span> <span class="o">&gt;</span> <span class="mf">0.02</span><span class="p">:</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">yield</span> <span class="n">assert_equal</span><span class="p">,</span> <span class="n">resp</span><span class="p">,</span> <span class="bp">True</span></div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

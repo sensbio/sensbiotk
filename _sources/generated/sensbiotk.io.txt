@@ -1,0 +1,61 @@
+sensbiotk.io package
+====================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    sensbiotk.io.scripts
+
+Submodules
+----------
+
+sensbiotk.io.ahrs module
+------------------------
+
+.. automodule:: sensbiotk.io.ahrs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.io.iofox module
+-------------------------
+
+.. automodule:: sensbiotk.io.iofox
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.io.iofox_deprec module
+--------------------------------
+
+.. automodule:: sensbiotk.io.iofox_deprec
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.io.uigetfile module
+-----------------------------
+
+.. automodule:: sensbiotk.io.uigetfile
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.io.viz module
+-----------------------
+
+.. automodule:: sensbiotk.io.viz
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sensbiotk.io
+    :members:
+    :undoc-members:
+    :show-inheritance:

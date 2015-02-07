@@ -1,0 +1,458 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.transforms3d.six &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.transforms3d.six</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.transforms3d.six</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.transforms3d.six</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Utilities for writing code that runs on Python 2 and 3&quot;&quot;&quot;</span>
+
+<span class="c"># Copyright (c) 2010-2013 Benjamin Peterson</span>
+<span class="c">#</span>
+<span class="c"># Permission is hereby granted, free of charge, to any person obtaining a copy of</span>
+<span class="c"># this software and associated documentation files (the &quot;Software&quot;), to deal in</span>
+<span class="c"># the Software without restriction, including without limitation the rights to</span>
+<span class="c"># use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of</span>
+<span class="c"># the Software, and to permit persons to whom the Software is furnished to do so,</span>
+<span class="c"># subject to the following conditions:</span>
+<span class="c">#</span>
+<span class="c"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c"># copies or substantial portions of the Software.</span>
+<span class="c">#</span>
+<span class="c"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS</span>
+<span class="c"># FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR</span>
+<span class="c"># COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER</span>
+<span class="c"># IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN</span>
+<span class="c"># CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</span>
+
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;Benjamin Peterson &lt;benjamin@python.org&gt;&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;1.3.0&quot;</span>
+
+
+<span class="c"># True if we are running on Python 3.</span>
+<span class="n">PY3</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
+
+<span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+    <span class="n">string_types</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">integer_types</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">class_types</span> <span class="o">=</span> <span class="nb">type</span><span class="p">,</span>
+    <span class="n">text_type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">binary_type</span> <span class="o">=</span> <span class="nb">bytes</span>
+
+    <span class="n">MAXSIZE</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">string_types</span> <span class="o">=</span> <span class="nb">basestring</span><span class="p">,</span>
+    <span class="n">integer_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">long</span><span class="p">)</span>
+    <span class="n">class_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">ClassType</span><span class="p">)</span>
+    <span class="n">text_type</span> <span class="o">=</span> <span class="nb">unicode</span>
+    <span class="n">binary_type</span> <span class="o">=</span> <span class="nb">str</span>
+
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;java&quot;</span><span class="p">):</span>
+        <span class="c"># Jython always uses 32 bits.</span>
+        <span class="n">MAXSIZE</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># It&#39;s possible to have sizeof(long) != sizeof(Py_ssize_t).</span>
+<div class="viewcode-block" id="X"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.X">[docs]</a>        <span class="k">class</span> <span class="nc">X</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+            <span class="c"># 32-bit</span>
+            <span class="n">MAXSIZE</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># 64-bit</span>
+            <span class="n">MAXSIZE</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">63</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">X</span>
+
+
+<span class="k">def</span> <span class="nf">_add_doc</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add documentation to a function.&quot;&quot;&quot;</span>
+    <span class="n">func</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">doc</span>
+
+
+<span class="k">def</span> <span class="nf">_import_module</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Import module, returning the module after the last dot.&quot;&quot;&quot;</span>
+    <span class="nb">__import__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">_LazyDescr</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">tp</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve</span><span class="p">()</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+        <span class="c"># This is a bit ugly, but it avoids running this again.</span>
+        <span class="nb">delattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="MovedModule"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.MovedModule">[docs]</a><span class="k">class</span> <span class="nc">MovedModule</span><span class="p">(</span><span class="n">_LazyDescr</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MovedModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">new</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span> <span class="o">=</span> <span class="n">new</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span> <span class="o">=</span> <span class="n">old</span>
+
+    <span class="k">def</span> <span class="nf">_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="MovedAttribute"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.MovedAttribute">[docs]</a><span class="k">class</span> <span class="nc">MovedAttribute</span><span class="p">(</span><span class="n">_LazyDescr</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old_mod</span><span class="p">,</span> <span class="n">new_mod</span><span class="p">,</span> <span class="n">old_attr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">new_attr</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MovedAttribute</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new_mod</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">new_mod</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span> <span class="o">=</span> <span class="n">new_mod</span>
+            <span class="k">if</span> <span class="n">new_attr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">old_attr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">new_attr</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_attr</span> <span class="o">=</span> <span class="n">old_attr</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attr</span> <span class="o">=</span> <span class="n">new_attr</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span> <span class="o">=</span> <span class="n">old_mod</span>
+            <span class="k">if</span> <span class="n">old_attr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">old_attr</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attr</span> <span class="o">=</span> <span class="n">old_attr</span>
+
+    <span class="k">def</span> <span class="nf">_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">_import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attr</span><span class="p">)</span>
+
+
+</div>
+<span class="k">class</span> <span class="nc">_MovedItems</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Lazy loading of moved objects&quot;&quot;&quot;</span>
+
+
+<span class="n">_moved_attributes</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">MovedAttribute</span><span class="p">(</span><span class="s">&quot;cStringIO&quot;</span><span class="p">,</span> <span class="s">&quot;cStringIO&quot;</span><span class="p">,</span> <span class="s">&quot;io&quot;</span><span class="p">,</span> <span class="s">&quot;StringIO&quot;</span><span class="p">),</span>
+    <span class="n">MovedAttribute</span><span class="p">(</span><span class="s">&quot;filter&quot;</span><span class="p">,</span> <span class="s">&quot;itertools&quot;</span><span class="p">,</span> <span class="s">&quot;builtins&quot;</span><span class="p">,</span> <span class="s">&quot;ifilter&quot;</span><span class="p">,</span> <span class="s">&quot;filter&quot;</span><span class="p">),</span>
+    <span class="n">MovedAttribute</span><span class="p">(</span><span class="s">&quot;input&quot;</span><span class="p">,</span> <span class="s">&quot;__builtin__&quot;</span><span class="p">,</span> <span class="s">&quot;builtins&quot;</span><span class="p">,</span> <span class="s">&quot;raw_input&quot;</span><span class="p">,</span> <span class="s">&quot;input&quot;</span><span class="p">),</span>
+    <span class="n">MovedAttribute</span><span class="p">(</span><span class="s">&quot;map&quot;</span><span class="p">,</span> <span class="s">&quot;itertools&quot;</span><span class="p">,</span> <span class="s">&quot;builtins&quot;</span><span class="p">,</span> <span class="s">&quot;imap&quot;</span><span class="p">,</span> <span class="s">&quot;map&quot;</span><span class="p">),</span>
+    <span class="n">MovedAttribute</span><span class="p">(</span><span class="s">&quot;reload_module&quot;</span><span class="p">,</span> <span class="s">&quot;__builtin__&quot;</span><span class="p">,</span> <span class="s">&quot;imp&quot;</span><span class="p">,</span> <span class="s">&quot;reload&quot;</span><span class="p">),</span>
+    <span class="n">MovedAttribute</span><span class="p">(</span><span class="s">&quot;reduce&quot;</span><span class="p">,</span> <span class="s">&quot;__builtin__&quot;</span><span class="p">,</span> <span class="s">&quot;functools&quot;</span><span class="p">),</span>
+    <span class="n">MovedAttribute</span><span class="p">(</span><span class="s">&quot;StringIO&quot;</span><span class="p">,</span> <span class="s">&quot;StringIO&quot;</span><span class="p">,</span> <span class="s">&quot;io&quot;</span><span class="p">),</span>
+    <span class="n">MovedAttribute</span><span class="p">(</span><span class="s">&quot;xrange&quot;</span><span class="p">,</span> <span class="s">&quot;__builtin__&quot;</span><span class="p">,</span> <span class="s">&quot;builtins&quot;</span><span class="p">,</span> <span class="s">&quot;xrange&quot;</span><span class="p">,</span> <span class="s">&quot;range&quot;</span><span class="p">),</span>
+    <span class="n">MovedAttribute</span><span class="p">(</span><span class="s">&quot;zip&quot;</span><span class="p">,</span> <span class="s">&quot;itertools&quot;</span><span class="p">,</span> <span class="s">&quot;builtins&quot;</span><span class="p">,</span> <span class="s">&quot;izip&quot;</span><span class="p">,</span> <span class="s">&quot;zip&quot;</span><span class="p">),</span>
+
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;builtins&quot;</span><span class="p">,</span> <span class="s">&quot;__builtin__&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;configparser&quot;</span><span class="p">,</span> <span class="s">&quot;ConfigParser&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;copyreg&quot;</span><span class="p">,</span> <span class="s">&quot;copy_reg&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;http_cookiejar&quot;</span><span class="p">,</span> <span class="s">&quot;cookielib&quot;</span><span class="p">,</span> <span class="s">&quot;http.cookiejar&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;http_cookies&quot;</span><span class="p">,</span> <span class="s">&quot;Cookie&quot;</span><span class="p">,</span> <span class="s">&quot;http.cookies&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;html_entities&quot;</span><span class="p">,</span> <span class="s">&quot;htmlentitydefs&quot;</span><span class="p">,</span> <span class="s">&quot;html.entities&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;html_parser&quot;</span><span class="p">,</span> <span class="s">&quot;HTMLParser&quot;</span><span class="p">,</span> <span class="s">&quot;html.parser&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;http_client&quot;</span><span class="p">,</span> <span class="s">&quot;httplib&quot;</span><span class="p">,</span> <span class="s">&quot;http.client&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;email_mime_multipart&quot;</span><span class="p">,</span> <span class="s">&quot;email.MIMEMultipart&quot;</span><span class="p">,</span> <span class="s">&quot;email.mime.multipart&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;email_mime_text&quot;</span><span class="p">,</span> <span class="s">&quot;email.MIMEText&quot;</span><span class="p">,</span> <span class="s">&quot;email.mime.text&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;email_mime_base&quot;</span><span class="p">,</span> <span class="s">&quot;email.MIMEBase&quot;</span><span class="p">,</span> <span class="s">&quot;email.mime.base&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;BaseHTTPServer&quot;</span><span class="p">,</span> <span class="s">&quot;BaseHTTPServer&quot;</span><span class="p">,</span> <span class="s">&quot;http.server&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;CGIHTTPServer&quot;</span><span class="p">,</span> <span class="s">&quot;CGIHTTPServer&quot;</span><span class="p">,</span> <span class="s">&quot;http.server&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;SimpleHTTPServer&quot;</span><span class="p">,</span> <span class="s">&quot;SimpleHTTPServer&quot;</span><span class="p">,</span> <span class="s">&quot;http.server&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;cPickle&quot;</span><span class="p">,</span> <span class="s">&quot;cPickle&quot;</span><span class="p">,</span> <span class="s">&quot;pickle&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;queue&quot;</span><span class="p">,</span> <span class="s">&quot;Queue&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;reprlib&quot;</span><span class="p">,</span> <span class="s">&quot;repr&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;socketserver&quot;</span><span class="p">,</span> <span class="s">&quot;SocketServer&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter&quot;</span><span class="p">,</span> <span class="s">&quot;Tkinter&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_dialog&quot;</span><span class="p">,</span> <span class="s">&quot;Dialog&quot;</span><span class="p">,</span> <span class="s">&quot;tkinter.dialog&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_filedialog&quot;</span><span class="p">,</span> <span class="s">&quot;FileDialog&quot;</span><span class="p">,</span> <span class="s">&quot;tkinter.filedialog&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_scrolledtext&quot;</span><span class="p">,</span> <span class="s">&quot;ScrolledText&quot;</span><span class="p">,</span> <span class="s">&quot;tkinter.scrolledtext&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_simpledialog&quot;</span><span class="p">,</span> <span class="s">&quot;SimpleDialog&quot;</span><span class="p">,</span> <span class="s">&quot;tkinter.simpledialog&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_tix&quot;</span><span class="p">,</span> <span class="s">&quot;Tix&quot;</span><span class="p">,</span> <span class="s">&quot;tkinter.tix&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_constants&quot;</span><span class="p">,</span> <span class="s">&quot;Tkconstants&quot;</span><span class="p">,</span> <span class="s">&quot;tkinter.constants&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_dnd&quot;</span><span class="p">,</span> <span class="s">&quot;Tkdnd&quot;</span><span class="p">,</span> <span class="s">&quot;tkinter.dnd&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_colorchooser&quot;</span><span class="p">,</span> <span class="s">&quot;tkColorChooser&quot;</span><span class="p">,</span>
+                <span class="s">&quot;tkinter.colorchooser&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_commondialog&quot;</span><span class="p">,</span> <span class="s">&quot;tkCommonDialog&quot;</span><span class="p">,</span>
+                <span class="s">&quot;tkinter.commondialog&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_tkfiledialog&quot;</span><span class="p">,</span> <span class="s">&quot;tkFileDialog&quot;</span><span class="p">,</span> <span class="s">&quot;tkinter.filedialog&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_font&quot;</span><span class="p">,</span> <span class="s">&quot;tkFont&quot;</span><span class="p">,</span> <span class="s">&quot;tkinter.font&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_messagebox&quot;</span><span class="p">,</span> <span class="s">&quot;tkMessageBox&quot;</span><span class="p">,</span> <span class="s">&quot;tkinter.messagebox&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;tkinter_tksimpledialog&quot;</span><span class="p">,</span> <span class="s">&quot;tkSimpleDialog&quot;</span><span class="p">,</span>
+                <span class="s">&quot;tkinter.simpledialog&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;urllib_robotparser&quot;</span><span class="p">,</span> <span class="s">&quot;robotparser&quot;</span><span class="p">,</span> <span class="s">&quot;urllib.robotparser&quot;</span><span class="p">),</span>
+    <span class="n">MovedModule</span><span class="p">(</span><span class="s">&quot;winreg&quot;</span><span class="p">,</span> <span class="s">&quot;_winreg&quot;</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">_moved_attributes</span><span class="p">:</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">_MovedItems</span><span class="p">,</span> <span class="n">attr</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+<span class="k">del</span> <span class="n">attr</span>
+
+<span class="n">moves</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&quot;.moves&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_MovedItems</span><span class="p">(</span><span class="s">&quot;moves&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="add_move"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.add_move">[docs]</a><span class="k">def</span> <span class="nf">add_move</span><span class="p">(</span><span class="n">move</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add an item to six.moves.&quot;&quot;&quot;</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">_MovedItems</span><span class="p">,</span> <span class="n">move</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">move</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="remove_move"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.remove_move">[docs]</a><span class="k">def</span> <span class="nf">remove_move</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove item from six.moves.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">delattr</span><span class="p">(</span><span class="n">_MovedItems</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">moves</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;no such move, </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
+
+</div>
+<span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+    <span class="n">_meth_func</span> <span class="o">=</span> <span class="s">&quot;__func__&quot;</span>
+    <span class="n">_meth_self</span> <span class="o">=</span> <span class="s">&quot;__self__&quot;</span>
+
+    <span class="n">_func_closure</span> <span class="o">=</span> <span class="s">&quot;__closure__&quot;</span>
+    <span class="n">_func_code</span> <span class="o">=</span> <span class="s">&quot;__code__&quot;</span>
+    <span class="n">_func_defaults</span> <span class="o">=</span> <span class="s">&quot;__defaults__&quot;</span>
+    <span class="n">_func_globals</span> <span class="o">=</span> <span class="s">&quot;__globals__&quot;</span>
+
+    <span class="n">_iterkeys</span> <span class="o">=</span> <span class="s">&quot;keys&quot;</span>
+    <span class="n">_itervalues</span> <span class="o">=</span> <span class="s">&quot;values&quot;</span>
+    <span class="n">_iteritems</span> <span class="o">=</span> <span class="s">&quot;items&quot;</span>
+    <span class="n">_iterlists</span> <span class="o">=</span> <span class="s">&quot;lists&quot;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">_meth_func</span> <span class="o">=</span> <span class="s">&quot;im_func&quot;</span>
+    <span class="n">_meth_self</span> <span class="o">=</span> <span class="s">&quot;im_self&quot;</span>
+
+    <span class="n">_func_closure</span> <span class="o">=</span> <span class="s">&quot;func_closure&quot;</span>
+    <span class="n">_func_code</span> <span class="o">=</span> <span class="s">&quot;func_code&quot;</span>
+    <span class="n">_func_defaults</span> <span class="o">=</span> <span class="s">&quot;func_defaults&quot;</span>
+    <span class="n">_func_globals</span> <span class="o">=</span> <span class="s">&quot;func_globals&quot;</span>
+
+    <span class="n">_iterkeys</span> <span class="o">=</span> <span class="s">&quot;iterkeys&quot;</span>
+    <span class="n">_itervalues</span> <span class="o">=</span> <span class="s">&quot;itervalues&quot;</span>
+    <span class="n">_iteritems</span> <span class="o">=</span> <span class="s">&quot;iteritems&quot;</span>
+    <span class="n">_iterlists</span> <span class="o">=</span> <span class="s">&quot;iterlists&quot;</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">advance_iterator</span> <span class="o">=</span> <span class="nb">next</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">advance_iterator</span><span class="p">(</span><span class="n">it</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">it</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="nb">next</span> <span class="o">=</span> <span class="n">advance_iterator</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">callable</span> <span class="o">=</span> <span class="nb">callable</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">callable</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="s">&quot;__call__&quot;</span> <span class="ow">in</span> <span class="n">klass</span><span class="o">.</span><span class="n">__dict__</span> <span class="k">for</span> <span class="n">klass</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">__mro__</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_unbound_function</span><span class="p">(</span><span class="n">unbound</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">unbound</span>
+
+    <span class="n">Iterator</span> <span class="o">=</span> <span class="nb">object</span>
+<span class="k">else</span><span class="p">:</span>
+<div class="viewcode-block" id="get_unbound_function"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.get_unbound_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_unbound_function</span><span class="p">(</span><span class="n">unbound</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">unbound</span><span class="o">.</span><span class="n">im_func</span>
+</div>
+<div class="viewcode-block" id="Iterator"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.Iterator">[docs]</a>    <span class="k">class</span> <span class="nc">Iterator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Iterator.next"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.Iterator.next">[docs]</a>        <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div></div>
+    <span class="nb">callable</span> <span class="o">=</span> <span class="nb">callable</span>
+<span class="n">_add_doc</span><span class="p">(</span><span class="n">get_unbound_function</span><span class="p">,</span>
+         <span class="sd">&quot;&quot;&quot;Get the function out of a possibly unbound function&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+<span class="n">get_method_function</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">_meth_func</span><span class="p">)</span>
+<span class="n">get_method_self</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">_meth_self</span><span class="p">)</span>
+<span class="n">get_function_closure</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">_func_closure</span><span class="p">)</span>
+<span class="n">get_function_code</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">_func_code</span><span class="p">)</span>
+<span class="n">get_function_defaults</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">_func_defaults</span><span class="p">)</span>
+<span class="n">get_function_globals</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">_func_globals</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="iterkeys"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.iterkeys">[docs]</a><span class="k">def</span> <span class="nf">iterkeys</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return an iterator over the keys of a dictionary.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">_iterkeys</span><span class="p">)(</span><span class="o">**</span><span class="n">kw</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="itervalues"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.itervalues">[docs]</a><span class="k">def</span> <span class="nf">itervalues</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return an iterator over the values of a dictionary.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">_itervalues</span><span class="p">)(</span><span class="o">**</span><span class="n">kw</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="iteritems"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.iteritems">[docs]</a><span class="k">def</span> <span class="nf">iteritems</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return an iterator over the (key, value) pairs of a dictionary.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">_iteritems</span><span class="p">)(</span><span class="o">**</span><span class="n">kw</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="iterlists"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.iterlists">[docs]</a><span class="k">def</span> <span class="nf">iterlists</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return an iterator over the (key, [values]) pairs of a dictionary.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">_iterlists</span><span class="p">)(</span><span class="o">**</span><span class="n">kw</span><span class="p">))</span>
+
+</div>
+<span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;latin-1&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">u</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">int2byte</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">bytes</span><span class="p">((</span><span class="n">i</span><span class="p">,))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># This is about 2x faster than the implementation above on 3.2+</span>
+        <span class="n">int2byte</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">methodcaller</span><span class="p">(</span><span class="s">&quot;to_bytes&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;big&quot;</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">io</span>
+    <span class="n">StringIO</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span>
+    <span class="n">BytesIO</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span>
+<span class="k">else</span><span class="p">:</span>
+<div class="viewcode-block" id="b"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.b">[docs]</a>    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+<div class="viewcode-block" id="u"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.u">[docs]</a>    <span class="k">def</span> <span class="nf">u</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s">&quot;unicode_escape&quot;</span><span class="p">)</span></div>
+    <span class="n">int2byte</span> <span class="o">=</span> <span class="nb">chr</span>
+    <span class="kn">import</span> <span class="nn">StringIO</span>
+    <span class="n">StringIO</span> <span class="o">=</span> <span class="n">BytesIO</span> <span class="o">=</span> <span class="n">StringIO</span><span class="o">.</span><span class="n">StringIO</span>
+<span class="n">_add_doc</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="s">&quot;&quot;&quot;Byte literal&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">_add_doc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s">&quot;&quot;&quot;Text literal&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">builtins</span>
+    <span class="n">exec_</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">builtins</span><span class="p">,</span> <span class="s">&quot;exec&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="reraise"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.reraise">[docs]</a>    <span class="k">def</span> <span class="nf">reraise</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tb</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">__traceback__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">tb</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">value</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">tb</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">value</span>
+
+</div>
+    <span class="n">print_</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">builtins</span><span class="p">,</span> <span class="s">&quot;print&quot;</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">builtins</span>
+
+<span class="k">else</span><span class="p">:</span>
+<div class="viewcode-block" id="exec_"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.exec_">[docs]</a>    <span class="k">def</span> <span class="nf">exec_</span><span class="p">(</span><span class="n">_code_</span><span class="p">,</span> <span class="n">_globs_</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">_locs_</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute code in a namespace.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_globs_</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">_globs_</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_globals</span>
+            <span class="k">if</span> <span class="n">_locs_</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">_locs_</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span>
+            <span class="k">del</span> <span class="n">frame</span>
+        <span class="k">elif</span> <span class="n">_locs_</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">_locs_</span> <span class="o">=</span> <span class="n">_globs_</span>
+        <span class="k">exec</span><span class="p">(</span><span class="s">&quot;&quot;&quot;exec _code_ in _globs_, _locs_&quot;&quot;&quot;</span><span class="p">)</span>
+
+</div>
+    <span class="n">exec_</span><span class="p">(</span><span class="s">&quot;&quot;&quot;def reraise(tp, value, tb=None):</span>
+<span class="s">    raise tp, value, tb</span>
+<span class="s">&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="print_"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.print_">[docs]</a>    <span class="k">def</span> <span class="nf">print_</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The new-style print function.&quot;&quot;&quot;</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;file&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">want_unicode</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">sep</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;sep&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sep</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+                <span class="n">want_unicode</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sep</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;sep must be None or a string&quot;</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;end&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+                <span class="n">want_unicode</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;end must be None or a string&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;invalid keyword arguments to print()&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">want_unicode</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+                    <span class="n">want_unicode</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">break</span>
+        <span class="k">if</span> <span class="n">want_unicode</span><span class="p">:</span>
+            <span class="n">newline</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="n">space</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">newline</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+            <span class="n">space</span> <span class="o">=</span> <span class="s">&quot; &quot;</span>
+        <span class="k">if</span> <span class="n">sep</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">sep</span> <span class="o">=</span> <span class="n">space</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">newline</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+                <span class="n">write</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+            <span class="n">write</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+        <span class="n">write</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+</div>
+<span class="n">_add_doc</span><span class="p">(</span><span class="n">reraise</span><span class="p">,</span> <span class="s">&quot;&quot;&quot;Reraise an exception.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="with_metaclass"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.six.with_metaclass">[docs]</a><span class="k">def</span> <span class="nf">with_metaclass</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a base class with a metaclass.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">meta</span><span class="p">(</span><span class="s">&quot;NewBase&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">base</span><span class="p">,),</span> <span class="p">{})</span></div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

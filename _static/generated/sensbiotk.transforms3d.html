@@ -1,0 +1,1311 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.transforms3d package &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../index.html" />
+    <link rel="up" title="sensbiotk package" href="sensbiotk.html" />
+    <link rel="prev" title="sensbiotk.tests package" href="sensbiotk.tests.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../index.html"
+          title="back to the documentation overview"><span>sensbiotk.transforms3d package</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="sensbiotk.tests.html">&laquo; sensbiotk.tests package</a> |
+        <a href="#">sensbiotk.transforms3d package</a>
+      </div>
+      <div id="contentwrapper">
+        <div id="toc">
+          <h3>Table Of Contents</h3>
+          <ul>
+<li><a class="reference internal" href="#">sensbiotk.transforms3d package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.transforms3d.eulerangles">sensbiotk.transforms3d.eulerangles module</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.transforms3d.quaternions">sensbiotk.transforms3d.quaternions module</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.transforms3d.setup">sensbiotk.transforms3d.setup module</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.transforms3d.six">sensbiotk.transforms3d.six module</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.transforms3d.utils">sensbiotk.transforms3d.utils module</a></li>
+<li><a class="reference internal" href="#module-sensbiotk.transforms3d">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+        
+  <div class="section" id="sensbiotk-transforms3d-package">
+<h1>sensbiotk.transforms3d package<a class="headerlink" href="#sensbiotk-transforms3d-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-sensbiotk.transforms3d.eulerangles">
+<span id="sensbiotk-transforms3d-eulerangles-module"></span><h2>sensbiotk.transforms3d.eulerangles module<a class="headerlink" href="#module-sensbiotk.transforms3d.eulerangles" title="Permalink to this headline">¶</a></h2>
+<p>Module implementing Euler angle rotations and their conversions</p>
+<p>See:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://en.wikipedia.org/wiki/Rotation_matrix">http://en.wikipedia.org/wiki/Rotation_matrix</a></li>
+<li><a class="reference external" href="http://en.wikipedia.org/wiki/Euler_angles">http://en.wikipedia.org/wiki/Euler_angles</a></li>
+<li><a class="reference external" href="http://mathworld.wolfram.com/EulerAngles.html">http://mathworld.wolfram.com/EulerAngles.html</a></li>
+</ul>
+<p>See also: <em>Representing Attitude with Euler Angles and Quaternions: A
+Reference</em> (2006) by James Diebel. A cached PDF link last found here:</p>
+<p><a class="reference external" href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.110.5134">http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.110.5134</a></p>
+<p>Euler&#8217;s rotation theorem tells us that any rotation in 3D can be
+described by 3 angles.  Let&#8217;s call the 3 angles the <em>Euler angle vector</em>
+and call the angles in the vector ,  and
+.  The vector is [ ,
+.  ] and, in this description, the order of the
+parameters specifies the order in which the rotations occur (so the
+rotation corresponding to  is applied first).</p>
+<p>In order to specify the meaning of an <em>Euler angle vector</em> we need to
+specify the axes around which each of the rotations corresponding to
+,  and  will occur.</p>
+<p>There are therefore three axes for the rotations ,
+ and ; let&#8217;s call them  ,
+.</p>
+<p>Let us express the rotation  around axis <cite>i</cite> as a 3 by 3
+rotation matrix <cite>A</cite>.  Similarly  around <cite>j</cite> becomes 3 x 3
+matrix <cite>B</cite> and  around <cite>k</cite> becomes matrix <cite>G</cite>.  Then the
+whole rotation expressed by the Euler angle vector [ ,
+.  ], <cite>R</cite> is given by:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">A</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>See <a class="reference external" href="http://mathworld.wolfram.com/EulerAngles.html">http://mathworld.wolfram.com/EulerAngles.html</a></p>
+<p>The order  expresses the fact that the rotations are
+performed in the order of the vector ( around axis <cite>i</cite> =
+<cite>A</cite> first).</p>
+<p>To convert a given Euler angle vector to a meaningful rotation, and a
+rotation matrix, we need to define:</p>
+<ul class="simple">
+<li>the axes <cite>i</cite>, <cite>j</cite>, <cite>k</cite></li>
+<li>whether a rotation matrix should be applied on the left of a vector to
+be transformed (vectors are column vectors) or on the right (vectors
+are row vectors).</li>
+<li>whether the rotations move the axes as they are applied (intrinsic
+rotations) - compared the situation where the axes stay fixed and the
+vectors move within the axis frame (extrinsic)</li>
+<li>the handedness of the coordinate system</li>
+</ul>
+<p>See: <a class="reference external" href="http://en.wikipedia.org/wiki/Rotation_matrix#Ambiguities">http://en.wikipedia.org/wiki/Rotation_matrix#Ambiguities</a></p>
+<p>We are using the following conventions:</p>
+<ul class="simple">
+<li>axes <cite>i</cite>, <cite>j</cite>, <cite>k</cite> are the <cite>z</cite>, <cite>y</cite>, and <cite>x</cite> axes respectively.  Thus
+an Euler angle vector [ , .  ]
+in our convention implies a  radian rotation around the
+<cite>z</cite> axis, followed by a  rotation around the <cite>y</cite> axis,
+followed by a  rotation around the <cite>x</cite> axis.</li>
+<li>the rotation matrix applies on the left, to column vectors on the
+right, so if <cite>R</cite> is the rotation matrix, and <cite>v</cite> is a 3 x N matrix
+with N column vectors, the transformed vector set <cite>vdash</cite> is given by
+<tt class="docutils literal"><span class="pre">vdash</span> <span class="pre">=</span> <span class="pre">np.dot(R,</span> <span class="pre">v)</span></tt>.</li>
+<li>extrinsic rotations - the axes are fixed, and do not move with the
+rotations.</li>
+<li>a right-handed coordinate system</li>
+</ul>
+<p>The convention of rotation around <tt class="docutils literal"><span class="pre">z</span></tt>, followed by rotation around
+<tt class="docutils literal"><span class="pre">y</span></tt>, followed by rotation around <tt class="docutils literal"><span class="pre">x</span></tt>, is known (confusingly) as
+&#8220;xyz&#8221;, pitch-roll-yaw, Cardan angles, or Tait-Bryan angles.</p>
+<dl class="function">
+<dt id="sensbiotk.transforms3d.eulerangles.angle_axis2euler">
+<tt class="descclassname">sensbiotk.transforms3d.eulerangles.</tt><tt class="descname">angle_axis2euler</tt><big>(</big><em>theta</em>, <em>vector</em>, <em>is_normalized=False</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/eulerangles.html#angle_axis2euler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.eulerangles.angle_axis2euler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert angle, axis pair to Euler angles</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>theta</strong> : scalar</p>
+<blockquote>
+<div><p>angle of rotation</p>
+</div></blockquote>
+<p><strong>vector</strong> : 3 element sequence</p>
+<blockquote>
+<div><p>vector specifying axis for rotation.</p>
+</div></blockquote>
+<p><strong>is_normalized</strong> : bool, optional</p>
+<blockquote>
+<div><p>True if vector is already normalized (has norm of 1).  Default
+False</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>z</strong> : scalar</p>
+<p><strong>y</strong> : scalar</p>
+<p><strong>x</strong> : scalar</p>
+<blockquote class="last">
+<div><p>Rotations in radians around z, y, x axes, respectively</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>It&#8217;s possible to reduce the amount of calculation a little, by
+combining parts of the <tt class="docutils literal"><span class="pre">angle_axis2mat</span></tt> and <tt class="docutils literal"><span class="pre">mat2euler</span></tt>
+functions, but the reduction in computation is small, and the code
+repetition is large.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">angle_axis2euler</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">((</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.eulerangles.euler2angle_axis">
+<tt class="descclassname">sensbiotk.transforms3d.eulerangles.</tt><tt class="descname">euler2angle_axis</tt><big>(</big><em>z=0</em>, <em>y=0</em>, <em>x=0</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/eulerangles.html#euler2angle_axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.eulerangles.euler2angle_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return angle, axis corresponding to these Euler angles</p>
+<p>Uses the z, then y, then x convention above</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>z</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around z-axis (performed first)</p>
+</div></blockquote>
+<p><strong>y</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around y-axis</p>
+</div></blockquote>
+<p><strong>x</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around x-axis (performed last)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>theta</strong> : scalar</p>
+<blockquote>
+<div><p>angle of rotation</p>
+</div></blockquote>
+<p><strong>vector</strong> : array shape (3,)</p>
+<blockquote class="last">
+<div><p>axis around which rotation occurs</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">theta</span><span class="p">,</span> <span class="n">vec</span> <span class="o">=</span> <span class="n">euler2angle_axis</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+<span class="go">1.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.eulerangles.euler2mat">
+<tt class="descclassname">sensbiotk.transforms3d.eulerangles.</tt><tt class="descname">euler2mat</tt><big>(</big><em>z=0</em>, <em>y=0</em>, <em>x=0</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/eulerangles.html#euler2mat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.eulerangles.euler2mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return matrix for rotations around z, y and x axes</p>
+<p>Uses the z, then y, then x convention above</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>z</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around z-axis (performed first)</p>
+</div></blockquote>
+<p><strong>y</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around y-axis</p>
+</div></blockquote>
+<p><strong>x</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around x-axis (performed last)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>M</strong> : array shape (3,3)</p>
+<blockquote class="last">
+<div><p>Rotation matrix giving same rotation as for given angles</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The direction of rotation is given by the right-hand rule (orient
+the thumb of the right hand along the axis around which the rotation
+occurs, with the end of the thumb at the positive end of the axis;
+curl your fingers; the direction your fingers curl is the direction
+of rotation).  Therefore, the rotations are counterclockwise if
+looking along the axis of rotation from positive to negative.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">zrot</span> <span class="o">=</span> <span class="mf">1.3</span> <span class="c"># radians</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">yrot</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xrot</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">M</span> <span class="o">=</span> <span class="n">euler2mat</span><span class="p">(</span><span class="n">zrot</span><span class="p">,</span> <span class="n">yrot</span><span class="p">,</span> <span class="n">xrot</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">M</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>The output rotation matrix is equal to the composition of the
+individual rotations</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">M1</span> <span class="o">=</span> <span class="n">euler2mat</span><span class="p">(</span><span class="n">zrot</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">M2</span> <span class="o">=</span> <span class="n">euler2mat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">yrot</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">M3</span> <span class="o">=</span> <span class="n">euler2mat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xrot</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">composed_M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M2</span><span class="p">,</span> <span class="n">M1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">composed_M</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>You can specify rotations by named arguments</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">M3</span> <span class="o">==</span> <span class="n">euler2mat</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xrot</span><span class="p">))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>When applying M to a vector, the vector should column vector to the
+right of M.  If the right hand side is a 2D array rather than a
+vector, then each column of the 2D array represents a vector.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">v2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">vec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span> <span class="c"># giving 3x2 array</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vecs2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">vecs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Rotations are counter-clockwise.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">zred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">zred</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">yred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">yred</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">xred</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.eulerangles.euler2quat">
+<tt class="descclassname">sensbiotk.transforms3d.eulerangles.</tt><tt class="descname">euler2quat</tt><big>(</big><em>z=0</em>, <em>y=0</em>, <em>x=0</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/eulerangles.html#euler2quat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.eulerangles.euler2quat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return quaternion corresponding to these Euler angles</p>
+<p>Uses the z, then y, then x convention above</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>z</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around z-axis (performed first)</p>
+</div></blockquote>
+<p><strong>y</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around y-axis</p>
+</div></blockquote>
+<p><strong>x</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around x-axis (performed last)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>quat</strong> : array shape (4,)</p>
+<blockquote class="last">
+<div><p>Quaternion in w, x, y z (real, then vector) format</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>We can derive this formula in Sympy using:</p>
+<ol class="arabic simple">
+<li>Formula giving quaternion corresponding to rotation of theta radians
+about arbitrary axis:
+<a class="reference external" href="http://mathworld.wolfram.com/EulerParameters.html">http://mathworld.wolfram.com/EulerParameters.html</a></li>
+<li>Generated formulae from 1.) for quaternions corresponding to
+theta radians rotations about <tt class="docutils literal"><span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z</span></tt> axes</li>
+<li>Apply quaternion multiplication formula -
+<a class="reference external" href="http://en.wikipedia.org/wiki/Quaternions#Hamilton_product">http://en.wikipedia.org/wiki/Quaternions#Hamilton_product</a> - to
+formulae from 2.) to give formula for combined rotations.</li>
+</ol>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.eulerangles.mat2euler">
+<tt class="descclassname">sensbiotk.transforms3d.eulerangles.</tt><tt class="descname">mat2euler</tt><big>(</big><em>M</em>, <em>cy_thresh=None</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/eulerangles.html#mat2euler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.eulerangles.mat2euler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discover Euler angle vector from 3x3 matrix</p>
+<p>Uses the conventions above.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>M</strong> : array-like, shape (3,3)</p>
+<p><strong>cy_thresh</strong> : None or scalar, optional</p>
+<blockquote>
+<div><p>threshold below which to give up on straightforward arctan for
+estimating x rotation.  If None (default), estimate from
+precision of input.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>z</strong> : scalar</p>
+<p><strong>y</strong> : scalar</p>
+<p><strong>x</strong> : scalar</p>
+<blockquote class="last">
+<div><p>Rotations in radians around z, y, x axes, respectively</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>If there was no numerical error, the routine could be derived using
+Sympy expression for z then y then x rotation matrix, which is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span>                       <span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">),</span>                       <span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">),</span>         <span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">)],</span>
+<span class="p">[</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span>
+<span class="p">[</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">),</span>  <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>with the obvious derivations for z, y, and x</p>
+<blockquote>
+<div>z = atan2(-r12, r11)
+y = asin(r13)
+x = atan2(-r23, r33)</div></blockquote>
+<p>Problems arise when cos(y) is close to zero, because both of:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">z</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>will be close to atan2(0, 0), and highly unstable.</p>
+<p>The <tt class="docutils literal"><span class="pre">cy</span></tt> fix for numerical instability below is from: <em>Graphics
+Gems IV</em>, Paul Heckbert (editor), Academic Press, 1994, ISBN:
+0123361559.  Specifically it comes from EulerAngles.c by Ken
+Shoemake, and deals with the case where cos(y) is close to zero:</p>
+<p>See: <a class="reference external" href="http://www.graphicsgems.org/">http://www.graphicsgems.org/</a></p>
+<p>The code appears to be licensed (from the website) as &#8220;can be used
+without restrictions&#8221;.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.eulerangles.quat2euler">
+<tt class="descclassname">sensbiotk.transforms3d.eulerangles.</tt><tt class="descname">quat2euler</tt><big>(</big><em>q</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/eulerangles.html#quat2euler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.eulerangles.quat2euler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Euler angles corresponding to quaternion <cite>q</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, x, y, z of quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>z</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around z-axis (performed first)</p>
+</div></blockquote>
+<p><strong>y</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around y-axis</p>
+</div></blockquote>
+<p><strong>x</strong> : scalar</p>
+<blockquote class="last">
+<div><p>Rotation angle in radians around x-axis (performed last)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>It&#8217;s possible to reduce the amount of calculation a little, by
+combining parts of the <tt class="docutils literal"><span class="pre">quat2mat</span></tt> and <tt class="docutils literal"><span class="pre">mat2euler</span></tt> functions, but
+the reduction in computation is small, and the code repetition is
+large.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.eulerangles.quat2euler2">
+<tt class="descclassname">sensbiotk.transforms3d.eulerangles.</tt><tt class="descname">quat2euler2</tt><big>(</big><em>q</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/eulerangles.html#quat2euler2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.eulerangles.quat2euler2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Euler angles corresponding to quaternion <cite>q</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, x, y, z of quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>z</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around z-axis (performed first)</p>
+</div></blockquote>
+<p><strong>y</strong> : scalar</p>
+<blockquote>
+<div><p>Rotation angle in radians around y-axis</p>
+</div></blockquote>
+<p><strong>x</strong> : scalar</p>
+<blockquote class="last">
+<div><p>Rotation angle in radians around x-axis (performed last)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Simple implementation using :
+<a class="reference external" href="http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles">http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles</a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sensbiotk.transforms3d.quaternions">
+<span id="sensbiotk-transforms3d-quaternions-module"></span><h2>sensbiotk.transforms3d.quaternions module<a class="headerlink" href="#module-sensbiotk.transforms3d.quaternions" title="Permalink to this headline">¶</a></h2>
+<p>Functions to operate on, or return, quaternions.</p>
+<p>The module also includes functions for the closely related angle, axis
+pair as a specification for rotation.</p>
+<p>Quaternions here consist of 4 values <tt class="docutils literal"><span class="pre">w,</span> <span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z</span></tt>, where <tt class="docutils literal"><span class="pre">w</span></tt> is the
+real (scalar) part, and <tt class="docutils literal"><span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z</span></tt> are the complex (vector) part.</p>
+<p>Note - rotation matrices here apply to column vectors, that is,
+they are applied on the left of the vector.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c"># 180 degree rotation around axis 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">M</span> <span class="o">=</span> <span class="n">quat2mat</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="c"># from this module</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> <span class="c"># column vector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">vec</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.angle_axis2mat">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">angle_axis2mat</tt><big>(</big><em>theta</em>, <em>vector</em>, <em>is_normalized=False</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#angle_axis2mat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.angle_axis2mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotation matrix of angle <cite>theta</cite> around <cite>vector</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>theta</strong> : scalar</p>
+<blockquote>
+<div><p>angle of rotation</p>
+</div></blockquote>
+<p><strong>vector</strong> : 3 element sequence</p>
+<blockquote>
+<div><p>vector specifying axis for rotation.</p>
+</div></blockquote>
+<p><strong>is_normalized</strong> : bool, optional</p>
+<blockquote>
+<div><p>True if vector is already normalized (has norm of 1).  Default
+False</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>mat</strong> : array shape (3,3)</p>
+<blockquote class="last">
+<div><p>rotation matrix specified rotation</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>From: <a class="reference external" href="http://en.wikipedia.org/wiki/Rotation_matrix#Axis_and_angle">http://en.wikipedia.org/wiki/Rotation_matrix#Axis_and_angle</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.angle_axis2quat">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">angle_axis2quat</tt><big>(</big><em>theta</em>, <em>vector</em>, <em>is_normalized=False</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#angle_axis2quat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.angle_axis2quat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quaternion for rotation of angle <cite>theta</cite> around <cite>vector</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>theta</strong> : scalar</p>
+<blockquote>
+<div><p>angle of rotation</p>
+</div></blockquote>
+<p><strong>vector</strong> : 3 element sequence</p>
+<blockquote>
+<div><p>vector specifying axis for rotation.</p>
+</div></blockquote>
+<p><strong>is_normalized</strong> : bool, optional</p>
+<blockquote>
+<div><p>True if vector is already normalized (has norm of 1).  Default
+False</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>quat</strong> : 4 element sequence of symbols</p>
+<blockquote class="last">
+<div><p>quaternion giving specified rotation</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Formula from <a class="reference external" href="http://mathworld.wolfram.com/EulerParameters.html">http://mathworld.wolfram.com/EulerParameters.html</a></p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">angle_axis2quat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>  <span class="mi">0</span><span class="p">])</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.conjugate">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">conjugate</tt><big>(</big><em>q</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#conjugate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.conjugate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conjugate of quaternion</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, i, j, k of quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>conjq</strong> : array shape (4,)</p>
+<blockquote class="last">
+<div><p>w, i, j, k of conjugate of <cite>q</cite></p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.eye">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">eye</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#eye"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.eye" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return identity quaternion</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.fillpositive">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">fillpositive</tt><big>(</big><em>xyz</em>, <em>w2_thresh=None</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#fillpositive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.fillpositive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute unit quaternion from last 3 values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>xyz</strong> : iterable</p>
+<blockquote>
+<div><p>iterable containing 3 values, corresponding to quaternion x, y, z</p>
+</div></blockquote>
+<p><strong>w2_thresh</strong> : None or float, optional</p>
+<blockquote>
+<div><p>threshold to determine if w squared is really negative.
+If None (default) then w2_thresh set equal to
+<tt class="docutils literal"><span class="pre">-np.finfo(xyz.dtype).eps</span></tt>, if possible, otherwise
+<tt class="docutils literal"><span class="pre">-np.finfo(np.float).eps</span></tt></p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>wxyz</strong> : array shape (4,)</p>
+<blockquote class="last">
+<div><p>Full 4 values of quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>If w, x, y, z are the values in the full quaternion, assumes w is
+positive.</p>
+<p>Gives error if w*w is estimated to be negative</p>
+<p>w = 0 corresponds to a 180 degree rotation</p>
+<p>The unit quaternion specifies that np.dot(wxyz, wxyz) == 1.</p>
+<p>If w is positive (assumed here), w is given by:</p>
+<p>w = np.sqrt(1.0-(x*x+y*y+z*z))</p>
+<p>w2 = 1.0-(x*x+y*y+z*z) can be near zero, which will lead to
+numerical instability in sqrt.  Here we use the system maximum
+float type to reduce numerical instability</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wxyz</span> <span class="o">=</span> <span class="n">fillpositive</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">wxyz</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wxyz</span> <span class="o">=</span> <span class="n">fillpositive</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="c"># Corner case; w is 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">wxyz</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">wxyz</span><span class="p">,</span> <span class="n">wxyz</span><span class="p">)</span>
+<span class="go">1.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.inverse">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">inverse</tt><big>(</big><em>q</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#inverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.inverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return multiplicative inverse of quaternion <cite>q</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, i, j, k of quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>invq</strong> : array shape (4,)</p>
+<blockquote class="last">
+<div><p>w, i, j, k of quaternion inverse</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.isunit">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">isunit</tt><big>(</big><em>q</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#isunit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.isunit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True is this is very nearly a unit quaternion</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.mat2quat">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">mat2quat</tt><big>(</big><em>M</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#mat2quat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.mat2quat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate quaternion corresponding to given rotation matrix</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>M</strong> : array-like</p>
+<blockquote>
+<div><p>3x3 rotation matrix</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>q</strong> : (4,) array</p>
+<blockquote class="last">
+<div><p>closest quaternion to input matrix, having positive q[0]</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Method claimed to be robust to numerical errors in M</p>
+<p>Constructs quaternion by calculating maximum eigenvector for matrix
+K (constructed from input <cite>M</cite>).  Although this is not tested, a
+maximum eigenvalue of 1 corresponds to a valid rotation.</p>
+<p>A quaternion q*-1 corresponds to the same rotation as q; thus the
+sign of the reconstructed quaternion is arbitrary, and we return
+quaternions with positive w (q[0]).</p>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><a class="reference external" href="http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion">http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion</a></li>
+<li>Bar-Itzhack, Itzhack Y. (2000), &#8220;New method for extracting the
+quaternion from a rotation matrix&#8221;, AIAA Journal of Guidance,
+Control and Dynamics 23(6):1085-1087 (Engineering Note), ISSN
+0731-5090</li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">mat2quat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="c"># Identity rotation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">mat2quat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="c"># 180 degree rotn around axis 0</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.mult">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">mult</tt><big>(</big><em>q1</em>, <em>q2</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#mult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.mult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two quaternions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q1</strong> : 4 element sequence</p>
+<p><strong>q2</strong> : 4 element sequence</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>q12</strong> : shape (4,) array</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>See : <a class="reference external" href="http://en.wikipedia.org/wiki/Quaternions#Hamilton_product">http://en.wikipedia.org/wiki/Quaternions#Hamilton_product</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.nearly_equivalent">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">nearly_equivalent</tt><big>(</big><em>q1</em>, <em>q2</em>, <em>rtol=1e-05</em>, <em>atol=1e-08</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#nearly_equivalent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.nearly_equivalent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if <cite>q1</cite> and <cite>q2</cite> give near equivalent transforms</p>
+<p>q1 may be nearly numerically equal to q2, or nearly equal to q2 * -1
+(becuase a quaternion multiplied by -1 gives the same transform).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q1</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, x, y, z of first quaternion</p>
+</div></blockquote>
+<p><strong>q2</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, x, y, z of second quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>equiv</strong> : bool</p>
+<blockquote class="last">
+<div><p>True if <cite>q1</cite> and <cite>q2</cite> are nearly equivalent, False otherwise</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">q1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nearly_equivalent</span><span class="p">(</span><span class="n">q1</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nearly_equivalent</span><span class="p">(</span><span class="n">q1</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nearly_equivalent</span><span class="p">(</span><span class="n">q1</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.norm">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">norm</tt><big>(</big><em>q</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return norm of quaternion</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, i, j, k of quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>n</strong> : scalar</p>
+<blockquote class="last">
+<div><p>quaternion norm</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.norm2">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">norm2</tt><big>(</big><em>q</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#norm2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.norm2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return norm of quaternion with sqrt</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, i, j, k of quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>n</strong> : scalar</p>
+<blockquote class="last">
+<div><p>quaternion norm</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.normalize">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">normalize</tt><big>(</big><em>q</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#normalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return quaternion with normalized</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, i, j, k of quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>n</strong> : 4 element sequence</p>
+<blockquote class="last">
+<div><p>quaternion normalized</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.quat2angle_axis">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">quat2angle_axis</tt><big>(</big><em>quat</em>, <em>identity_thresh=None</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#quat2angle_axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.quat2angle_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert quaternion to rotation of angle around axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quat</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, x, y, z forming quaternion</p>
+</div></blockquote>
+<p><strong>identity_thresh</strong> : None or scalar, optional</p>
+<blockquote>
+<div><p>threshold below which the norm of the vector part of the
+quaternion (x, y, z) is deemed to be 0, leading to the identity
+rotation.  None (the default) leads to a threshold estimated
+based on the precision of the input.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>theta</strong> : scalar</p>
+<blockquote>
+<div><p>angle of rotation</p>
+</div></blockquote>
+<p><strong>vector</strong> : array shape (3,)</p>
+<blockquote class="last">
+<div><p>axis around which rotation occurs</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>A quaternion for which x, y, z are all equal to 0, is an identity
+rotation.  In this case we return a 0 angle and an  arbitrary
+vector, here [1, 0, 0]</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">theta</span><span class="p">,</span> <span class="n">vec</span> <span class="o">=</span> <span class="n">quat2angle_axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vec</span>
+<span class="go">array([ 1.,  0.,  0.])</span>
+</pre></div>
+</div>
+<p>If this is an identity rotation, we return a zero angle and an
+arbitrary vector</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">quat2angle_axis</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">(0.0, array([ 1.,  0.,  0.]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.quat2mat">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">quat2mat</tt><big>(</big><em>q</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#quat2mat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.quat2mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate rotation matrix corresponding to quaternion</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q</strong> : 4 element array-like</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>M</strong> : (3,3) array</p>
+<blockquote class="last">
+<div><p>Rotation matrix corresponding to input quaternion <em>q</em></p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Rotation matrix applies to column vectors, and is applied to the
+left of coordinate vectors.  The algorithm here allows non-unit
+quaternions.</p>
+<p class="rubric">References</p>
+<p>Algorithm from
+<a class="reference external" href="http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion">http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion</a></p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">M</span> <span class="o">=</span> <span class="n">quat2mat</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="c"># Identity quaternion</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">M</span> <span class="o">=</span> <span class="n">quat2mat</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="c"># 180 degree rotn around axis 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.quaternions.rotate_vector">
+<tt class="descclassname">sensbiotk.transforms3d.quaternions.</tt><tt class="descname">rotate_vector</tt><big>(</big><em>v</em>, <em>q</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/quaternions.html#rotate_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.quaternions.rotate_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply transformation in quaternion <cite>q</cite> to vector <cite>v</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>v</strong> : 3 element sequence</p>
+<blockquote>
+<div><p>3 dimensional vector</p>
+</div></blockquote>
+<p><strong>q</strong> : 4 element sequence</p>
+<blockquote>
+<div><p>w, i, j, k of quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>vdash</strong> : array shape (3,)</p>
+<blockquote class="last">
+<div><p><cite>v</cite> rotated by quaternion <cite>q</cite></p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>See: <a class="reference external" href="http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Describing_rotations_with_quaternions">http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Describing_rotations_with_quaternions</a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sensbiotk.transforms3d.setup">
+<span id="sensbiotk-transforms3d-setup-module"></span><h2>sensbiotk.transforms3d.setup module<a class="headerlink" href="#module-sensbiotk.transforms3d.setup" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="sensbiotk.transforms3d.setup.configuration">
+<tt class="descclassname">sensbiotk.transforms3d.setup.</tt><tt class="descname">configuration</tt><big>(</big><em>parent_package=''</em>, <em>top_path=None</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/setup.html#configuration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.setup.configuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sensbiotk.transforms3d.six">
+<span id="sensbiotk-transforms3d-six-module"></span><h2>sensbiotk.transforms3d.six module<a class="headerlink" href="#module-sensbiotk.transforms3d.six" title="Permalink to this headline">¶</a></h2>
+<p>Utilities for writing code that runs on Python 2 and 3</p>
+<dl class="class">
+<dt id="sensbiotk.transforms3d.six.Iterator">
+<em class="property">class </em><tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">Iterator</tt><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#Iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.Iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="sensbiotk.transforms3d.six.Iterator.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#Iterator.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.Iterator.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sensbiotk.transforms3d.six.MovedAttribute">
+<em class="property">class </em><tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">MovedAttribute</tt><big>(</big><em>name</em>, <em>old_mod</em>, <em>new_mod</em>, <em>old_attr=None</em>, <em>new_attr=None</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#MovedAttribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.MovedAttribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sensbiotk.transforms3d.six._LazyDescr</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sensbiotk.transforms3d.six.MovedModule">
+<em class="property">class </em><tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">MovedModule</tt><big>(</big><em>name</em>, <em>old</em>, <em>new=None</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#MovedModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.MovedModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sensbiotk.transforms3d.six._LazyDescr</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sensbiotk.transforms3d.six.X">
+<em class="property">class </em><tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">X</tt><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#X"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.add_move">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">add_move</tt><big>(</big><em>move</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#add_move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.add_move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an item to six.moves.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.b">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">b</tt><big>(</big><em>s</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#b"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Byte literal</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.exec_">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">exec_</tt><big>(</big><em>_code_</em>, <em>_globs_=None</em>, <em>_locs_=None</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#exec_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.exec_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute code in a namespace.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.get_unbound_function">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">get_unbound_function</tt><big>(</big><em>unbound</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#get_unbound_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.get_unbound_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the function out of a possibly unbound function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.iteritems">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">iteritems</tt><big>(</big><em>d</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#iteritems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.iteritems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an iterator over the (key, value) pairs of a dictionary.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.iterkeys">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">iterkeys</tt><big>(</big><em>d</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#iterkeys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.iterkeys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an iterator over the keys of a dictionary.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.iterlists">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">iterlists</tt><big>(</big><em>d</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#iterlists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.iterlists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an iterator over the (key, [values]) pairs of a dictionary.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.itervalues">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">itervalues</tt><big>(</big><em>d</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#itervalues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.itervalues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an iterator over the values of a dictionary.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.print_">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">print_</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#print_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.print_" title="Permalink to this definition">¶</a></dt>
+<dd><p>The new-style print function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.remove_move">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">remove_move</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#remove_move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.remove_move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove item from six.moves.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.reraise">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">reraise</tt><big>(</big><em>tp</em>, <em>value</em>, <em>tb=None</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#reraise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.reraise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reraise an exception.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.u">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">u</tt><big>(</big><em>s</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#u"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.u" title="Permalink to this definition">¶</a></dt>
+<dd><p>Text literal</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.six.with_metaclass">
+<tt class="descclassname">sensbiotk.transforms3d.six.</tt><tt class="descname">with_metaclass</tt><big>(</big><em>meta</em>, <em>base=&lt;type 'object'&gt;</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/six.html#with_metaclass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.six.with_metaclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a base class with a metaclass.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sensbiotk.transforms3d.utils">
+<span id="sensbiotk-transforms3d-utils-module"></span><h2>sensbiotk.transforms3d.utils module<a class="headerlink" href="#module-sensbiotk.transforms3d.utils" title="Permalink to this headline">¶</a></h2>
+<p>Utilities for transforms3d</p>
+<dl class="function">
+<dt id="sensbiotk.transforms3d.utils.inique">
+<tt class="descclassname">sensbiotk.transforms3d.utils.</tt><tt class="descname">inique</tt><big>(</big><em>iterable</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/utils.html#inique"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.utils.inique" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate unique elements from <cite>iterable</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>iterable</strong> : iterable</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>gen</strong> : generator</p>
+<blockquote class="last">
+<div><p>generator that yields unique elements from <cite>iterable</cite></p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">tuple</span><span class="p">(</span><span class="n">inique</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
+<span class="go">(0, 1, 2, 3)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.utils.normalized_vector">
+<tt class="descclassname">sensbiotk.transforms3d.utils.</tt><tt class="descname">normalized_vector</tt><big>(</big><em>vec</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/utils.html#normalized_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.utils.normalized_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return vector divided by Euclidean (L2) norm</p>
+<p>See <em class="xref std std-term">unit vector</em> and <em class="xref std std-term">Euclidean norm</em></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>vec</strong> : array-like shape (3,)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>nvec</strong> : array shape (3,)</p>
+<blockquote class="last">
+<div><p>vector divided by L2 norm</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">vec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l2n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">vec</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nvec</span> <span class="o">=</span> <span class="n">normalized_vector</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span> <span class="o">/</span> <span class="n">l2n</span><span class="p">,</span> <span class="n">nvec</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1, 3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">normalized_vector</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(3,)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.utils.permutations">
+<tt class="descclassname">sensbiotk.transforms3d.utils.</tt><tt class="descname">permutations</tt><big>(</big><em>iterable</em>, <em>r=None</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/utils.html#permutations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.utils.permutations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate all permutations of <cite>iterable</cite>, of length <cite>r</cite></p>
+<p>From Python docs, expressing 2.6 <tt class="docutils literal"><span class="pre">itertools.permutations</span></tt>
+algorithm.</p>
+<p>If the elements are unique, then the resulting permutations will
+also be unique.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>iterable</strong> : iterable</p>
+<blockquote>
+<div><p>returning elements that will be permuted</p>
+</div></blockquote>
+<p><strong>r</strong> : None or int</p>
+<blockquote>
+<div><p>length of sequence to return, if None (default) use length of
+<cite>iterable</cite></p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>gen</strong> : generator</p>
+<blockquote class="last">
+<div><p>generator that yields permutations</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">tuple</span><span class="p">(</span><span class="n">permutations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+<span class="go">((0, 1, 2), (0, 2, 1), (1, 0, 2), (1, 2, 0), (2, 0, 1), (2, 1, 0))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">tuple</span><span class="p">(</span><span class="n">permutations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+<span class="go">((0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.utils.permuted_signs">
+<tt class="descclassname">sensbiotk.transforms3d.utils.</tt><tt class="descname">permuted_signs</tt><big>(</big><em>seq</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/utils.html#permuted_signs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.utils.permuted_signs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate permuted signs for sequence <cite>seq</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>seq</strong> : sequence</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>gen</strong> : generator</p>
+<blockquote class="last">
+<div><p>generator returning <cite>seq</cite> with signs permuted</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">tuple</span><span class="p">(</span><span class="n">permuted_signs</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+<span class="go">((1, -2, 0), (1, -2, 0), (1, 2, 0), (1, 2, 0), (-1, -2, 0), (-1, -2, 0), (-1, 2, 0), (-1, 2, 0))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.utils.permuted_with_signs">
+<tt class="descclassname">sensbiotk.transforms3d.utils.</tt><tt class="descname">permuted_with_signs</tt><big>(</big><em>seq</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/utils.html#permuted_with_signs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.utils.permuted_with_signs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all permutations of <cite>seq</cite> with all sign permutations</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>seq</strong> : sequence</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>gen</strong> : generator</p>
+<blockquote class="last">
+<div><p>generator returning permutations and sign permutations</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">tuple</span><span class="p">(</span><span class="n">permuted_with_signs</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+<span class="go">((1, 2), (1, -2), (-1, 2), (-1, -2), (2, 1), (2, -1), (-2, 1), (-2, -1))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sensbiotk.transforms3d.utils.vector_norm">
+<tt class="descclassname">sensbiotk.transforms3d.utils.</tt><tt class="descname">vector_norm</tt><big>(</big><em>vec</em><big>)</big><a class="reference internal" href="../_modules/sensbiotk/transforms3d/utils.html#vector_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sensbiotk.transforms3d.utils.vector_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return vector Euclidaan (L2) norm</p>
+<p>See <em class="xref std std-term">unit vector</em> and <em class="xref std std-term">Euclidean norm</em></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vec</strong> : array-like shape (3,)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>norm</strong> : scalar</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">vec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l2n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">vec</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nvec</span> <span class="o">=</span> <span class="n">vector_norm</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">nvec</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">vec</span><span class="p">)))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sensbiotk.transforms3d">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sensbiotk.transforms3d" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

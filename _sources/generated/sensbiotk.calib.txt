@@ -1,0 +1,54 @@
+sensbiotk.calib package
+=======================
+
+Submodules
+----------
+
+sensbiotk.calib.calib module
+----------------------------
+
+.. automodule:: sensbiotk.calib.calib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.calib.calib_acc module
+--------------------------------
+
+.. automodule:: sensbiotk.calib.calib_acc
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.calib.calib_geom module
+---------------------------------
+
+.. automodule:: sensbiotk.calib.calib_geom
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.calib.calib_gyr module
+--------------------------------
+
+.. automodule:: sensbiotk.calib.calib_gyr
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.calib.calib_mag module
+--------------------------------
+
+.. automodule:: sensbiotk.calib.calib_mag
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sensbiotk.calib
+    :members:
+    :undoc-members:
+    :show-inheritance:

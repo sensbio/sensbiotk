@@ -1,0 +1,70 @@
+sensbiotk.algorithms package
+============================
+
+Submodules
+----------
+
+sensbiotk.algorithms.basic module
+---------------------------------
+
+.. automodule:: sensbiotk.algorithms.basic
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.algorithms.goniometer module
+--------------------------------------
+
+.. automodule:: sensbiotk.algorithms.goniometer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.algorithms.integration_gyro module
+--------------------------------------------
+
+.. automodule:: sensbiotk.algorithms.integration_gyro
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.algorithms.madgwick_ahrs module
+-----------------------------------------
+
+.. automodule:: sensbiotk.algorithms.madgwick_ahrs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.algorithms.mahony_ahrs module
+---------------------------------------
+
+.. automodule:: sensbiotk.algorithms.mahony_ahrs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.algorithms.markley module
+-----------------------------------
+
+.. automodule:: sensbiotk.algorithms.markley
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.algorithms.martin_ahrs module
+---------------------------------------
+
+.. automodule:: sensbiotk.algorithms.martin_ahrs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sensbiotk.algorithms
+    :members:
+    :undoc-members:
+    :show-inheritance:

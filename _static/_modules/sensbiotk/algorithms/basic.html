@@ -1,0 +1,475 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.algorithms.basic &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.algorithms.basic</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.algorithms.basic</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.algorithms.basic</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8; -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbio@inria.fr</span>
+<span class="c"># Copyright (C) 2014  INRIA (Contact: sensbiotk@inria.fr)</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Basic algo for sensors data</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
+
+<span class="c"># disabling pylint errors &#39;E1101&#39; no-member, false positive from pylint</span>
+<span class="c"># pylint:disable=I0011,E1101</span>
+
+
+<div class="viewcode-block" id="find_peaks"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.find_peaks">[docs]</a><span class="k">def</span> <span class="nf">find_peaks</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">,</span> <span class="n">min_peak_height</span><span class="p">,</span> <span class="n">min_peak_distance</span><span class="p">,</span> <span class="n">max_peak_distance</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Find locations and peak values in a 1D numpy array,</span>
+<span class="sd">        taking into account a minimal peak height, min distance</span>
+<span class="sd">         and max distance.</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_raw : 1D numpy array of float</span>
+<span class="sd">     signal input</span>
+<span class="sd">    min_peak_height : float</span>
+<span class="sd">     minimum height of the peak to detect</span>
+<span class="sd">    min_peak_distance : integer</span>
+<span class="sd">     minimal nb of samples between two consecutives peaks</span>
+<span class="sd">    max_peak_distance : integer</span>
+<span class="sd">     maximal nb of samples between two consecutives peaks</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sig_raw[locs]  : numpy array of float</span>
+<span class="sd">     detected peaks values</span>
+<span class="sd">    locs : numpy array of float</span>
+<span class="sd">     detected peaks locations</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># find extremas location</span>
+    <span class="n">loc_extrema</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">argrelextrema</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">greater</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dif_loc_extrema</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">loc_extrema</span><span class="p">)</span>
+    <span class="c"># keeps only extremas between min and max_peak_distance spaced</span>
+    <span class="n">loc_extrema_dist</span> <span class="o">=</span> \
+        <span class="n">loc_extrema</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+            <span class="n">dif_loc_extrema</span> <span class="o">&gt;</span> <span class="n">min_peak_distance</span><span class="p">,</span>
+            <span class="n">dif_loc_extrema</span> <span class="o">&lt;</span> <span class="n">max_peak_distance</span>
+            <span class="p">)]</span>
+    <span class="c"># keeps only extremas higher than the min peak threshold</span>
+    <span class="n">locs</span> <span class="o">=</span> <span class="n">loc_extrema_dist</span><span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">[</span><span class="n">loc_extrema_dist</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">min_peak_height</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">sig_raw</span><span class="p">[</span><span class="n">locs</span><span class="p">],</span> <span class="n">locs</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="find_static_periods"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.find_static_periods">[docs]</a><span class="k">def</span> <span class="nf">find_static_periods</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">,</span> <span class="n">static_threshold</span><span class="p">,</span> <span class="n">min_sample_duration</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Find locations of static periods in a 1D numpy array, taking</span>
+<span class="sd">    into account a minimal static threshold (ex: 3 deg/s), and a minimum</span>
+<span class="sd">    nb of samples for the static duration.</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_raw : 1D numpy array of float</span>
+<span class="sd">     signal input</span>
+<span class="sd">    static_threshold : float</span>
+<span class="sd">     threshold for considering a static period (ex: &lt; deg/s)</span>
+<span class="sd">    min_sample_duration : integer</span>
+<span class="sd">     minimum nb of consecutives samples considered as</span>
+<span class="sd">     a static period (duration * Fs)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    start_idx  : numpy array of float</span>
+<span class="sd">     start periods locations</span>
+<span class="sd">    end_idx : numpy array of float</span>
+<span class="sd">     end periods locations</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">temp</span> <span class="o">=</span> \
+        <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">static_threshold</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">])</span>
+    <span class="n">dtemp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">([</span><span class="n">temp</span><span class="p">])</span>
+    <span class="c"># indices of start periods</span>
+    <span class="n">start_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dtemp</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c"># indices of end periods</span>
+    <span class="n">end_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dtemp</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">end_idx</span> <span class="o">-</span> <span class="n">start_idx</span>
+    <span class="n">end_idx</span> <span class="o">=</span> <span class="n">end_idx</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="n">start_tab</span> <span class="o">=</span> <span class="n">start_idx</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">count</span> <span class="o">&gt;=</span> <span class="n">min_sample_duration</span><span class="p">)]</span>
+    <span class="n">end_tab</span> <span class="o">=</span> <span class="n">end_idx</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">count</span> <span class="o">&gt;=</span> <span class="n">min_sample_duration</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">start_tab</span><span class="p">,</span> <span class="n">end_tab</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="find_static_periods_3D"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.find_static_periods_3D">[docs]</a><span class="k">def</span> <span class="nf">find_static_periods_3D</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">,</span> <span class="n">static_threshold</span><span class="p">,</span> <span class="n">min_sample_duration</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Find locations of static periods in a 3D numpy array, taking</span>
+<span class="sd">    into account a minimal static threshold (ex: 3 deg/s), and a minimum</span>
+<span class="sd">    nb of samples for the static duration.</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_raw : 3D numpy array of float</span>
+<span class="sd">     signal input (ex: gyr(x,y,z))</span>
+<span class="sd">    static_threshold : float</span>
+<span class="sd">     threshold for considering a static period (ex: &lt; deg/s)</span>
+<span class="sd">    min_sample_duration : integer</span>
+<span class="sd">     minimum nb of consecutives samples considered as</span>
+<span class="sd">     a static period (duration * Fs)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    start_idx  : numpy array of float</span>
+<span class="sd">     start periods locations</span>
+<span class="sd">    end_idx : numpy array of float</span>
+<span class="sd">     end periods locations</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">temp</span> <span class="o">=</span> \
+        <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">static_threshold</span><span class="p">)</span> <span class="o">&amp;</span> \
+            <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">static_threshold</span><span class="p">)</span> <span class="o">&amp;</span> \
+            <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">static_threshold</span><span class="p">)),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">])</span>
+    <span class="n">dtemp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">([</span><span class="n">temp</span><span class="p">])</span>
+    <span class="c"># indices of start periods</span>
+    <span class="n">start_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dtemp</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c"># indices of end periods</span>
+    <span class="n">end_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dtemp</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">end_idx</span> <span class="o">-</span> <span class="n">start_idx</span>
+    <span class="n">end_idx</span> <span class="o">=</span> <span class="n">end_idx</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="n">start_tab</span> <span class="o">=</span> <span class="n">start_idx</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">count</span> <span class="o">&gt;=</span> <span class="n">min_sample_duration</span><span class="p">)]</span>
+    <span class="n">end_tab</span> <span class="o">=</span> <span class="n">end_idx</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">count</span> <span class="o">&gt;=</span> <span class="n">min_sample_duration</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">start_tab</span><span class="p">,</span> <span class="n">end_tab</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="cut_signal"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.cut_signal">[docs]</a><span class="k">def</span> <span class="nf">cut_signal</span><span class="p">(</span><span class="n">sig_time</span><span class="p">,</span> <span class="n">sig_raw</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">timef</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Cut the signal on a windows between time0 and timef.</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_time : numpy array of float of dim N</span>
+<span class="sd">    time signal</span>
+<span class="sd">    sig_raw  : numpy array of float of dim Nx3</span>
+<span class="sd">    signal</span>
+<span class="sd">    time0    : float</span>
+<span class="sd">    initial time of the window,</span>
+<span class="sd">    timef    : float</span>
+<span class="sd">    final time  of the window,</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sig_time:numpy array of float</span>
+<span class="sd">      time signal between time0 and timef</span>
+<span class="sd">    sig_cut : numpy array of float</span>
+<span class="sd">      signal cutted in a window time0 and timef.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tc_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sig_time</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time0</span><span class="p">))</span>
+    <span class="n">tc_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sig_time</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">timef</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">print</span> <span class="s">&quot;TIME&quot;</span><span class="p">,</span> <span class="n">tc_i</span><span class="p">,</span> <span class="n">tc_f</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">timef</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">sig_time</span><span class="p">[</span><span class="n">tc_i</span><span class="p">:</span><span class="n">tc_f</span><span class="p">,</span> <span class="p">:],</span> <span class="n">sig_raw</span><span class="p">[</span><span class="n">tc_i</span><span class="p">:</span><span class="n">tc_f</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]]</span>
+
+</div>
+<div class="viewcode-block" id="lowpass_filter"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.lowpass_filter">[docs]</a><span class="k">def</span> <span class="nf">lowpass_filter</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">,</span> <span class="n">cuttoff_freq</span><span class="p">,</span> <span class="n">samp_freq</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Low pass filter (butterworth order 6) on a signal</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_raw : numpy array of float of dim N</span>
+<span class="sd">     signal to be filtered</span>
+<span class="sd">    cuttoff_freq : float</span>
+<span class="sd">     cut-off frequency</span>
+<span class="sd">    samp_freq: float</span>
+<span class="sd">     sampling frequency</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sig_filt : numpy array of float of dim N</span>
+<span class="sd">    signal filtered</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">norm_pass</span> <span class="o">=</span> <span class="n">cuttoff_freq</span> <span class="o">/</span> <span class="p">(</span><span class="n">samp_freq</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">param_b</span><span class="p">,</span> <span class="n">param_a</span><span class="p">)</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">norm_pass</span><span class="p">)</span>
+    <span class="n">sig_filt</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">filtfilt</span><span class="p">(</span><span class="n">param_b</span><span class="p">,</span> <span class="n">param_a</span><span class="p">,</span> <span class="n">sig_raw</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sig_filt</span>
+
+</div>
+<div class="viewcode-block" id="lowpass_filter2"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.lowpass_filter2">[docs]</a><span class="k">def</span> <span class="nf">lowpass_filter2</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">,</span> <span class="n">cuttoff_freq</span><span class="p">,</span> <span class="n">samp_freq</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Simple low pass filter on a signal</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_raw : numpy array of float of dim N</span>
+<span class="sd">     signal to be filtered</span>
+<span class="sd">    cuttoff_freq : float</span>
+<span class="sd">     cut-off frequency</span>
+<span class="sd">    samp_freq: float</span>
+<span class="sd">     sampling frequency</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sig_filt : numpy array of float of dim N</span>
+<span class="sd">    signal filtered</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vdt</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">samp_freq</span>
+    <span class="n">vrc</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">cuttoff_freq</span><span class="p">)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">vdt</span> <span class="o">/</span> <span class="p">(</span><span class="n">vrc</span> <span class="o">+</span> <span class="n">vdt</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&quot;ALPHA&quot;</span><span class="p">,</span> <span class="n">alpha</span>
+
+    <span class="n">sig_filt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">))</span>
+    <span class="n">sig_filt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_raw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">)):</span>
+        <span class="n">sig_filt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_filt</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">sig_raw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">sig_filt</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">sig_filt</span>
+
+</div>
+<div class="viewcode-block" id="window_mean"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.window_mean">[docs]</a><span class="k">def</span> <span class="nf">window_mean</span><span class="p">(</span><span class="n">sig_time</span><span class="p">,</span> <span class="n">sig_raw</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">timef</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Mean of the signal on a windows between time0 and timef.</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_time : numpy array of float</span>
+<span class="sd">     time signal</span>
+<span class="sd">    sig_raw  : numpy array of float of dim Nx3</span>
+<span class="sd">     signal</span>
+<span class="sd">    time0    : float</span>
+<span class="sd">     initial time to compute the offset,</span>
+<span class="sd">    timef    : float</span>
+<span class="sd">     final time to compute the offset</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sig_mean : numpy array of float</span>
+<span class="sd">     mean of the signal assumed to be constant between time0 and timef.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tc_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sig_time</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time0</span><span class="p">))</span>
+    <span class="n">tc_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sig_time</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">timef</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">print</span> <span class="s">&quot;TIME&quot;</span><span class="p">,</span> <span class="n">tc_i</span><span class="p">,</span> <span class="n">tc_f</span>
+
+    <span class="n">sig_mean</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">[</span><span class="n">tc_i</span><span class="p">:</span><span class="n">tc_f</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">[</span><span class="n">tc_i</span><span class="p">:</span><span class="n">tc_f</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">[</span><span class="n">tc_i</span><span class="p">:</span><span class="n">tc_f</span><span class="p">,</span> <span class="mi">2</span><span class="p">])]</span>
+
+    <span class="k">print</span> <span class="s">&quot;Signal Offset =&quot;</span><span class="p">,</span> <span class="n">sig_mean</span>
+
+    <span class="k">return</span> <span class="n">sig_mean</span>
+
+</div>
+<div class="viewcode-block" id="moving_average"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.moving_average">[docs]</a><span class="k">def</span> <span class="nf">moving_average</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">,</span> <span class="n">fen</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Moving Average on a signal</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_raw : numpy array of float of dim N</span>
+<span class="sd">    signal to be filtered</span>
+<span class="sd">    fen  : size index  of the windows for the moving average</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sig_filt : numpy array of float</span>
+<span class="sd">    signal filtered</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lensig</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">)</span>
+    <span class="n">sig_filt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">lensig</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lensig</span><span class="o">-</span><span class="n">fen</span><span class="p">):</span>
+        <span class="n">moy</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">fen</span><span class="p">):</span>
+            <span class="n">moy</span> <span class="o">=</span> <span class="n">moy</span> <span class="o">+</span> <span class="n">sig_raw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">sig_filt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">moy</span> <span class="o">/</span> <span class="n">fen</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fen</span><span class="p">):</span>
+        <span class="n">sig_filt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_raw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lensig</span><span class="o">-</span><span class="n">fen</span><span class="p">,</span> <span class="n">lensig</span><span class="p">):</span>
+        <span class="n">sig_filt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_raw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+   <span class="c"># return sig_filt[fen-1:-fen+1]</span>
+    <span class="k">return</span> <span class="n">sig_filt</span>
+
+</div>
+<div class="viewcode-block" id="moving_average2"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.moving_average2">[docs]</a><span class="k">def</span> <span class="nf">moving_average2</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">,</span> <span class="n">fen</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Moving Average using convolution on a signal</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_raw : numpy array of float of dim N</span>
+<span class="sd">    signal to be filtered</span>
+<span class="sd">    fen  : size index  of the windows for the moving average</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sig_filt : numpy array of float</span>
+<span class="sd">    signal filtered</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">fen</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">sig_filt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">win</span><span class="o">/</span><span class="n">win</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">sig_raw</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;same&#39;</span><span class="p">)</span>
+
+   <span class="c"># return sig_filt[fen-1:-fen+1]</span>
+    <span class="k">return</span> <span class="n">sig_filt</span>
+
+</div>
+<div class="viewcode-block" id="search_maxpeak"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.search_maxpeak">[docs]</a><span class="k">def</span> <span class="nf">search_maxpeak</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Search max peak</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_time: numpy array of float of dim N</span>
+<span class="sd">     signal time</span>
+<span class="sd">    sig_raw : numpy array of float of dim N</span>
+<span class="sd">     signal input</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    time_peak  : numpy array of float</span>
+<span class="sd">       time where a max peak has been detected</span>
+<span class="sd">    index_peak : numpy array of float</span>
+<span class="sd">        index where a max peak has been detected</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">index_peak</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+   <span class="c"># index_peak = signal.argrelmax(sig_raw, np.greater)</span>
+
+    <span class="k">return</span> <span class="n">index_peak</span>
+
+</div>
+<div class="viewcode-block" id="threshold_signal"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.threshold_signal">[docs]</a><span class="k">def</span> <span class="nf">threshold_signal</span><span class="p">(</span><span class="n">sig_time</span><span class="p">,</span> <span class="n">sig_raw</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Threshold signal</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_time: numpy array of float of dim N</span>
+<span class="sd">     signal time</span>
+<span class="sd">    sig_raw : numpy array of float of dim N</span>
+<span class="sd">     signal input</span>
+<span class="sd">    threshold : float</span>
+<span class="sd">     threshold for the signal</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    time_thresh  : numpy array of float</span>
+<span class="sd">     time signal thresholed</span>
+<span class="sd">    index_peak : numpy array of float</span>
+<span class="sd">     signal thresholed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">acc_thresh</span> <span class="o">=</span> <span class="n">sig_raw</span><span class="p">[</span><span class="n">sig_raw</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span>
+    <span class="n">time_thresh</span> <span class="o">=</span> <span class="n">sig_time</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sig_raw</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">time_thresh</span><span class="p">,</span> <span class="n">acc_thresh</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="threshold_under_signal"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.threshold_under_signal">[docs]</a><span class="k">def</span> <span class="nf">threshold_under_signal</span><span class="p">(</span><span class="n">sig_time</span><span class="p">,</span> <span class="n">sig_raw</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Threshold under signal</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_time: numpy array of float of dim N</span>
+<span class="sd">     signal time</span>
+<span class="sd">    sig_raw : numpy array of float of dim N</span>
+<span class="sd">     signal input</span>
+<span class="sd">    threshold : float</span>
+<span class="sd">     threshold for the signal</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    time_thresh  : numpy array of float</span>
+<span class="sd">     time signal thresholed</span>
+<span class="sd">    index_peak : numpy array of float</span>
+<span class="sd">     signal thresholed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">acc_thresh</span> <span class="o">=</span> <span class="n">sig_raw</span><span class="p">[</span><span class="n">sig_raw</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">]</span>
+    <span class="n">time_thresh</span> <span class="o">=</span> <span class="n">sig_time</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sig_raw</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">time_thresh</span><span class="p">,</span> <span class="n">acc_thresh</span><span class="p">]</span>
+
+
+</div>
+<div class="viewcode-block" id="compute_norm"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.basic.compute_norm">[docs]</a><span class="k">def</span> <span class="nf">compute_norm</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Norm on a signal</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    sig_raw : numpy array of float of dim Nx3</span>
+<span class="sd">     signal to be normed</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sig_norm : numpy array of float</span>
+<span class="sd">     norm of the signal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sig_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sig_raw</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">sig_norm</span>
+</pre></div></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

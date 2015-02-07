@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.algorithms.martin_ahrs &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.algorithms.martin_ahrs</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.algorithms.martin_ahrs</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.algorithms.martin_ahrs</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8; -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbio@inria.fr</span>
+<span class="c"># Copyright (C) 2014  INRIA (Contact: sensbiotk@inria.fr)</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Martin Salaun observer implementation</span>
+
+<span class="sd">This algorithms is based on the following work :</span>
+
+<span class="sd">Martin, P. and E. Salaün, Design and implementation</span>
+<span class="sd">of a low-cost observer-based attitude and heading reference system.</span>
+<span class="sd">Control Engineering Practice, 2010. 18(7): p. 712-722.</span>
+
+<span class="sd">It enables the computation of a quaternion from magneto-inertial measurements.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># disabling pylint errors &#39;C0103&#39; invalid variable name, for variables : a,b</span>
+<span class="c"># pylint:disable=I0011,C0103</span>
+<span class="c"># disabling pylint errors &#39;E1101&#39; no-member, false positive from pylint</span>
+<span class="c"># pylint:disable=I0011,E1101</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.transforms3d</span> <span class="kn">import</span> <span class="n">quaternions</span> <span class="k">as</span> <span class="n">nq</span>
+
+
+<div class="viewcode-block" id="martin_ahrs"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.martin_ahrs.martin_ahrs">[docs]</a><span class="k">class</span> <span class="nc">martin_ahrs</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Martin Salaun observer class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<span class="c">#        # Observer gains (test)</span>
+<span class="c">#        self.la = 0.06</span>
+<span class="c">#        self.lc = 0.1</span>
+<span class="c">#        self.ld = 0.06</span>
+<span class="c">#        self.n = 0.25</span>
+<span class="c">#        self.o = 0.50</span>
+<span class="c">#        self.k = 1</span>
+<span class="c">#        self.sigma = 4./75</span>
+<span class="c">#        # Gravity scale factor</span>
+<span class="c">#        self.a_s = 9.81</span>
+<span class="c">#        # Magnetic field scale factor</span>
+<span class="c">#        self.c_s =  self.a_s*1</span>
+
+        <span class="c"># Observer gains (HikoB)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">la</span> <span class="o">=</span> <span class="mf">0.7</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lc</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ld</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">o</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="mf">0.7</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.002</span>
+        <span class="c"># Gravity scale factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_s</span> <span class="o">=</span> <span class="mf">9.81</span>
+        <span class="c"># Magnetic field scale factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_s</span><span class="o">*</span><span class="mi">1</span>
+        <span class="c"># Reconstructed quaternion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="c"># Quaternion director</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_A</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_D</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="martin_ahrs.init_observer"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.martin_ahrs.martin_ahrs.init_observer">[docs]</a>    <span class="k">def</span> <span class="nf">init_observer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Martin Salaun init observer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Quaternions construction</span>
+        <span class="n">ya</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+        <span class="n">yb</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="mi">5</span><span class="p">]]</span>
+        <span class="n">yc</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">ya</span><span class="p">,</span> <span class="n">yb</span><span class="p">)</span>
+        <span class="c"># Normalization</span>
+        <span class="n">ya</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">ya</span><span class="p">)</span>
+<span class="c">#        yb = nq.normalize(yb)</span>
+        <span class="n">yc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">yc</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">yc</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ya</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">ya</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ya</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ya</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qinv</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qinv</span><span class="p">)</span>
+
+        <span class="n">yc</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">yc</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">yc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qinv</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="n">yc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">yc</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">yc</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qinv</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qinv</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+</div>
+<div class="viewcode-block" id="martin_ahrs.update"><a class="viewcode-back" href="../../../generated/sensbiotk.algorithms.html#sensbiotk.algorithms.martin_ahrs.martin_ahrs.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">sample_period</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Martin Salaun iteration observer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Quaternions construction</span>
+        <span class="n">ya</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
+<span class="c">#        ya = nq.normalize(ya)</span>
+        <span class="n">yb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="mi">5</span><span class="p">]])</span>
+<span class="c">#        yb = nq.normalize(yb)</span>
+        <span class="n">wm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="mi">8</span><span class="p">]])</span>
+<span class="c">#        wm = nq.normalize(wm)</span>
+
+        <span class="c"># Compute quaternions products</span>
+        <span class="n">yc</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">ya</span><span class="p">,</span> <span class="n">yb</span><span class="p">)</span>
+        <span class="n">yc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">yd</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">yc</span><span class="p">,</span> <span class="n">ya</span><span class="p">)</span>
+        <span class="n">yd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># Compute errors</span>
+        <span class="n">EA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_A</span> <span class="o">-</span> \
+            <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">ya</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span><span class="p">))</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_s</span>
+        <span class="n">EC</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">-</span> \
+            <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">yc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span><span class="p">))</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_s</span>
+        <span class="n">ED</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_D</span> <span class="o">-</span> \
+            <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">yd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_s</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_s</span><span class="p">)</span>
+
+        <span class="c"># Numerical stabilisation</span>
+        <span class="n">EA</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">EC</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ED</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># sEA = &lt;EA, EA - A&gt; = ||EA||² - &lt;EA, A&gt;</span>
+        <span class="n">sEA</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">EA</span><span class="p">)</span> <span class="o">-</span> <span class="n">EA</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="c"># sEC = &lt;EC, EC - C&gt; = ||EC||² - &lt;EC, C&gt;</span>
+        <span class="n">sEC</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">EC</span><span class="p">)</span> <span class="o">-</span> <span class="n">EC</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c"># sED = &lt;ED, ED - D&gt; = ||ED||² - &lt;ED, D&gt;</span>
+        <span class="n">sED</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ED</span><span class="p">)</span> <span class="o">-</span> <span class="n">ED</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">LE</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_A</span><span class="p">,</span> <span class="n">EA</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">la</span> <span class="o">+</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">,</span> <span class="n">EC</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lc</span> \
+            <span class="o">+</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_D</span><span class="p">,</span> <span class="n">ED</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ld</span>
+        <span class="n">LE</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ME</span> <span class="o">=</span> <span class="n">LE</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">la</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ld</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">NE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">la</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ld</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">la</span> <span class="o">*</span> <span class="n">sEA</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ld</span> <span class="o">*</span> <span class="n">sED</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">NE</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ld</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">OE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">o</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ld</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lc</span> <span class="o">*</span> <span class="n">sEC</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ld</span> <span class="o">*</span> <span class="n">sED</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">OE</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">qdot</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">wm</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span> <span class="o">+</span> \
+            <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">LE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">nq</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)))</span>
+        <span class="n">wbdot</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qinv</span><span class="p">,</span> <span class="n">ME</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">a_sdot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_s</span> <span class="o">*</span> <span class="n">NE</span>
+        <span class="n">csdot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_s</span> <span class="o">*</span> <span class="n">OE</span>
+
+        <span class="c"># Integration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">+</span> <span class="n">qdot</span> <span class="o">*</span> <span class="n">sample_period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="o">+</span> <span class="n">wbdot</span> <span class="o">*</span> <span class="n">sample_period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_s</span> <span class="o">+</span> <span class="n">a_sdot</span> <span class="o">*</span> <span class="n">sample_period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_s</span> <span class="o">+</span> <span class="n">csdot</span> <span class="o">*</span> <span class="n">sample_period</span>
+
+        <span class="c"># compute inverse for the next step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qinv</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+
+        <span class="n">qrot</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">qrot</span>
+</pre></div></div></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

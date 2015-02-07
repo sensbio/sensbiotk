@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.tests.test_quaternions &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.tests.test_quaternions</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.tests.test_quaternions</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.tests.test_quaternions</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39; Test quaternion calculations &#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">pi</span>
+
+<span class="c"># Recent (1.2) versions of numpy have this decorator</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">numpy.testing.decorators</span> <span class="kn">import</span> <span class="n">slow</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">slow</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">slow</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">t</span>
+
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_raises</span><span class="p">,</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">assert_false</span><span class="p">,</span> \
+    <span class="n">assert_equal</span>
+
+<span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">assert_array_equal</span>
+
+<span class="kn">from</span> <span class="nn">sensbiotk.transforms3d</span> <span class="kn">import</span> <span class="n">quaternions</span> <span class="k">as</span> <span class="n">nq</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.transforms3d</span> <span class="kn">import</span> <span class="n">eulerangles</span> <span class="k">as</span> <span class="n">nea</span>
+
+<span class="c"># Example rotations &#39;&#39;&#39;</span>
+<span class="n">eg_rots</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">pi</span><span class="p">,</span><span class="n">pi</span><span class="p">,</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">)</span>
+<span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">)</span>
+<span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">zs</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">ys</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">:</span>
+            <span class="n">eg_rots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nea</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">))</span>
+<span class="c"># Example quaternions (from rotations)</span>
+<span class="n">eg_quats</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">M</span> <span class="ow">in</span> <span class="n">eg_rots</span><span class="p">:</span>
+    <span class="n">eg_quats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nq</span><span class="o">.</span><span class="n">mat2quat</span><span class="p">(</span><span class="n">M</span><span class="p">))</span>
+<span class="c"># M, quaternion pairs</span>
+<span class="n">eg_pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">eg_rots</span><span class="p">,</span> <span class="n">eg_quats</span><span class="p">))</span>
+
+<span class="c"># Set of arbitrary unit quaternions</span>
+<span class="n">unit_quats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="n">params</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+                <span class="n">Nq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">Nq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">q</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">e</span> <span class="o">/</span> <span class="n">Nq</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">q</span><span class="p">])</span>
+                    <span class="n">unit_quats</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="test_fillpos"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_fillpos">[docs]</a><span class="k">def</span> <span class="nf">test_fillpos</span><span class="p">():</span>
+    <span class="c"># Takes np array</span>
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,))</span>
+    <span class="n">w</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">fillpositive</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">w</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="c"># Or lists</span>
+    <span class="n">xyz</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+    <span class="n">w</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">fillpositive</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">w</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="c"># Errors with wrong number of values</span>
+    <span class="k">yield</span> <span class="n">assert_raises</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">nq</span><span class="o">.</span><span class="n">fillpositive</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">yield</span> <span class="n">assert_raises</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">nq</span><span class="o">.</span><span class="n">fillpositive</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span>
+    <span class="c"># Errors with negative w2</span>
+    <span class="k">yield</span> <span class="n">assert_raises</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">nq</span><span class="o">.</span><span class="n">fillpositive</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span>
+    <span class="c"># Test corner case where w is near zero</span>
+    <span class="n">wxyz</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">fillpositive</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">wxyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span>
+
+</div>
+<div class="viewcode-block" id="test_conjugate"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_conjugate">[docs]</a><span class="k">def</span> <span class="nf">test_conjugate</span><span class="p">():</span>
+    <span class="c"># Takes sequence</span>
+    <span class="n">cq</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">conjugate</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="c"># Returns float type</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">cq</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s">&#39;f&#39;</span>
+
+</div>
+<div class="viewcode-block" id="test_quat2mat"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_quat2mat">[docs]</a><span class="k">def</span> <span class="nf">test_quat2mat</span><span class="p">():</span>
+    <span class="c"># also tested in roundtrip case below</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    
+</div>
+<span class="k">def</span> <span class="nf">test_inverse</span><span class="p">():</span>
+    <span class="c"># Takes sequence</span>
+    <span class="n">iq</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">inverse</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="c"># Returns float type</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">iq</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s">&#39;f&#39;</span>
+    <span class="k">for</span> <span class="n">M</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">eg_pairs</span><span class="p">:</span>
+        <span class="n">iq</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">iqM</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">(</span><span class="n">iq</span><span class="p">)</span>
+        <span class="n">iM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">iM</span><span class="p">,</span> <span class="n">iqM</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_eye</span><span class="p">():</span>
+    <span class="n">qi</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">eye</span><span class="p">()</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">qi</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s">&#39;f&#39;</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">qi</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">(</span><span class="n">qi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="test_norm"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_norm">[docs]</a><span class="k">def</span> <span class="nf">test_norm</span><span class="p">():</span>
+    <span class="n">qi</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">eye</span><span class="p">()</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">nq</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">qi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">nq</span><span class="o">.</span><span class="n">isunit</span><span class="p">(</span><span class="n">qi</span><span class="p">)</span>
+    <span class="n">qi</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="ow">not</span> <span class="n">nq</span><span class="o">.</span><span class="n">isunit</span><span class="p">(</span><span class="n">qi</span><span class="p">)</span>
+
+</div>
+<span class="nd">@slow</span>
+<div class="viewcode-block" id="test_mult"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_mult">[docs]</a><span class="k">def</span> <span class="nf">test_mult</span><span class="p">():</span>
+    <span class="c"># Test that quaternion * same as matrix * </span>
+    <span class="k">for</span> <span class="n">M1</span><span class="p">,</span> <span class="n">q1</span> <span class="ow">in</span> <span class="n">eg_pairs</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">4</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">M2</span><span class="p">,</span> <span class="n">q2</span> <span class="ow">in</span> <span class="n">eg_pairs</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">4</span><span class="p">]:</span>
+            <span class="n">q21</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">q2</span><span class="p">,</span> <span class="n">q1</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M2</span><span class="p">,</span><span class="n">M1</span><span class="p">),</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">(</span><span class="n">q21</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="test_inverse"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_inverse">[docs]</a><span class="k">def</span> <span class="nf">test_inverse</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">M</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">eg_pairs</span><span class="p">:</span>
+        <span class="n">iq</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">iqM</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">(</span><span class="n">iq</span><span class="p">)</span>
+        <span class="n">iM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">iM</span><span class="p">,</span> <span class="n">iqM</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="test_eye"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_eye">[docs]</a><span class="k">def</span> <span class="nf">test_eye</span><span class="p">():</span>
+    <span class="n">qi</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">eye</span><span class="p">()</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">qi</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">(</span><span class="n">qi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="test_qrotate"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_qrotate">[docs]</a><span class="k">def</span> <span class="nf">test_qrotate</span><span class="p">():</span>
+    <span class="n">vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">M</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">eg_pairs</span><span class="p">:</span>
+            <span class="n">vdash</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">rotate_vector</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+            <span class="n">vM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">vec</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">vdash</span><span class="p">,</span> <span class="n">vM</span>
+
+</div>
+<div class="viewcode-block" id="test_quaternion_reconstruction"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_quaternion_reconstruction">[docs]</a><span class="k">def</span> <span class="nf">test_quaternion_reconstruction</span><span class="p">():</span>
+    <span class="c"># Test reconstruction of arbitrary unit quaternions</span>
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">unit_quats</span><span class="p">:</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2mat</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">qt</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">mat2quat</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+        <span class="c"># Accept positive or negative match</span>
+        <span class="n">posm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">qt</span><span class="p">)</span>
+        <span class="n">negm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="o">-</span><span class="n">qt</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">assert_true</span><span class="p">,</span> <span class="n">posm</span> <span class="ow">or</span> <span class="n">negm</span>
+
+</div>
+<div class="viewcode-block" id="test_angle_axis2quat"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_angle_axis2quat">[docs]</a><span class="k">def</span> <span class="nf">test_angle_axis2quat</span><span class="p">():</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">angle_axis2quat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">yield</span> <span class="n">assert_array_equal</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">angle_axis2quat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">angle_axis2quat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">angle_axis2quat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">False</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="test_angle_axis"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_quaternions.test_angle_axis">[docs]</a><span class="k">def</span> <span class="nf">test_angle_axis</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">M</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">eg_pairs</span><span class="p">:</span>
+        <span class="n">theta</span><span class="p">,</span> <span class="n">vec</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">quat2angle_axis</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">q2</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">angle_axis2quat</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">vec</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">nq</span><span class="o">.</span><span class="n">nearly_equivalent</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">q2</span>
+        <span class="n">aa_mat</span> <span class="o">=</span> <span class="n">nq</span><span class="o">.</span><span class="n">angle_axis2mat</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">vec</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">aa_mat</span><span class="p">,</span> <span class="n">M</span></div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

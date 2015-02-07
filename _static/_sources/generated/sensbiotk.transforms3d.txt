@@ -1,0 +1,54 @@
+sensbiotk.transforms3d package
+==============================
+
+Submodules
+----------
+
+sensbiotk.transforms3d.eulerangles module
+-----------------------------------------
+
+.. automodule:: sensbiotk.transforms3d.eulerangles
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.transforms3d.quaternions module
+-----------------------------------------
+
+.. automodule:: sensbiotk.transforms3d.quaternions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.transforms3d.setup module
+-----------------------------------
+
+.. automodule:: sensbiotk.transforms3d.setup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.transforms3d.six module
+---------------------------------
+
+.. automodule:: sensbiotk.transforms3d.six
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.transforms3d.utils module
+-----------------------------------
+
+.. automodule:: sensbiotk.transforms3d.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sensbiotk.transforms3d
+    :members:
+    :undoc-members:
+    :show-inheritance:

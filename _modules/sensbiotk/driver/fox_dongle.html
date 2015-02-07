@@ -1,0 +1,336 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.driver.fox_dongle &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.driver.fox_dongle</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.driver.fox_dongle</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.driver.fox_dongle</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8; -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbio@inria.fr</span>
+<span class="c"># Copyright (C) 2014  INRIA (Contact: sensbiotk@inria.fr)</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Fox dongle management module</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Lock</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">fox_sink</span>
+
+
+<div class="viewcode-block" id="FoxDongle"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.FoxDongle">[docs]</a><span class="k">class</span> <span class="nc">FoxDongle</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Class to manage Fox dongle data sensor reception &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class Initialization&quot;&quot;&quot;</span>
+        <span class="c"># sink node FoxSink class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># user callback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># PC time when the connection has been</span>
+        <span class="c"># established with the sink node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time0</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="c"># Sample time of acquisition in seconds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampletime</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c"># Data list acquisition [time,ax,ay,az,mx,my,mz,gx,gygz] (storage)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c"># Mutex to handle &#39;data access&#39; critical section (FRD)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_mutex</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+        <span class="c"># Last Data value [time,nax,ay,az,mx,my,mz,gx,gy,gz]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastdata</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+<div class="viewcode-block" id="FoxDongle.init_dongle"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.FoxDongle.init_dongle">[docs]</a>    <span class="k">def</span> <span class="nf">init_dongle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Search a Fox sink dongle on serial link</span>
+
+<span class="sd">        Parameters :</span>
+<span class="sd">        ------------</span>
+<span class="sd">        funcname: fonction without return and parameters</span>
+<span class="sd">            user callback function to be called during the data reception</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Reset data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastdata</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="c"># Class fox_pedometer instantiation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span> <span class="o">=</span> <span class="n">fox_sink</span><span class="o">.</span><span class="n">FoxSink</span><span class="p">()</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Search USB serial line...&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">connect_serial</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Line not found&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span> <span class="c"># failed</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Line found = &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">())</span>
+
+        <span class="c"># PC time:time.strftime(&quot;%a, %d %b %Y %H:%M:%S&quot;, time.localtime())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">fox_run</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time0</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">funcname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">set_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">start_read</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">True</span> <span class="c"># ok</span>
+</div>
+<div class="viewcode-block" id="FoxDongle.close_dongle"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.FoxDongle.close_dongle">[docs]</a>    <span class="k">def</span> <span class="nf">close_dongle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Close the serial link of the Fox pedometer dongle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">fox_close</span><span class="p">()</span>
+        <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="FoxDongle.is_running"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.FoxDongle.is_running">[docs]</a>    <span class="k">def</span> <span class="nf">is_running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Say if the Fox pedometer dongle &#39;read process&#39; is running</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">run</span>
+</div>
+<div class="viewcode-block" id="FoxDongle.line"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.FoxDongle.line">[docs]</a>    <span class="k">def</span> <span class="nf">line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the sinknode line value (string)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">line</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FoxDongle.read"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.FoxDongle.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Read the last stored data</span>
+
+<span class="sd">        Returns :</span>
+<span class="sd">        ---------</span>
+<span class="sd">        onesample : [float, f, f, f, f, f, f, f, f, f]</span>
+<span class="sd">        read/pop the last data value [time, datas]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span> <span class="c"># enter critical section</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">onesample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">onesample</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span> <span class="c"># leave critical section</span>
+
+        <span class="k">return</span> <span class="n">onesample</span>
+</div>
+<div class="viewcode-block" id="FoxDongle.unstack_read"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.FoxDongle.unstack_read">[docs]</a>    <span class="k">def</span> <span class="nf">unstack_read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reads one data stored and erases it</span>
+
+<span class="sd">        Returns :</span>
+<span class="sd">        ---------</span>
+<span class="sd">        onesample : [float, f, f, f, f, f, f, f, f, f]</span>
+<span class="sd">        read/pop the last data value [time, datas]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span> <span class="c"># enter critical section</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">onesample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">onesample</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span> <span class="c"># leave critical section</span>
+
+        <span class="k">return</span> <span class="n">onesample</span>
+
+</div>
+<div class="viewcode-block" id="FoxDongle.read_all"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.FoxDongle.read_all">[docs]</a>    <span class="k">def</span> <span class="nf">read_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Read one data stored</span>
+
+<span class="sd">        Returns :</span>
+<span class="sd">        ---------</span>
+<span class="sd">        time : list of [float, int]</span>
+<span class="sd">        read/pop the complete list ([t0, steps0],...,[t0, steps0])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span> <span class="c"># enter critical section</span>
+        <span class="n">copy_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span> <span class="c"># leave critical section</span>
+
+        <span class="k">return</span> <span class="n">copy_data</span>
+</div>
+<div class="viewcode-block" id="FoxDongle.store"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.FoxDongle.store">[docs]</a>    <span class="k">def</span> <span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Fox sink read callback to store data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span> <span class="c"># enter critical section</span>
+
+        <span class="c"># handle sink node</span>
+        <span class="k">try</span><span class="p">:</span>
+           
+            <span class="c">#onesample = [(self.sinknode.count * self.sampletime) + self.time0,</span>
+            <span class="c">#             self.sinknode.sensor]</span>
+            <span class="n">onesample</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">count</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampletime</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">time0</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">count</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>\
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>\
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>\
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>\
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span>\
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">sinknode</span><span class="o">.</span><span class="n">sensor</span><span class="p">[</span><span class="mi">8</span><span class="p">]])</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="p">[]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">onesample</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">onesample</span><span class="p">))</span>
+
+            <span class="c">#self.data.append(onesample)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastdata</span> <span class="o">=</span> <span class="n">onesample</span> <span class="c"># saved</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Store&#39;</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="n">onesample</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+             <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;exception reached:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span> <span class="c"># leave critical section</span>
+
+        <span class="c"># Launch the user callback</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logging</span><span class="p">(</span><span class="s">&#39;exception reached:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="k">return</span>
+
+<span class="c">##</span>
+<span class="c">## main test part</span>
+<span class="c">##</span>
+</div></div>
+<div class="viewcode-block" id="test_acq_callback"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.test_acq_callback">[docs]</a><span class="k">def</span> <span class="nf">test_acq_callback</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Fake function to test callback&quot;&quot;&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Nb of sample&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="test1"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.test1">[docs]</a><span class="k">def</span> <span class="nf">test1</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Example of use of the Fox Sink dongle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># instanciate dongle</span>
+    <span class="n">foxdongle</span> <span class="o">=</span> <span class="n">FoxDongle</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s">&#39;Enter acquisition loop (type ^ to stop).&#39;</span>
+
+    <span class="n">init</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># handle dongle initialization</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">init</span> <span class="ow">and</span> <span class="n">foxdongle</span><span class="o">.</span><span class="n">init_dongle</span><span class="p">(</span><span class="n">test_acq_callback</span><span class="p">):</span>
+                <span class="n">init</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">print</span> <span class="s">&#39;Device is connected to </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">foxdongle</span><span class="o">.</span><span class="n">line</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="n">foxdongle</span><span class="o">.</span><span class="n">is_running</span><span class="p">():</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">foxdongle</span><span class="o">.</span><span class="n">read_all</span><span class="p">()</span>
+                <span class="k">print</span> <span class="s">&quot;READ_ALL:&quot;</span><span class="p">,</span> <span class="n">val</span>
+            <span class="k">elif</span> <span class="n">init</span><span class="p">:</span>
+                <span class="n">init</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">print</span> <span class="s">&#39;Device is disconnected. Please reconnect.&#39;</span>
+
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Stopped.&quot;</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;exception reached:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+    <span class="c"># must close to kill read thread (fox_pedometer)</span>
+    <span class="n">foxdongle</span><span class="o">.</span><span class="n">close_dongle</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s">&#39;Done&#39;</span>
+
+</div>
+<div class="viewcode-block" id="test2"><a class="viewcode-back" href="../../../generated/sensbiotk.driver.html#sensbiotk.driver.fox_dongle.test2">[docs]</a><span class="k">def</span> <span class="nf">test2</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Example of use of the Fox Sink dongle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io</span> <span class="kn">import</span> <span class="n">iofox</span> <span class="k">as</span> <span class="n">fox</span>
+
+    <span class="c"># instanciate dongle</span>
+    <span class="n">foxdongle</span> <span class="o">=</span> <span class="n">FoxDongle</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s">&#39;Enter acquisition loop (type ^C to stop and save tmp_imu.csv).&#39;</span>
+
+    <span class="n">init</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># handle dongle initialization</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">init</span> <span class="ow">and</span> <span class="n">foxdongle</span><span class="o">.</span><span class="n">init_dongle</span><span class="p">(</span><span class="n">test_acq_callback</span><span class="p">):</span>
+                <span class="n">init</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">print</span> <span class="s">&#39;Device is connected to </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">foxdongle</span><span class="o">.</span><span class="n">line</span><span class="p">())</span>
+           
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Stopped and Record in tmp_imu.csv.&quot;</span>
+            
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">fox</span><span class="o">.</span><span class="n">save_foxsignals_csvfile</span><span class="p">(</span><span class="n">foxdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> 
+                                               <span class="n">foxdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span>\
+                                               <span class="n">foxdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span>\
+                                               <span class="n">foxdongle</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">],</span>
+                                               <span class="s">&quot;tmp_imu.csv&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;exception reached:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+           
+
+    <span class="c"># must close to kill read thread (fox_sink)</span>
+    <span class="n">foxdongle</span><span class="o">.</span><span class="n">close_dongle</span><span class="p">()</span>
+           
+
+    <span class="k">print</span> <span class="s">&#39;Done&#39;</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">test2</span><span class="p">()</span>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

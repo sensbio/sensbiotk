@@ -1,0 +1,38 @@
+sensbiotk.io.scripts package
+============================
+
+Submodules
+----------
+
+sensbiotk.io.scripts.fox_multiple_raw_folder_to_CSV module
+----------------------------------------------------------
+
+.. automodule:: sensbiotk.io.scripts.fox_multiple_raw_folder_to_CSV
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.io.scripts.fox_multiple_raw_to_csv module
+---------------------------------------------------
+
+.. automodule:: sensbiotk.io.scripts.fox_multiple_raw_to_csv
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.io.scripts.fox_raw module
+-----------------------------------
+
+.. automodule:: sensbiotk.io.scripts.fox_raw
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sensbiotk.io.scripts
+    :members:
+    :undoc-members:
+    :show-inheritance:

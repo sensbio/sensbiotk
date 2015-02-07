@@ -1,0 +1,441 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.calib.calib_acc &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.calib.calib_acc</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.calib.calib_acc</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.calib.calib_acc</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8; -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbio@inria.fr</span>
+<span class="c"># Copyright (C) 2014  INRIA (Contact: sensbiotk@inria.fr)</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Calib algo for accelerometers sensors data</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.algorithms</span> <span class="kn">import</span> <span class="n">basic</span> <span class="k">as</span> <span class="n">algo</span>
+
+<span class="c"># pylint:disable= I0011, E1101, R0913, R0914, R0915</span>
+<span class="c"># E1101 no-member false positif</span>
+<span class="c"># R0913 too-many-arguments</span>
+<span class="c"># R0914 too-many-locals</span>
+<span class="c"># R0915 too-many-statements</span>
+
+<span class="n">SEP</span> <span class="o">=</span> <span class="s">&quot;;&quot;</span>
+
+
+<div class="viewcode-block" id="scale_fit"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.scale_fit">[docs]</a><span class="k">def</span> <span class="nf">scale_fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">constant</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Compute scale from a constant signal to fit with a constant</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    data : numpy array of float</span>
+<span class="sd">           [sx sy sz] data sensor containing all the acquisition</span>
+<span class="sd">           on three axis</span>
+<span class="sd">    constant : float</span>
+<span class="sd">           value to be fitted ajusting scale</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    offset :numpy array of float (dim=3)</span>
+<span class="sd">     scale parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">scale</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;Warning:: scale_fit not implemented&quot;</span>
+    <span class="k">print</span> <span class="n">data</span><span class="p">,</span> <span class="n">constant</span>
+
+    <span class="k">return</span> <span class="n">scale</span>
+
+</div>
+<div class="viewcode-block" id="scale_fit_norm"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.scale_fit_norm">[docs]</a><span class="k">def</span> <span class="nf">scale_fit_norm</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">constant</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Compute scale from a constant signal to fit with a constant</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    data : numpy array of float</span>
+<span class="sd">           [sx sy sz] data sensor containing all the acquisition</span>
+<span class="sd">           on three axis</span>
+<span class="sd">    constant : float</span>
+<span class="sd">           value to be fitted ajusting scale</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    offset :float (dim=1)</span>
+<span class="sd">     scale parameters</span>
+
+<span class="sd">     Notes</span>
+<span class="sd">     -----</span>
+<span class="sd">     To allow a good fitting, The motion must cover all axis</span>
+<span class="sd">     rotation without high acceleration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">constant</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">scale</span>
+
+</div>
+<div class="viewcode-block" id="compute"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.compute">[docs]</a><span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the Scale factor Matrix and the bias vector of a</span>
+<span class="sd">    MEMS accelerometer.</span>
+<span class="sd">    The procedure exploits the fact that, in static conditions, the</span>
+<span class="sd">    modulus of the accelerometer output vector matches that of the</span>
+<span class="sd">    gravity acceleration. The calibration model incorporates the bias</span>
+<span class="sd">    and scale factor for each axis and the cross-axis symmetrical</span>
+<span class="sd">    actors. The parameters are computed through Gauss-Newton nonlinear</span>
+<span class="sd">    optimization.</span>
+
+<span class="sd">    The mathematical model used is</span>
+<span class="sd">    A = M(V - B)</span>
+<span class="sd">    where M (scale) and B (bias) are scale factor matrix and</span>
+<span class="sd">    bias vector respectively.</span>
+
+<span class="sd">    M = [ Mxx Mxy Mxz; Myx Myy Myz; Mzx Mzy Mzz ];</span>
+<span class="sd">         where  Mxy = Myx; Myz = Mzy; Mxz = Mzx;</span>
+<span class="sd">    B = [ Bx; By; Bz ];</span>
+
+<span class="sd">    The diagonal elements of M represent the scale factors along the</span>
+<span class="sd">    three axes, whereas the other elements of M are called cross-axis</span>
+<span class="sd">    factors. These terms allow describing both the axes misalignment</span>
+<span class="sd">    and the crosstalk effect between different channels caused</span>
+<span class="sd">    by the sensor electronics. In an ideal world, M = 1; B = 0</span>
+
+<span class="sd">    --------------------------------------------------------------</span>
+<span class="sd">    scale, biais = calibaccel( data )</span>
+<span class="sd">    --------------------------------------------------------------</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : np.array</span>
+<span class="sd">    (x,3) columns ax, ay and az acceleration values obtained from</span>
+<span class="sd">    the accelerometer represented in m.s-2</span>
+<span class="sd">     x rows represent averaged data from x different static positions</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    scale : np.array</span>
+<span class="sd">        the scale factor matrix</span>
+
+<span class="sd">    biais : np.array</span>
+<span class="sd">        the bias vector (in m.s-2)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Remove aberrant values (with norm too far from 9.81 =&gt; not a static position) </span>
+    <span class="n">data_corr</span> <span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>  
+        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,:])</span> <span class="o">&lt;</span> <span class="mf">10.3</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,:])</span> <span class="o">&gt;</span> <span class="mf">9.3</span><span class="p">):</span>
+            <span class="n">data_corr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,:])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_corr</span><span class="p">)</span>
+    
+    <span class="c"># For the solution converges, the recording has to be done in each axis direction. If it is not the case</span>
+    <span class="c"># we add the missing direction to the data</span>
+    <span class="n">missing_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span>    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>    
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span><span class="n">i</span><span class="p">]))</span><span class="o">&lt;</span><span class="mi">9</span><span class="p">:</span>
+            <span class="n">missing_axis</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">9.81</span>            
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">missing_axis</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">-</span><span class="n">missing_axis</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">missing_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span>    
+            
+    <span class="c"># Configurable variables</span>
+    <span class="c"># Damping Gain - Start with 1</span>
+    <span class="n">_lambda</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c"># Damping paremeter - has to be less than 1.</span>
+    <span class="c"># Changing this will affect rate of convergence;</span>
+    <span class="c"># Recommend to use k1 between 0.01 - 0.05</span>
+    <span class="n">k_l</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="c"># Convergence criterion threshold</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-09</span>
+    <span class="c"># Better to leave this No. big.</span>
+    <span class="n">r_old</span> <span class="o">=</span> <span class="mi">10000000</span>
+    <span class="c"># No. Of iterations. If your solutions don&#39;t converge</span>
+    <span class="c"># then try increasing this. Typically it should converge</span>
+    <span class="c"># within 20 iterations</span>
+    <span class="n">itr</span> <span class="o">=</span> <span class="mi">50</span>
+
+    <span class="c"># Initial Guess values of M and B.  Change this only if you need to</span>
+    <span class="n">mxx0</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">mxy0</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">mxz0</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">myy0</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">myz0</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">mzz0</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="n">b_x0</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">b_y0</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">b_z0</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="c">#   Algorithm</span>
+    <span class="n">vold</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">v_d</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="p">(</span><span class="n">r_d</span><span class="p">,</span> <span class="n">c_d</span><span class="p">)</span> <span class="o">=</span> <span class="n">v_d</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">if</span> <span class="n">r_d</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;WARNING !!! Need atleast 9 Measurements for a correct calibration procedure! </span><span class="se">\n</span><span class="s">&#39;</span>
+
+    <span class="k">if</span> <span class="n">c_d</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;Not enough columns in the data&#39;</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+
+    <span class="n">v_x</span> <span class="o">=</span> <span class="n">v_d</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">v_y</span> <span class="o">=</span> <span class="n">v_d</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">v_z</span> <span class="o">=</span> <span class="n">v_d</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">m_d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">v_d</span><span class="p">)</span>
+    <span class="n">r_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m_d</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">jac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m_d</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+    <span class="n">v_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">mxx0</span><span class="p">,</span> <span class="n">mxy0</span><span class="p">,</span> <span class="n">mxz0</span><span class="p">,</span> <span class="n">myy0</span><span class="p">,</span> <span class="n">myz0</span><span class="p">,</span> <span class="n">mzz0</span><span class="p">,</span> <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">]])</span>
+
+    <span class="c"># iterate</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">itr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c"># Calculate the Jacobian at every iteration</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">v_x</span><span class="p">)):</span>
+            <span class="n">r_j</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">errorf</span><span class="p">(</span><span class="n">v_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                            <span class="n">mxx0</span><span class="p">,</span> <span class="n">mxy0</span><span class="p">,</span> <span class="n">mxz0</span><span class="p">,</span>
+                            <span class="n">myy0</span><span class="p">,</span> <span class="n">myz0</span><span class="p">,</span> <span class="n">mzz0</span><span class="p">,</span>
+                            <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">)</span>
+            <span class="n">jac</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">jac1</span><span class="p">(</span><span class="n">v_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="n">mxx0</span><span class="p">,</span> <span class="n">mxy0</span><span class="p">,</span> <span class="n">mxz0</span><span class="p">,</span>
+                             <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">)</span>
+            <span class="n">jac</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">jac2</span><span class="p">(</span><span class="n">v_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="n">mxx0</span><span class="p">,</span> <span class="n">mxy0</span><span class="p">,</span> <span class="n">mxz0</span><span class="p">,</span> <span class="n">myy0</span><span class="p">,</span> <span class="n">myz0</span><span class="p">,</span>
+                             <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">)</span>
+            <span class="n">jac</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">jac3</span><span class="p">(</span><span class="n">v_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="n">mxx0</span><span class="p">,</span> <span class="n">mxy0</span><span class="p">,</span> <span class="n">mxz0</span><span class="p">,</span> <span class="n">myz0</span><span class="p">,</span> <span class="n">mzz0</span><span class="p">,</span>
+                             <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">)</span>
+            <span class="n">jac</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">jac4</span><span class="p">(</span><span class="n">v_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="n">mxy0</span><span class="p">,</span> <span class="n">myy0</span><span class="p">,</span> <span class="n">myz0</span><span class="p">,</span>
+                             <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">)</span>
+            <span class="n">jac</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">jac5</span><span class="p">(</span><span class="n">v_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="n">mxy0</span><span class="p">,</span> <span class="n">mxz0</span><span class="p">,</span> <span class="n">myy0</span><span class="p">,</span> <span class="n">myz0</span><span class="p">,</span> <span class="n">mzz0</span><span class="p">,</span>
+                             <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">)</span>
+            <span class="n">jac</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">jac6</span><span class="p">(</span><span class="n">v_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="n">mxz0</span><span class="p">,</span> <span class="n">myz0</span><span class="p">,</span> <span class="n">mzz0</span><span class="p">,</span>
+                             <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">)</span>
+            <span class="n">jac</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">jac7</span><span class="p">(</span><span class="n">v_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="n">mxx0</span><span class="p">,</span> <span class="n">mxy0</span><span class="p">,</span> <span class="n">mxz0</span><span class="p">,</span>
+                             <span class="n">myy0</span><span class="p">,</span> <span class="n">myz0</span><span class="p">,</span> <span class="n">mzz0</span><span class="p">,</span>
+                             <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">)</span>
+            <span class="n">jac</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">jac8</span><span class="p">(</span><span class="n">v_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="n">mxx0</span><span class="p">,</span> <span class="n">mxy0</span><span class="p">,</span> <span class="n">mxz0</span><span class="p">,</span>
+                             <span class="n">myy0</span><span class="p">,</span> <span class="n">myz0</span><span class="p">,</span> <span class="n">mzz0</span><span class="p">,</span>
+                             <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">)</span>
+            <span class="n">jac</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">jac9</span><span class="p">(</span><span class="n">v_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="n">mxx0</span><span class="p">,</span> <span class="n">mxy0</span><span class="p">,</span> <span class="n">mxz0</span><span class="p">,</span> <span class="n">myy0</span><span class="p">,</span> <span class="n">myz0</span><span class="p">,</span> <span class="n">mzz0</span><span class="p">,</span>
+                             <span class="n">b_x0</span><span class="p">,</span> <span class="n">b_y0</span><span class="p">,</span> <span class="n">b_z0</span><span class="p">)</span>
+        <span class="n">r_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_j</span><span class="p">)</span>
+        <span class="c"># Hessian matrix</span>
+        <span class="n">hes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">jac</span><span class="p">)),</span> <span class="n">jac</span><span class="p">))</span>
+        <span class="n">hes_non_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">jac</span><span class="p">)),</span> <span class="n">jac</span><span class="p">)</span>
+        <span class="n">des</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">jac</span><span class="p">)),</span> <span class="n">r_j</span><span class="p">)</span>
+        <span class="n">des</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">des</span><span class="p">))</span>
+
+<span class="c">#        v_k = v_k - np.dot(_lambda, np.dot(des, hes))</span>
+        <span class="n">v_k</span> <span class="o">=</span> <span class="n">v_k</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">_lambda</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">hes_non_inv</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">des</span><span class="o">.</span><span class="n">T</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+        <span class="n">v_k</span> <span class="o">=</span> <span class="n">v_k</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;Iteration num :&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">v_k</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> \
+            <span class="nb">str</span><span class="p">(</span><span class="n">v_k</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">v_k</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">v_k</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> \
+            <span class="nb">str</span><span class="p">(</span><span class="n">v_k</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">v_k</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">v_k</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> \
+            <span class="nb">str</span><span class="p">(</span><span class="n">v_k</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">v_k</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="s">&quot;Error : &quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">r_new</span><span class="p">)</span>
+
+        <span class="c"># This is to make sure that the error is decreasing with every</span>
+        <span class="c"># iteration</span>
+        <span class="k">if</span> <span class="n">r_new</span> <span class="o">&lt;=</span> <span class="n">r_old</span><span class="p">:</span>
+            <span class="n">_lambda</span> <span class="o">=</span> <span class="n">_lambda</span> <span class="o">-</span> <span class="n">k_l</span> <span class="o">*</span> <span class="n">_lambda</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_lambda</span> <span class="o">=</span> <span class="n">k_l</span> <span class="o">*</span> <span class="n">_lambda</span>
+
+        <span class="c"># Iterations are stopped when the following convergence criteria is</span>
+        <span class="c"># satisfied</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Convergence tol. : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_k</span> <span class="o">-</span> <span class="n">vold</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">v_k</span> <span class="o">+</span> <span class="n">vold</span><span class="p">))))</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_k</span> <span class="o">-</span> <span class="n">vold</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">v_k</span> <span class="o">+</span> <span class="n">vold</span><span class="p">)))</span> <span class="o">&lt;=</span> <span class="n">tol</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Convergence achieved&quot;</span>
+                <span class="k">break</span>
+
+        <span class="n">mxx0</span> <span class="o">=</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">mxy0</span> <span class="o">=</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">mxz0</span> <span class="o">=</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">myy0</span> <span class="o">=</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">myz0</span> <span class="o">=</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">mzz0</span> <span class="o">=</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">b_x0</span> <span class="o">=</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">b_y0</span> <span class="o">=</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="n">b_z0</span> <span class="o">=</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+        <span class="n">vold</span> <span class="o">=</span> <span class="n">v_k</span>
+        <span class="n">r_old</span> <span class="o">=</span> <span class="n">r_new</span>
+
+    <span class="k">if</span> <span class="n">r_new</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Important error, WARNING : WRONG CALIBRATION PARAMETERS&quot;</span>
+        
+        
+    <span class="c"># Save Outputs</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">v_k</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="p">[</span><span class="n">v_k</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">4</span><span class="p">]],</span>
+                      <span class="p">[</span><span class="n">v_k</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">5</span><span class="p">]]])</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">v_k</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">v_k</span><span class="p">[</span><span class="mi">8</span><span class="p">]]))</span>
+
+    <span class="k">return</span> <span class="n">offset</span><span class="p">,</span> <span class="n">scale</span>
+
+</div>
+<div class="viewcode-block" id="errorf"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.errorf">[docs]</a><span class="k">def</span> <span class="nf">errorf</span><span class="p">(</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">v_z</span><span class="p">,</span> <span class="n">mxx</span><span class="p">,</span> <span class="n">mxy</span><span class="p">,</span> <span class="n">mxz</span><span class="p">,</span> <span class="n">myy</span><span class="p">,</span> <span class="n">myz</span><span class="p">,</span> <span class="n">mzz</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">b_y</span><span class="p">,</span> <span class="n">b_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; error function given by Ax**2+Ay**2+Az**2 - g**2,</span>
+<span class="sd">         where g = 9.81</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="p">(</span><span class="n">mxx</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxy</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>\
+          <span class="p">(</span><span class="n">mxy</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myy</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>\
+          <span class="p">(</span><span class="n">mxz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mzz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">9.81</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="jac1"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.jac1">[docs]</a><span class="k">def</span> <span class="nf">jac1</span><span class="p">(</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">v_z</span><span class="p">,</span> <span class="n">mxx</span><span class="p">,</span> <span class="n">mxy</span><span class="p">,</span> <span class="n">mxz</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">b_y</span><span class="p">,</span> <span class="n">b_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Functions jac1 to jac9 are the elements of the Jacobian</span>
+<span class="sd">        vector (partial derivatives of the error function with</span>
+<span class="sd">        respect to the gain and bias components)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span>\
+        <span class="o">*</span> <span class="p">(</span><span class="n">mxx</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxy</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="jac2"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.jac2">[docs]</a><span class="k">def</span> <span class="nf">jac2</span><span class="p">(</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">v_z</span><span class="p">,</span> <span class="n">mxx</span><span class="p">,</span> <span class="n">mxy</span><span class="p">,</span> <span class="n">mxz</span><span class="p">,</span> <span class="n">myy</span><span class="p">,</span> <span class="n">myz</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">b_y</span><span class="p">,</span> <span class="n">b_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; element 2 of the jacobian &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span>\
+        <span class="o">*</span> <span class="p">(</span><span class="n">mxx</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxy</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>\
+        <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span>\
+        <span class="o">*</span> <span class="p">(</span><span class="n">mxy</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myy</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="jac3"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.jac3">[docs]</a><span class="k">def</span> <span class="nf">jac3</span><span class="p">(</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">v_z</span><span class="p">,</span> <span class="n">mxx</span><span class="p">,</span> <span class="n">mxy</span><span class="p">,</span> <span class="n">mxz</span><span class="p">,</span> <span class="n">myz</span><span class="p">,</span> <span class="n">mzz</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">b_y</span><span class="p">,</span> <span class="n">b_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; element 3 of the jacobian &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span>\
+        <span class="o">*</span> <span class="p">(</span><span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mzz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>\
+        <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">)</span>\
+        <span class="o">*</span> <span class="p">(</span><span class="n">mxx</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxy</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxz</span> <span class="o">*</span> <span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="jac4"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.jac4">[docs]</a><span class="k">def</span> <span class="nf">jac4</span><span class="p">(</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">v_z</span><span class="p">,</span> <span class="n">mxy</span><span class="p">,</span> <span class="n">myy</span><span class="p">,</span> <span class="n">myz</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">b_y</span><span class="p">,</span> <span class="n">b_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; element 4 of the jacobian &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">mxy</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myy</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="jac5"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.jac5">[docs]</a><span class="k">def</span> <span class="nf">jac5</span><span class="p">(</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">v_z</span><span class="p">,</span> <span class="n">mxy</span><span class="p">,</span> <span class="n">mxz</span><span class="p">,</span> <span class="n">myy</span><span class="p">,</span> <span class="n">myz</span><span class="p">,</span> <span class="n">mzz</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">b_y</span><span class="p">,</span> <span class="n">b_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; element 5 of the jacobian &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mzz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>\
+        <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">mxy</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myy</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="jac6"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.jac6">[docs]</a><span class="k">def</span> <span class="nf">jac6</span><span class="p">(</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">v_z</span><span class="p">,</span> <span class="n">mxz</span><span class="p">,</span> <span class="n">myz</span><span class="p">,</span> <span class="n">mzz</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">b_y</span><span class="p">,</span> <span class="n">b_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; element 6 of the jacobian &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mzz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="jac7"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.jac7">[docs]</a><span class="k">def</span> <span class="nf">jac7</span><span class="p">(</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">v_z</span><span class="p">,</span> <span class="n">mxx</span><span class="p">,</span> <span class="n">mxy</span><span class="p">,</span> <span class="n">mxz</span><span class="p">,</span> <span class="n">myy</span><span class="p">,</span> <span class="n">myz</span><span class="p">,</span> <span class="n">mzz</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">b_y</span><span class="p">,</span> <span class="n">b_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; element 7 of the jacobian &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">mxx</span><span class="o">*</span><span class="p">(</span><span class="n">mxx</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxy</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>\
+        <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">mxy</span><span class="o">*</span><span class="p">(</span><span class="n">mxy</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myy</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>\
+        <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mzz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="jac8"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.jac8">[docs]</a><span class="k">def</span> <span class="nf">jac8</span><span class="p">(</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">v_z</span><span class="p">,</span> <span class="n">mxx</span><span class="p">,</span> <span class="n">mxy</span><span class="p">,</span> <span class="n">mxz</span><span class="p">,</span> <span class="n">myy</span><span class="p">,</span> <span class="n">myz</span><span class="p">,</span> <span class="n">mzz</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">b_y</span><span class="p">,</span> <span class="n">b_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; element 8 of the jacobian &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">mxy</span><span class="o">*</span><span class="p">(</span><span class="n">mxx</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxy</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>\
+        <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">myy</span><span class="o">*</span><span class="p">(</span><span class="n">mxy</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myy</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>\
+        <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mzz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="jac9"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.jac9">[docs]</a><span class="k">def</span> <span class="nf">jac9</span><span class="p">(</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">v_z</span><span class="p">,</span> <span class="n">mxx</span><span class="p">,</span> <span class="n">mxy</span><span class="p">,</span> <span class="n">mxz</span><span class="p">,</span> <span class="n">myy</span><span class="p">,</span> <span class="n">myz</span><span class="p">,</span> <span class="n">mzz</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">b_y</span><span class="p">,</span> <span class="n">b_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; f9 function &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">mxx</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxy</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>\
+        <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">mxy</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myy</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>\
+        <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">mzz</span><span class="o">*</span><span class="p">(</span><span class="n">mxz</span><span class="o">*</span><span class="p">(</span><span class="n">b_x</span> <span class="o">-</span> <span class="n">v_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">myz</span><span class="o">*</span><span class="p">(</span><span class="n">b_y</span> <span class="o">-</span> <span class="n">v_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">mzz</span><span class="o">*</span><span class="p">(</span><span class="n">b_z</span> <span class="o">-</span> <span class="n">v_z</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="compute_simple"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib_acc.compute_simple">[docs]</a><span class="k">def</span> <span class="nf">compute_simple</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Compute IMU accelerometer calibration parameters</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    data : numpy array of float</span>
+<span class="sd">           data sensor in motion containing all the acquisition</span>
+<span class="sd">           on three axis</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">     offset : numpy array of float (dim=3)</span>
+<span class="sd">              offset parameter</span>
+<span class="sd">     scale  : numpy array of float (dim=3)</span>
+<span class="sd">               scale parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">norm_acc</span> <span class="o">=</span> <span class="n">algo</span><span class="o">.</span><span class="n">compute_norm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">val_scale</span> <span class="o">=</span> <span class="n">scale_fit_norm</span><span class="p">(</span><span class="n">norm_acc</span><span class="p">,</span> <span class="mf">9.81</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="p">[</span><span class="n">val_scale</span><span class="p">,</span> <span class="n">val_scale</span><span class="p">,</span> <span class="n">val_scale</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">scale</span><span class="p">,</span> <span class="n">offset</span>
+</pre></div></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.tests.test_markley &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.tests.test_markley</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.tests.test_markley</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.tests.test_markley</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8; -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbio@inria.fr</span>
+<span class="c"># Copyright (C) 2014  INRIA (Contact: sensbiotk@inria.fr)</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tests Unit for sensbiotk/algorithms/markley</span>
+
+<span class="sd">EN COURS...</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sensbiotk.algorithms.markley</span> <span class="kn">as</span> <span class="nn">markley</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.io.iofox</span> <span class="kn">import</span> <span class="n">load_foxcsvfile</span>
+<span class="kn">import</span> <span class="nn">sensbiotk.calib.calib</span> <span class="kn">as</span> <span class="nn">calib</span>
+
+<div class="viewcode-block" id="test_markley"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_markley.test_markley">[docs]</a><span class="k">def</span> <span class="nf">test_markley</span><span class="p">():</span>
+
+    <span class="c"># Compute </span>
+    <span class="p">[</span><span class="n">params_acc</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">,</span> <span class="n">params_gyr</span><span class="p">]</span> <span class="o">=</span> \
+        <span class="n">calib</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">imuNumber</span><span class="o">=</span><span class="mi">4</span> <span class="p">,</span><span class="n">filepath</span><span class="o">=</span><span class="s">&quot;data/3D_validation/CALIB_ACCEL_MAGNETO/4_IMU4_WAND.csv&quot;</span><span class="p">)</span>
+
+    <span class="c"># Load the recording data </span>
+    <span class="p">[</span><span class="n">time_imu</span><span class="p">,</span> <span class="n">accx</span><span class="p">,</span> <span class="n">accy</span><span class="p">,</span> <span class="n">accz</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">]</span> <span class="o">=</span> \
+        <span class="n">load_foxcsvfile</span><span class="p">(</span><span class="s">&quot;data/3D_validation/3/3_IMU4_WAND.csv&quot;</span><span class="p">)</span>
+
+    <span class="c"># Applies the Scale and Offset to data</span>
+    <span class="n">scale_acc</span> <span class="o">=</span> <span class="n">params_acc</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">,:]</span>
+    <span class="n">bias_acc</span> <span class="o">=</span> <span class="n">params_acc</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span>
+    <span class="n">scale_mag</span> <span class="o">=</span> <span class="n">params_mag</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">,:]</span>
+    <span class="n">bias_mag</span> <span class="o">=</span> <span class="n">params_mag</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span>    
+    
+    <span class="n">acc_imu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">accx</span><span class="p">,</span> <span class="n">accy</span><span class="p">,</span> <span class="n">accz</span><span class="p">])</span>
+    <span class="n">mag_imu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">])</span>
+    
+    <span class="n">quaternion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">acc_imu</span><span class="p">),</span><span class="mi">4</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">acc_imu</span><span class="p">)):</span>
+        <span class="n">acc_imu</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">scale_acc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="n">acc_imu</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">bias_acc</span><span class="p">)))))</span>
+        <span class="n">mag_imu</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">scale_mag</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="n">mag_imu</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">bias_mag</span><span class="p">)))))</span>
+        <span class="n">quaternion</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span> <span class="n">markley</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">acc_imu</span><span class="p">[</span><span class="n">i</span><span class="p">,:],</span><span class="n">mag_imu</span><span class="p">[</span><span class="n">i</span><span class="p">,:]]))</span>
+
+    <span class="k">return</span> <span class="n">quaternion</span>        
+
+
+<span class="c">#if __name__ == &#39;__main__&#39;:</span>
+<span class="c">#   test_markley() </span>
+</pre></div></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

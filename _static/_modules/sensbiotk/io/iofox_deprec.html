@@ -1,0 +1,623 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.io.iofox_deprec &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.io.iofox_deprec</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.io.iofox_deprec</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.io.iofox_deprec</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8; -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbiotk@inria.fr</span>
+<span class="c"># Copyright (C) 2015  INRIA </span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Loader for HikoB Fox Node format - deprecated data format</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="c"># pylint:disable= I0011, E1101, R0912, R0913, R0914, R0915</span>
+<span class="c"># E1101 no-member false positif</span>
+
+<span class="c"># Global dictionnaries</span>
+<span class="n">LSM303DLHC_ACC_SCALE</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;2g&#39;</span><span class="p">:</span> <span class="mh">0x00</span><span class="p">,</span> <span class="s">&#39;4g&#39;</span><span class="p">:</span> <span class="mh">0x10</span><span class="p">,</span> <span class="s">&#39;8g&#39;</span><span class="p">:</span> <span class="mh">0x20</span><span class="p">,</span> <span class="s">&#39;16g&#39;</span><span class="p">:</span> <span class="mh">0x30</span><span class="p">}</span>
+<span class="n">LSM303DLHC_MAG_SCALE</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1_3gauss&#39;</span><span class="p">:</span> <span class="mh">0x20</span><span class="p">,</span> <span class="s">&#39;1_9gauss&#39;</span><span class="p">:</span> <span class="mh">0x40</span><span class="p">,</span> <span class="s">&#39;2_5gauss&#39;</span><span class="p">:</span> <span class="mh">0x60</span><span class="p">,</span>
+                        <span class="s">&#39;4_0gauss&#39;</span><span class="p">:</span> <span class="mh">0x80</span><span class="p">,</span> <span class="s">&#39;4_7gauss&#39;</span><span class="p">:</span> <span class="mh">0xA0</span><span class="p">,</span> <span class="s">&#39;5_6gauss&#39;</span><span class="p">:</span> <span class="mh">0xC0</span><span class="p">,</span>
+                        <span class="s">&#39;8_1gauss&#39;</span><span class="p">:</span> <span class="mh">0xE0</span><span class="p">}</span>
+<span class="n">L3G4200D_SCALE</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;250dps&#39;</span><span class="p">:</span> <span class="mh">0x00</span><span class="p">,</span> <span class="s">&#39;500dps&#39;</span><span class="p">:</span> <span class="mh">0x10</span><span class="p">,</span> <span class="s">&#39;2000dps&#39;</span><span class="p">:</span> <span class="mh">0x30</span><span class="p">}</span>
+<span class="n">SCALE</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;ref_g&#39;</span><span class="p">:</span> <span class="mf">9.81</span><span class="p">,</span> <span class="s">&#39;time&#39;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>
+         <span class="s">&#39;acc&#39;</span><span class="p">:</span> <span class="mf">2.0e-2</span><span class="p">,</span> <span class="s">&#39;mag_xy&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">670.0</span><span class="p">),</span> <span class="s">&#39;mag_z&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">600.0</span><span class="p">),</span>
+         <span class="s">&#39;press&#39;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">4096.0</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="s">&#39;temp&#39;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">480.0</span><span class="p">,</span>
+         <span class="s">&#39;offset_temp&#39;</span><span class="p">:</span> <span class="mf">22.5</span><span class="p">}</span>
+<span class="n">SEP</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_get_acc_scale</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; get accelerometer scale</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    accelerometer : array of float</span>
+<span class="sd">                  It contains [scale, min, max].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;acc&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">scale</span><span class="p">,</span> <span class="o">-</span><span class="mi">2048</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span> <span class="mi">2047</span> <span class="o">*</span> <span class="n">scale</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_get_magxy_scale</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;g et magnetometer scale</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    magnetometer : array of float</span>
+<span class="sd">                 It contains [scale, min, max]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_xy&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">scale</span><span class="p">,</span> <span class="o">-</span><span class="mi">2048</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span> <span class="mi">2047</span> <span class="o">*</span> <span class="n">scale</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_get_gyr_scale</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; get gyrometer scale</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gyrometer : array of float</span>
+<span class="sd">              It contains [scale, min, max]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;gyr&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">scale</span><span class="p">,</span> <span class="o">-</span><span class="mi">32768</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span> <span class="mi">32767</span> <span class="o">*</span> <span class="n">scale</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_get_time</span><span class="p">(</span><span class="n">rawval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get time value from a binary format</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    rawval: binary format</span>
+<span class="sd">            time value</span>
+
+<span class="sd">    Returns :</span>
+<span class="sd">    ---------</span>
+<span class="sd">    time : float</span>
+<span class="sd">         value in second</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;=HH&quot;</span><span class="p">,</span> <span class="n">rawval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">65536</span> <span class="o">+</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">_get_acc</span><span class="p">(</span><span class="n">rawval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get accelerometer values  from a binary format</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rawval: binary format</span>
+<span class="sd">            accelerometer values</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    accelerometer : numpy array of float</span>
+<span class="sd">                  3 axis values  [ax,ay,az] in m/s^2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;=hhh&quot;</span><span class="p">,</span> <span class="n">rawval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;acc&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_mag</span><span class="p">(</span><span class="n">rawval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;get magnetometer values  from a binary format</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    rawval: binary format</span>
+<span class="sd">          magnetometer values in gauss</span>
+
+<span class="sd">    Returns :</span>
+<span class="sd">    ---------</span>
+<span class="sd">    magnetometer : numpy array of float</span>
+<span class="sd">                 3 axis values [ax,ay,az]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;=hhh&quot;</span><span class="p">,</span> <span class="n">rawval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_xy&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_xy&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                     <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_z&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_gyr</span><span class="p">(</span><span class="n">rawval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get gyrometer values  from a binary format</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rawval: binary format</span>
+<span class="sd">            gyrometer values</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gyrometer : numpy array of float</span>
+<span class="sd">              3 axis values [ax,ay,az] in rad/s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;=hhh&quot;</span><span class="p">,</span> <span class="n">rawval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;gyr&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_press</span><span class="p">(</span><span class="n">rawval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get pression value from a binary format</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rawval: binary format</span>
+<span class="sd">          pression value</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pression : float</span>
+<span class="sd">             value in bar</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;=BBB&quot;</span><span class="p">,</span> <span class="n">rawval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;press&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_get_temp</span><span class="p">(</span><span class="n">rawval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get temperature value from a binary format</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rawval: binary format</span>
+<span class="sd">            temperature value</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    temperature : float</span>
+<span class="sd">                value in degree</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;=h&quot;</span><span class="p">,</span> <span class="n">rawval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;offset_temp&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;temp&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_set_time_scale</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; set time scale value</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    val: float</span>
+<span class="sd">         time scale in second</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">_set_acc_scale</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; set accelerometer scale value</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    val: float</span>
+<span class="sd">        accelerometer scale value in m/s^2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_ACC_SCALE</span><span class="p">[</span><span class="s">&#39;2g&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;acc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;ref_g&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_ACC_SCALE</span><span class="p">[</span><span class="s">&#39;4g&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;acc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2e-3</span> <span class="o">*</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;ref_g&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_ACC_SCALE</span><span class="p">[</span><span class="s">&#39;8g&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;acc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">4e-3</span> <span class="o">*</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;ref_g&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_ACC_SCALE</span><span class="p">[</span><span class="s">&#39;16g&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;acc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">12e-3</span> <span class="o">*</span> <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;ref_g&#39;</span><span class="p">]</span>
+    <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">_set_mag_scale</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; set magnetometer scale value</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    val: magnetometer scale value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_MAG_SCALE</span><span class="p">[</span><span class="s">&#39;1_3gauss&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_xy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">1100.0</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">980.0</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_MAG_SCALE</span><span class="p">[</span><span class="s">&#39;1_9gauss&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_xy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">850.0</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">760.0</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_MAG_SCALE</span><span class="p">[</span><span class="s">&#39;2_5gauss&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_xy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">670.0</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">600.0</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_MAG_SCALE</span><span class="p">[</span><span class="s">&#39;4_0gauss&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_xy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">450.0</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">400.0</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_MAG_SCALE</span><span class="p">[</span><span class="s">&#39;4_7gauss&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_xy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">400.0</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">355.0</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_MAG_SCALE</span><span class="p">[</span><span class="s">&#39;5_6gauss&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_xy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">330.0</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">295.0</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">LSM303DLHC_MAG_SCALE</span><span class="p">[</span><span class="s">&#39;8_1gauss&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_xy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">230.0</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;mag_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">205.0</span>
+
+    <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">_set_gyr_scale</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; set gyrometer scale value</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    val: float</span>
+<span class="sd">         gyrometer scale value in rad/sec</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="n">L3G4200D_SCALE</span><span class="p">[</span><span class="s">&#39;250dps&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;gyr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">8.75e-3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">L3G4200D_SCALE</span><span class="p">[</span><span class="s">&#39;500dps&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;gyr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.75e-2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+    <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">L3G4200D_SCALE</span><span class="p">[</span><span class="s">&#39;2000dps&#39;</span><span class="p">]:</span>
+        <span class="n">SCALE</span><span class="p">[</span><span class="s">&#39;gyr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">7e-2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+
+    <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">_write_imu_header</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="n">binfilename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; write the IMU header file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fid : file object opened</span>
+<span class="sd">          file to be writted</span>
+<span class="sd">    binfilename : str</span>
+<span class="sd">          binary filename readed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# FOX Logger (IMU file)</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# (c) INRIA 2013</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="s">&quot;# File created from file &quot;</span><span class="o">+</span><span class="n">binfilename</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\r\n</span><span class="s"># File format:</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# id</span><span class="se">\t</span><span class="s">t</span><span class="se">\t</span><span class="s">dt</span><span class="se">\t</span><span class="s">ax</span><span class="se">\t</span><span class="s">ay</span><span class="se">\t</span><span class="s">az</span><span class="se">\t</span><span class="s">mx</span><span class="se">\t</span><span class="s">my</span><span class="se">\t</span><span class="s">mz</span><span class="se">\t</span><span class="s">gx</span><span class="se">\t</span><span class="s">gy</span><span class="se">\t</span><span class="s">gz</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\r\n</span><span class="s"># Units:</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\t</span><span class="s">Time: s</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\t</span><span class="s">Acceleration: m.s^-2</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\t</span><span class="s">Magnetic field: gauss</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\t</span><span class="s">Rotation speed: rad.s^-1</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">_write_imu_data</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; write a IMU data line</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fid : file object opened</span>
+<span class="sd">        file to be writted</span>
+<span class="sd">    data: dictionnary</span>
+<span class="sd">        The keys definded must be :</span>
+<span class="sd">    &#39;id&#39;:int, &#39;t&#39;:float, &#39;acc&#39;:[float,float,float],</span>
+<span class="sd">    &#39;mag&#39;:[float,float,float],&#39;gyr&#39;:[float,float,float]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lineformat</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\r\n</span><span class="s">&quot;</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">_write_presst_data</span><span class="o">.</span><span class="n">lastt</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">],</span> <span class="n">delta</span><span class="p">,</span>
+                         <span class="n">data</span><span class="p">[</span><span class="s">&#39;acc&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;acc&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;acc&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span>
+                         <span class="n">data</span><span class="p">[</span><span class="s">&#39;mag&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;mag&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;mag&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span>
+                         <span class="n">data</span><span class="p">[</span><span class="s">&#39;gyr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;gyr&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;gyr&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">_write_imu_data</span><span class="o">.</span><span class="n">lastt</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span>
+
+<span class="n">_write_imu_data</span><span class="o">.</span><span class="n">lastt</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<span class="k">def</span> <span class="nf">_write_presst_header</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="n">binfilename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Write the pression and temperature header file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fid : file object opened</span>
+<span class="sd">        file to be writted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# FOX Logger (pression and temperature file)</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# (c) INRIA 2013</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="s">&quot;# File created from file &quot;</span><span class="o">+</span><span class="n">binfilename</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\r\n</span><span class="s"># File format:</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# id</span><span class="se">\t</span><span class="s">t</span><span class="se">\t</span><span class="s">dt</span><span class="se">\t</span><span class="s">pression</span><span class="se">\t</span><span class="s">temperature</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\r\n</span><span class="s"># Units:</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\t</span><span class="s">Time: s</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\t</span><span class="s">Pression: bar</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\t</span><span class="s">Temperature: degree (C)</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;#</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">_write_presst_data</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Write a pression and temperature data line.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fid : file object opened</span>
+<span class="sd">        file to be writted</span>
+<span class="sd">    data: dictionnary</span>
+<span class="sd">        The keys defined must be :</span>
+<span class="sd">    &#39;id&#39;:int, &#39;t&#39;:float, &#39;pression&#39;:float, &#39;temperature&#39;:float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lineformat</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\r\n</span><span class="s">&quot;</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">_write_presst_data</span><span class="o">.</span><span class="n">lastt</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">],</span>
+                         <span class="n">delta</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;press&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;temp&#39;</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">_write_presst_data</span><span class="o">.</span><span class="n">lastt</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span>
+
+<span class="n">_write_presst_data</span><span class="o">.</span><span class="n">lastt</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<div class="viewcode-block" id="convert_fox_rawfile"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.iofox_deprec.convert_fox_rawfile">[docs]</a><span class="k">def</span> <span class="nf">convert_fox_rawfile</span><span class="p">(</span><span class="n">binfilename</span><span class="p">,</span> <span class="n">imufilename</span><span class="p">,</span> <span class="n">presstfilename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert a raw bin HikoB Fox file into an ascii csv files.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    binfilename : str</span>
+<span class="sd">                Name of the raw file to load and convert.</span>
+<span class="sd">    imufilename : str</span>
+<span class="sd">                Name of the csv imu file</span>
+<span class="sd">    presstfilename : str</span>
+<span class="sd">                   Name of the presst file</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    status : str</span>
+<span class="sd">             &quot;OK&quot; or &quot;ERROR&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">binfilename</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">in_fox</span><span class="p">:</span>
+        <span class="n">out_imu</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">imufilename</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">out_presst</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">presstfilename</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="c"># Read Header Name</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">in_fox</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Error while reading file&quot;</span>
+            <span class="k">return</span> <span class="s">&quot;ERROR&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;=ccccc&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">!=</span> <span class="s">&quot;HiKoB&quot;</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Error while reading file&quot;</span>
+                <span class="k">return</span> <span class="s">&quot;ERROR&quot;</span>
+        <span class="c"># Read Scale</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">in_fox</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Error while reading file&quot;</span>
+            <span class="k">return</span> <span class="s">&quot;ERROR&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;=BBBB&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">)</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">_set_acc_scale</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">_set_mag_scale</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">_set_gyr_scale</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">_set_time_scale</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">)</span>
+                <span class="n">imu_size</span> <span class="o">=</span> <span class="mi">22</span>
+                <span class="n">presst_size</span> <span class="o">=</span> <span class="mi">9</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_set_time_scale</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">32768.0</span><span class="p">)</span>
+                <span class="n">imu_size</span> <span class="o">=</span> <span class="mi">22</span>
+                <span class="n">presst_size</span> <span class="o">=</span> <span class="mi">10</span>
+            <span class="c"># Read data packets</span>
+            <span class="n">cont</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">imu</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;t&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s">&#39;acc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                   <span class="s">&#39;mag&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="s">&#39;gyr&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]}</span>
+            <span class="n">presst</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;t&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s">&#39;press&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s">&#39;temp&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span>
+            <span class="n">_write_imu_header</span><span class="p">(</span><span class="n">out_imu</span><span class="p">,</span> <span class="n">binfilename</span><span class="p">)</span>
+            <span class="n">_write_presst_header</span><span class="p">(</span><span class="n">out_presst</span><span class="p">,</span> <span class="n">binfilename</span><span class="p">)</span>
+
+            <span class="k">while</span> <span class="n">cont</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="n">in_fox</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">cont</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">idb</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;=HH&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">)</span>
+                    <span class="n">sensid</span> <span class="o">=</span> <span class="n">idb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">65536</span> <span class="o">+</span> <span class="n">idb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">typ</span> <span class="o">=</span> <span class="n">sensid</span> <span class="o">&gt;&gt;</span> <span class="mi">30</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">typ</span> <span class="o">=</span> <span class="n">sensid</span> <span class="o">&gt;&gt;</span> <span class="mi">28</span>
+                    <span class="k">if</span> <span class="n">typ</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">buf</span> <span class="o">=</span> <span class="n">in_fox</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">imu_size</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">!=</span> <span class="n">imu_size</span><span class="p">:</span>
+                            <span class="n">cont</span> <span class="o">=</span> <span class="bp">False</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">imu</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sensid</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x3FFFFFFF</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">imu</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sensid</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x0FFFFFFF</span><span class="p">)</span>
+                            <span class="n">imu</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_time</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+                            <span class="n">imu</span><span class="p">[</span><span class="s">&#39;acc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_acc</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+                            <span class="n">imu</span><span class="p">[</span><span class="s">&#39;mag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_mag</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">16</span><span class="p">])</span>
+                            <span class="n">imu</span><span class="p">[</span><span class="s">&#39;gyr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_gyr</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">22</span><span class="p">])</span>
+                            <span class="n">_write_imu_data</span><span class="p">(</span><span class="n">out_imu</span><span class="p">,</span> <span class="n">imu</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">typ</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">buf</span> <span class="o">=</span> <span class="n">in_fox</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">presst_size</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">!=</span> <span class="n">presst_size</span><span class="p">:</span>
+                            <span class="n">cont</span> <span class="o">=</span> <span class="bp">False</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">presst</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sensid</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x3FFFFFFF</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">presst</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sensid</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mh">0x0FFFFFFF</span><span class="p">)</span>
+                            <span class="n">presst</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_time</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+                            <span class="n">presst</span><span class="p">[</span><span class="s">&#39;press&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_press</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+                            <span class="n">presst</span><span class="p">[</span><span class="s">&#39;temp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_temp</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+                            <span class="n">_write_presst_data</span><span class="p">(</span><span class="n">out_presst</span><span class="p">,</span> <span class="n">presst</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">:</span>
+                            <span class="n">cont</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">in_fox</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">out_imu</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">out_presst</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="s">&quot;OK&quot;</span>
+
+</div>
+<div class="viewcode-block" id="info_fox_rawfile"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.iofox_deprec.info_fox_rawfile">[docs]</a><span class="k">def</span> <span class="nf">info_fox_rawfile</span><span class="p">(</span><span class="n">binfilename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Extract info. HikoB Fox Node from a raw bin file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">             Name of the bin file to load.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">convert_fox_rawfile</span><span class="p">(</span><span class="n">binfilename</span><span class="p">,</span> <span class="s">&quot;imuf.txt&quot;</span><span class="p">,</span> <span class="s">&quot;press.txt&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+</div>
+<div class="viewcode-block" id="load_foximu_csvfile"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.iofox_deprec.load_foximu_csvfile">[docs]</a><span class="k">def</span> <span class="nf">load_foximu_csvfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Load IMU HikoB Fox Node from a CSV file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: str</span>
+<span class="sd">            Name of the CSV file to load.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tabA numpy array which contains id</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">imu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="c"># Split data</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">imu</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">imu</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+    <span class="n">mag</span> <span class="o">=</span> <span class="n">imu</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span>
+    <span class="n">gyr</span> <span class="o">=</span> <span class="n">imu</span><span class="p">[:,</span> <span class="mi">9</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="load_foxpresst_csvfile"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.iofox_deprec.load_foxpresst_csvfile">[docs]</a><span class="k">def</span> <span class="nf">load_foxpresst_csvfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Load Pression/Temperature HikoB Fox Node from a CSV file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: str</span>
+<span class="sd">            Name of the CSV file to load.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    time : np.array</span>
+<span class="sd">          The matrix contains time [id,time,dt],  pression (bar)</span>
+<span class="sd">          and temperature (degree). id is an int and time,dt,bar</span>
+<span class="sd">          and degree are float values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">presst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="c"># Split data</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">presst</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">press</span> <span class="o">=</span> <span class="n">presst</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">presst</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">press</span><span class="p">,</span> <span class="n">temp</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="save_foximu_csvfile"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.iofox_deprec.save_foximu_csvfile">[docs]</a><span class="k">def</span> <span class="nf">save_foximu_csvfile</span><span class="p">(</span><span class="n">accfilename</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">SEP</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; save a ascii csv file accelerometers IMU HikoB Fox file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    accfilename : str</span>
+<span class="sd">                Name of the csv imu file</span>
+<span class="sd">    time : numpy array</span>
+<span class="sd">         [t, dt]</span>
+<span class="sd">    acc : numpy array</span>
+<span class="sd">         [ax ay az]</span>
+<span class="sd">    mag : numpy array</span>
+<span class="sd">         [mx my mz]</span>
+<span class="sd">    gyr : numpy array</span>
+<span class="sd">         [gx gy gz]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    status : str</span>
+<span class="sd">             &quot;OK&quot; or &quot;ERROR&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">out_acc</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">accfilename</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">_write_imu_header</span><span class="p">(</span><span class="n">out_acc</span><span class="p">,</span> <span class="s">&quot;sensbiotk output&quot;</span><span class="p">)</span>
+    <span class="n">lineformat</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> \
+                 <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> \
+                 <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> \
+                 <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">separator</span> <span class="o">+</span> \
+                 <span class="o">+</span> <span class="s">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)):</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">time</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">time</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                             <span class="n">acc</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">acc</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">acc</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                             <span class="n">mag</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">mag</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">mag</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                             <span class="n">gyr</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">gyr</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">gyr</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">out_acc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="n">out_acc</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="s">&quot;OK&quot;</span></div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

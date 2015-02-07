@@ -1,0 +1,572 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.transforms3d.quaternions &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.transforms3d.quaternions</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.transforms3d.quaternions</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.transforms3d.quaternions</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Functions to operate on, or return, quaternions.</span>
+
+<span class="sd">The module also includes functions for the closely related angle, axis</span>
+<span class="sd">pair as a specification for rotation.</span>
+
+<span class="sd">Quaternions here consist of 4 values ``w, x, y, z``, where ``w`` is the</span>
+<span class="sd">real (scalar) part, and ``x, y, z`` are the complex (vector) part.</span>
+
+<span class="sd">Note - rotation matrices here apply to column vectors, that is,</span>
+<span class="sd">they are applied on the left of the vector.  For example:</span>
+
+<span class="sd">&gt;&gt;&gt; import numpy as np</span>
+<span class="sd">&gt;&gt;&gt; q = [0, 1, 0, 0] # 180 degree rotation around axis 0</span>
+<span class="sd">&gt;&gt;&gt; M = quat2mat(q) # from this module</span>
+<span class="sd">&gt;&gt;&gt; vec = np.array([1, 2, 3]).reshape((3,1)) # column vector</span>
+<span class="sd">&gt;&gt;&gt; tvec = np.dot(M, vec)</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">MAX_FLOAT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum_sctype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+<span class="n">FLOAT_EPS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+
+
+<div class="viewcode-block" id="fillpositive"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.fillpositive">[docs]</a><span class="k">def</span> <span class="nf">fillpositive</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">w2_thresh</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Compute unit quaternion from last 3 values</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xyz : iterable</span>
+<span class="sd">       iterable containing 3 values, corresponding to quaternion x, y, z</span>
+<span class="sd">    w2_thresh : None or float, optional</span>
+<span class="sd">       threshold to determine if w squared is really negative.</span>
+<span class="sd">       If None (default) then w2_thresh set equal to</span>
+<span class="sd">       ``-np.finfo(xyz.dtype).eps``, if possible, otherwise</span>
+<span class="sd">       ``-np.finfo(np.float).eps``</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    wxyz : array shape (4,)</span>
+<span class="sd">         Full 4 values of quaternion</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If w, x, y, z are the values in the full quaternion, assumes w is</span>
+<span class="sd">    positive.</span>
+
+<span class="sd">    Gives error if w*w is estimated to be negative</span>
+
+<span class="sd">    w = 0 corresponds to a 180 degree rotation</span>
+
+<span class="sd">    The unit quaternion specifies that np.dot(wxyz, wxyz) == 1.</span>
+
+<span class="sd">    If w is positive (assumed here), w is given by:</span>
+
+<span class="sd">    w = np.sqrt(1.0-(x*x+y*y+z*z))</span>
+
+<span class="sd">    w2 = 1.0-(x*x+y*y+z*z) can be near zero, which will lead to</span>
+<span class="sd">    numerical instability in sqrt.  Here we use the system maximum</span>
+<span class="sd">    float type to reduce numerical instability</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; wxyz = fillpositive([0,0,0])</span>
+<span class="sd">    &gt;&gt;&gt; np.all(wxyz == [1, 0, 0, 0])</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; wxyz = fillpositive([1,0,0]) # Corner case; w is 0</span>
+<span class="sd">    &gt;&gt;&gt; np.all(wxyz == [0, 1, 0, 0])</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; np.dot(wxyz, wxyz)</span>
+<span class="sd">    1.0</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># Check inputs (force error if &lt; 3 values)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;xyz should have length 3&#39;</span><span class="p">)</span>
+    <span class="c"># If necessary, guess precision of input</span>
+    <span class="k">if</span> <span class="n">w2_thresh</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span> <span class="c"># trap errors for non-array, integer array</span>
+            <span class="n">w2_thresh</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">xyz</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">*</span> <span class="mi">3</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">w2_thresh</span> <span class="o">=</span> <span class="o">-</span><span class="n">FLOAT_EPS</span> <span class="o">*</span> <span class="mi">3</span>
+    <span class="c"># Use maximum precision</span>
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">MAX_FLOAT</span><span class="p">)</span>
+    <span class="c"># Calculate w</span>
+    <span class="n">w2</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">xyz</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">w2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">w2</span> <span class="o">&lt;</span> <span class="n">w2_thresh</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;w2 should be positive, but is </span><span class="si">%e</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">w2</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">w2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="n">xyz</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="quat2mat"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.quat2mat">[docs]</a><span class="k">def</span> <span class="nf">quat2mat</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Calculate rotation matrix corresponding to quaternion</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q : 4 element array-like</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    M : (3,3) array</span>
+<span class="sd">      Rotation matrix corresponding to input quaternion *q*</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Rotation matrix applies to column vectors, and is applied to the</span>
+<span class="sd">    left of coordinate vectors.  The algorithm here allows non-unit</span>
+<span class="sd">    quaternions.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Algorithm from</span>
+<span class="sd">    http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; M = quat2mat([1, 0, 0, 0]) # Identity quaternion</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(M, np.eye(3))</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; M = quat2mat([0, 1, 0, 0]) # 180 degree rotn around axis 0</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(M, np.diag([1, -1, -1]))</span>
+<span class="sd">    True</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">q</span>
+    <span class="n">Nq</span> <span class="o">=</span> <span class="n">w</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">z</span>
+    <span class="k">if</span> <span class="n">Nq</span> <span class="o">&lt;</span> <span class="n">FLOAT_EPS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">/</span><span class="n">Nq</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">s</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">y</span><span class="o">*</span><span class="n">s</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">z</span><span class="o">*</span><span class="n">s</span>
+    <span class="n">wX</span> <span class="o">=</span> <span class="n">w</span><span class="o">*</span><span class="n">X</span><span class="p">;</span> <span class="n">wY</span> <span class="o">=</span> <span class="n">w</span><span class="o">*</span><span class="n">Y</span><span class="p">;</span> <span class="n">wZ</span> <span class="o">=</span> <span class="n">w</span><span class="o">*</span><span class="n">Z</span>
+    <span class="n">xX</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">X</span><span class="p">;</span> <span class="n">xY</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">Y</span><span class="p">;</span> <span class="n">xZ</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">Z</span>
+    <span class="n">yY</span> <span class="o">=</span> <span class="n">y</span><span class="o">*</span><span class="n">Y</span><span class="p">;</span> <span class="n">yZ</span> <span class="o">=</span> <span class="n">y</span><span class="o">*</span><span class="n">Z</span><span class="p">;</span> <span class="n">zZ</span> <span class="o">=</span> <span class="n">z</span><span class="o">*</span><span class="n">Z</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+           <span class="p">[[</span> <span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">yY</span><span class="o">+</span><span class="n">zZ</span><span class="p">),</span> <span class="n">xY</span><span class="o">-</span><span class="n">wZ</span><span class="p">,</span> <span class="n">xZ</span><span class="o">+</span><span class="n">wY</span> <span class="p">],</span>
+            <span class="p">[</span> <span class="n">xY</span><span class="o">+</span><span class="n">wZ</span><span class="p">,</span> <span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">xX</span><span class="o">+</span><span class="n">zZ</span><span class="p">),</span> <span class="n">yZ</span><span class="o">-</span><span class="n">wX</span> <span class="p">],</span>
+            <span class="p">[</span> <span class="n">xZ</span><span class="o">-</span><span class="n">wY</span><span class="p">,</span> <span class="n">yZ</span><span class="o">+</span><span class="n">wX</span><span class="p">,</span> <span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">xX</span><span class="o">+</span><span class="n">yY</span><span class="p">)</span> <span class="p">]])</span>
+
+</div>
+<div class="viewcode-block" id="mat2quat"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.mat2quat">[docs]</a><span class="k">def</span> <span class="nf">mat2quat</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Calculate quaternion corresponding to given rotation matrix</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M : array-like</span>
+<span class="sd">      3x3 rotation matrix</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    q : (4,) array</span>
+<span class="sd">      closest quaternion to input matrix, having positive q[0]</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Method claimed to be robust to numerical errors in M</span>
+
+<span class="sd">    Constructs quaternion by calculating maximum eigenvector for matrix</span>
+<span class="sd">    K (constructed from input `M`).  Although this is not tested, a</span>
+<span class="sd">    maximum eigenvalue of 1 corresponds to a valid rotation.</span>
+
+<span class="sd">    A quaternion q*-1 corresponds to the same rotation as q; thus the</span>
+<span class="sd">    sign of the reconstructed quaternion is arbitrary, and we return</span>
+<span class="sd">    quaternions with positive w (q[0]).</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    * http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion</span>
+<span class="sd">    * Bar-Itzhack, Itzhack Y. (2000), &quot;New method for extracting the</span>
+<span class="sd">      quaternion from a rotation matrix&quot;, AIAA Journal of Guidance,</span>
+<span class="sd">      Control and Dynamics 23(6):1085-1087 (Engineering Note), ISSN</span>
+<span class="sd">      0731-5090</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; q = mat2quat(np.eye(3)) # Identity rotation</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(q, [1, 0, 0, 0])</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; q = mat2quat(np.diag([1, -1, -1]))</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(q, [0, 1, 0, 0]) # 180 degree rotn around axis 0</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># Qyx refers to the contribution of the y input vector component to</span>
+    <span class="c"># the x output vector component.  Qyx is therefore the same as</span>
+    <span class="c"># M[0,1].  The notation is from the Wikipedia article.</span>
+    <span class="n">Qxx</span><span class="p">,</span> <span class="n">Qyx</span><span class="p">,</span> <span class="n">Qzx</span><span class="p">,</span> <span class="n">Qxy</span><span class="p">,</span> <span class="n">Qyy</span><span class="p">,</span> <span class="n">Qzy</span><span class="p">,</span> <span class="n">Qxz</span><span class="p">,</span> <span class="n">Qyz</span><span class="p">,</span> <span class="n">Qzz</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">flat</span>
+    <span class="c"># Fill only lower half of symmetric matrix</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="n">Qxx</span> <span class="o">-</span> <span class="n">Qyy</span> <span class="o">-</span> <span class="n">Qzz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>               <span class="mi">0</span><span class="p">,</span>               <span class="mi">0</span>              <span class="p">],</span>
+        <span class="p">[</span><span class="n">Qyx</span> <span class="o">+</span> <span class="n">Qxy</span><span class="p">,</span>       <span class="n">Qyy</span> <span class="o">-</span> <span class="n">Qxx</span> <span class="o">-</span> <span class="n">Qzz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>               <span class="mi">0</span>              <span class="p">],</span>
+        <span class="p">[</span><span class="n">Qzx</span> <span class="o">+</span> <span class="n">Qxz</span><span class="p">,</span>       <span class="n">Qzy</span> <span class="o">+</span> <span class="n">Qyz</span><span class="p">,</span>       <span class="n">Qzz</span> <span class="o">-</span> <span class="n">Qxx</span> <span class="o">-</span> <span class="n">Qyy</span><span class="p">,</span> <span class="mi">0</span>              <span class="p">],</span>
+        <span class="p">[</span><span class="n">Qyz</span> <span class="o">-</span> <span class="n">Qzy</span><span class="p">,</span>       <span class="n">Qzx</span> <span class="o">-</span> <span class="n">Qxz</span><span class="p">,</span>       <span class="n">Qxy</span> <span class="o">-</span> <span class="n">Qyx</span><span class="p">,</span>       <span class="n">Qxx</span> <span class="o">+</span> <span class="n">Qyy</span> <span class="o">+</span> <span class="n">Qzz</span><span class="p">]]</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="mf">3.0</span>
+    <span class="c"># Use Hermitian eigenvectors, values for speed</span>
+    <span class="n">vals</span><span class="p">,</span> <span class="n">vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+    <span class="c"># Select largest eigenvector, reorder to w,x,y,z quaternion</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">vecs</span><span class="p">[[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vals</span><span class="p">)]</span>
+    <span class="c"># Prefer quaternion with positive w</span>
+    <span class="c"># (q * -1 corresponds to same rotation as q)</span>
+    <span class="k">if</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">q</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">q</span>
+
+</div>
+<div class="viewcode-block" id="mult"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.mult">[docs]</a><span class="k">def</span> <span class="nf">mult</span><span class="p">(</span><span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Multiply two quaternions</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q1 : 4 element sequence</span>
+<span class="sd">    q2 : 4 element sequence</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    q12 : shape (4,) array</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    See : http://en.wikipedia.org/wiki/Quaternions#Hamilton_product</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">w1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">q1</span>
+    <span class="n">w2</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">z2</span> <span class="o">=</span> <span class="n">q2</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">w1</span><span class="o">*</span><span class="n">w2</span> <span class="o">-</span> <span class="n">x1</span><span class="o">*</span><span class="n">x2</span> <span class="o">-</span> <span class="n">y1</span><span class="o">*</span><span class="n">y2</span> <span class="o">-</span> <span class="n">z1</span><span class="o">*</span><span class="n">z2</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">w1</span><span class="o">*</span><span class="n">x2</span> <span class="o">+</span> <span class="n">x1</span><span class="o">*</span><span class="n">w2</span> <span class="o">+</span> <span class="n">y1</span><span class="o">*</span><span class="n">z2</span> <span class="o">-</span> <span class="n">z1</span><span class="o">*</span><span class="n">y2</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">w1</span><span class="o">*</span><span class="n">y2</span> <span class="o">+</span> <span class="n">y1</span><span class="o">*</span><span class="n">w2</span> <span class="o">+</span> <span class="n">z1</span><span class="o">*</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="o">*</span><span class="n">z2</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">w1</span><span class="o">*</span><span class="n">z2</span> <span class="o">+</span> <span class="n">z1</span><span class="o">*</span><span class="n">w2</span> <span class="o">+</span> <span class="n">x1</span><span class="o">*</span><span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span><span class="o">*</span><span class="n">x2</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="conjugate"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.conjugate">[docs]</a><span class="k">def</span> <span class="nf">conjugate</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Conjugate of quaternion</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q : 4 element sequence</span>
+<span class="sd">       w, i, j, k of quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    conjq : array shape (4,)</span>
+<span class="sd">       w, i, j, k of conjugate of `q`</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="norm"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.norm">[docs]</a><span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return norm of quaternion</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q : 4 element sequence</span>
+<span class="sd">       w, i, j, k of quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    n : scalar</span>
+<span class="sd">       quaternion norm</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="norm2"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.norm2">[docs]</a><span class="k">def</span> <span class="nf">norm2</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return norm of quaternion with sqrt</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q : 4 element sequence</span>
+<span class="sd">       w, i, j, k of quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    n : scalar</span>
+<span class="sd">       quaternion norm</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="normalize"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.normalize">[docs]</a><span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return quaternion with normalized</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q : 4 element sequence</span>
+<span class="sd">       w, i, j, k of quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    n : 4 element sequence</span>
+<span class="sd">       quaternion normalized</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">q</span> <span class="o">/</span> <span class="n">norm2</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="isunit"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.isunit">[docs]</a><span class="k">def</span> <span class="nf">isunit</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return True is this is very nearly a unit quaternion &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="inverse"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.inverse">[docs]</a><span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return multiplicative inverse of quaternion `q`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q : 4 element sequence</span>
+<span class="sd">       w, i, j, k of quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    invq : array shape (4,)</span>
+<span class="sd">       w, i, j, k of quaternion inverse</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">conjugate</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="eye"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.eye">[docs]</a><span class="k">def</span> <span class="nf">eye</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39; Return identity quaternion &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="rotate_vector"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.rotate_vector">[docs]</a><span class="k">def</span> <span class="nf">rotate_vector</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Apply transformation in quaternion `q` to vector `v`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    v : 3 element sequence</span>
+<span class="sd">       3 dimensional vector</span>
+<span class="sd">    q : 4 element sequence</span>
+<span class="sd">       w, i, j, k of quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vdash : array shape (3,)</span>
+<span class="sd">       `v` rotated by quaternion `q`</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    See: http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Describing_rotations_with_quaternions</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">varr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,))</span>
+    <span class="n">varr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">mult</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">mult</span><span class="p">(</span><span class="n">varr</span><span class="p">,</span> <span class="n">conjugate</span><span class="p">(</span><span class="n">q</span><span class="p">)))[</span><span class="mi">1</span><span class="p">:]</span>
+
+</div>
+<div class="viewcode-block" id="nearly_equivalent"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.nearly_equivalent">[docs]</a><span class="k">def</span> <span class="nf">nearly_equivalent</span><span class="p">(</span><span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Returns True if `q1` and `q2` give near equivalent transforms</span>
+
+<span class="sd">    q1 may be nearly numerically equal to q2, or nearly equal to q2 * -1</span>
+<span class="sd">    (becuase a quaternion multiplied by -1 gives the same transform).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q1 : 4 element sequence</span>
+<span class="sd">       w, x, y, z of first quaternion</span>
+<span class="sd">    q2 : 4 element sequence</span>
+<span class="sd">       w, x, y, z of second quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    equiv : bool</span>
+<span class="sd">       True if `q1` and `q2` are nearly equivalent, False otherwise</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; q1 = [1, 0, 0, 0]</span>
+<span class="sd">    &gt;&gt;&gt; nearly_equivalent(q1, [0, 1, 0, 0])</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; nearly_equivalent(q1, [1, 0, 0, 0])</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; nearly_equivalent(q1, [-1, 0, 0, 0])</span>
+<span class="sd">    True</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">q1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span>
+    <span class="n">q2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">q1</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="angle_axis2quat"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.angle_axis2quat">[docs]</a><span class="k">def</span> <span class="nf">angle_axis2quat</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">is_normalized</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Quaternion for rotation of angle `theta` around `vector`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : scalar</span>
+<span class="sd">       angle of rotation</span>
+<span class="sd">    vector : 3 element sequence</span>
+<span class="sd">       vector specifying axis for rotation.</span>
+<span class="sd">    is_normalized : bool, optional</span>
+<span class="sd">       True if vector is already normalized (has norm of 1).  Default</span>
+<span class="sd">       False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    quat : 4 element sequence of symbols</span>
+<span class="sd">       quaternion giving specified rotation</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; q = angle_axis2quat(np.pi, [1, 0, 0])</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(q, [0, 1, 0,  0])</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Formula from http://mathworld.wolfram.com/EulerParameters.html</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_normalized</span><span class="p">:</span>
+        <span class="c"># Cannot divide in-place because input vector may be integer type,</span>
+        <span class="c"># whereas output will be float type; this may raise an error in versions</span>
+        <span class="c"># of numpy &gt; 1.6.1</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="n">vector</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">vector</span><span class="p">))</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="n">st2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t2</span><span class="p">)],</span>
+                           <span class="n">vector</span> <span class="o">*</span> <span class="n">st2</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="angle_axis2mat"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.angle_axis2mat">[docs]</a><span class="k">def</span> <span class="nf">angle_axis2mat</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">is_normalized</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Rotation matrix of angle `theta` around `vector`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : scalar</span>
+<span class="sd">       angle of rotation</span>
+<span class="sd">    vector : 3 element sequence</span>
+<span class="sd">       vector specifying axis for rotation.</span>
+<span class="sd">    is_normalized : bool, optional</span>
+<span class="sd">       True if vector is already normalized (has norm of 1).  Default</span>
+<span class="sd">       False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mat : array shape (3,3)</span>
+<span class="sd">       rotation matrix specified rotation</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    From: http://en.wikipedia.org/wiki/Rotation_matrix#Axis_and_angle</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">vector</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_normalized</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">/</span><span class="n">n</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">/</span><span class="n">n</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">/</span><span class="n">n</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">);</span> <span class="n">s</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">);</span> <span class="n">C</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">c</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">s</span><span class="p">;</span>   <span class="n">ys</span> <span class="o">=</span> <span class="n">y</span><span class="o">*</span><span class="n">s</span><span class="p">;</span>   <span class="n">zs</span> <span class="o">=</span> <span class="n">z</span><span class="o">*</span><span class="n">s</span>
+    <span class="n">xC</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">C</span><span class="p">;</span>   <span class="n">yC</span> <span class="o">=</span> <span class="n">y</span><span class="o">*</span><span class="n">C</span><span class="p">;</span>   <span class="n">zC</span> <span class="o">=</span> <span class="n">z</span><span class="o">*</span><span class="n">C</span>
+    <span class="n">xyC</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">yC</span><span class="p">;</span> <span class="n">yzC</span> <span class="o">=</span> <span class="n">y</span><span class="o">*</span><span class="n">zC</span><span class="p">;</span> <span class="n">zxC</span> <span class="o">=</span> <span class="n">z</span><span class="o">*</span><span class="n">xC</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span> <span class="n">x</span><span class="o">*</span><span class="n">xC</span><span class="o">+</span><span class="n">c</span><span class="p">,</span>   <span class="n">xyC</span><span class="o">-</span><span class="n">zs</span><span class="p">,</span>   <span class="n">zxC</span><span class="o">+</span><span class="n">ys</span> <span class="p">],</span>
+            <span class="p">[</span> <span class="n">xyC</span><span class="o">+</span><span class="n">zs</span><span class="p">,</span>   <span class="n">y</span><span class="o">*</span><span class="n">yC</span><span class="o">+</span><span class="n">c</span><span class="p">,</span>   <span class="n">yzC</span><span class="o">-</span><span class="n">xs</span> <span class="p">],</span>
+            <span class="p">[</span> <span class="n">zxC</span><span class="o">-</span><span class="n">ys</span><span class="p">,</span>   <span class="n">yzC</span><span class="o">+</span><span class="n">xs</span><span class="p">,</span>   <span class="n">z</span><span class="o">*</span><span class="n">zC</span><span class="o">+</span><span class="n">c</span> <span class="p">]])</span>
+
+</div>
+<div class="viewcode-block" id="quat2angle_axis"><a class="viewcode-back" href="../../../generated/sensbiotk.transforms3d.html#sensbiotk.transforms3d.quaternions.quat2angle_axis">[docs]</a><span class="k">def</span> <span class="nf">quat2angle_axis</span><span class="p">(</span><span class="n">quat</span><span class="p">,</span> <span class="n">identity_thresh</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Convert quaternion to rotation of angle around axis</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    quat : 4 element sequence</span>
+<span class="sd">       w, x, y, z forming quaternion</span>
+<span class="sd">    identity_thresh : None or scalar, optional</span>
+<span class="sd">       threshold below which the norm of the vector part of the</span>
+<span class="sd">       quaternion (x, y, z) is deemed to be 0, leading to the identity</span>
+<span class="sd">       rotation.  None (the default) leads to a threshold estimated</span>
+<span class="sd">       based on the precision of the input.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    theta : scalar</span>
+<span class="sd">       angle of rotation</span>
+<span class="sd">    vector : array shape (3,)</span>
+<span class="sd">       axis around which rotation occurs</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; theta, vec = quat2angle_axis([0, 1, 0, 0])</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(theta, np.pi)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; vec</span>
+<span class="sd">    array([ 1.,  0.,  0.])</span>
+
+<span class="sd">    If this is an identity rotation, we return a zero angle and an</span>
+<span class="sd">    arbitrary vector</span>
+
+<span class="sd">    &gt;&gt;&gt; quat2angle_axis([1, 0, 0, 0])</span>
+<span class="sd">    (0.0, array([ 1.,  0.,  0.]))</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    A quaternion for which x, y, z are all equal to 0, is an identity</span>
+<span class="sd">    rotation.  In this case we return a 0 angle and an  arbitrary</span>
+<span class="sd">    vector, here [1, 0, 0]</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">quat</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">identity_thresh</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">identity_thresh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">*</span> <span class="mi">3</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span> <span class="c"># integer type</span>
+            <span class="n">identity_thresh</span> <span class="o">=</span> <span class="n">FLOAT_EPS</span> <span class="o">*</span> <span class="mi">3</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">identity_thresh</span><span class="p">:</span>
+        <span class="c"># if vec is nearly 0,0,0, this is an identity rotation</span>
+        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span>  <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">w</span><span class="p">),</span> <span class="n">vec</span> <span class="o">/</span> <span class="n">n</span></div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.calib.calib &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.calib.calib</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.calib.calib</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.calib.calib</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8; -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbio@inria.fr</span>
+<span class="c"># Copyright (C) 2014  INRIA (Contact: sensbiotk@inria.fr)</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Calib for IMU sensors data</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.algorithms</span> <span class="kn">import</span> <span class="n">basic</span> <span class="k">as</span> <span class="n">algo</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.calib</span> <span class="kn">import</span> <span class="n">calib_acc</span> <span class="k">as</span> <span class="n">calib_acc</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.calib</span> <span class="kn">import</span> <span class="n">calib_mag</span> <span class="k">as</span> <span class="n">calib_mag</span>
+<span class="kn">from</span> <span class="nn">sensbiotk.calib</span> <span class="kn">import</span> <span class="n">calib_gyr</span> <span class="k">as</span> <span class="n">calib_gyr</span>
+
+<span class="c"># disabling pylint errors &#39;E1101&#39; no-member, false positive from pylint</span>
+<span class="c"># disabling pylint errors &#39;C0103&#39; invalid variable name, for variables : a,b</span>
+<span class="c"># pylint:disable=I0011,E1101,C0103</span>
+
+<span class="n">SEP</span> <span class="o">=</span> <span class="s">&quot;;&quot;</span>
+
+
+<div class="viewcode-block" id="calib_imu_parameters"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib.calib_imu_parameters">[docs]</a><span class="k">def</span> <span class="nf">calib_imu_parameters</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Compute IMU calibration parameters</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    acc  : numpy array of float</span>
+<span class="sd">                 accelerometers data motionless containing all the acquisition</span>
+<span class="sd">                 on three axis</span>
+<span class="sd">    mag : numpy array of float</span>
+<span class="sd">                 magnetometers in motion containing all the acquisition</span>
+<span class="sd">                 on three axis</span>
+<span class="sd">    gyr : numpy array of float</span>
+<span class="sd">                 gyrometers data motionless containing all the acquisition</span>
+<span class="sd">                 on three axis</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">     params : numpy array of float</span>
+<span class="sd">             [ [off_accx off_accy off_accz], offset for accelerometers</span>
+<span class="sd">             [sca_accx sca_accy sca_accz], scale for accelerometers</span>
+<span class="sd">             [off_magx off_magy off_magz], offset for magnetometers</span>
+<span class="sd">             [sca_magx sca_magy sca_magz], scale for magnetometers</span>
+<span class="sd">             [off_gyrx off_gyry off_gyrz], offset for gyrometers</span>
+<span class="sd">             [sca_gyrx sca_gyry sca_gyrz]] scale for gyrometers</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Accelerometers calibration parameters</span>
+    <span class="n">offset</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">calib_acc</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
+    <span class="n">params_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">offset</span><span class="p">],</span> <span class="p">[</span><span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">params_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params_acc</span><span class="p">,</span> <span class="p">[</span><span class="n">scale</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">params_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params_acc</span><span class="p">,</span> <span class="p">[</span><span class="n">scale</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c"># Magnetometers calibration parameters</span>
+    <span class="n">offset</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">calib_mag</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span>
+    <span class="n">params_mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">offset</span><span class="p">],</span> <span class="p">[</span><span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">params_mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params_mag</span><span class="p">,</span> <span class="p">[</span><span class="n">scale</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">params_mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params_mag</span><span class="p">,</span> <span class="p">[</span><span class="n">scale</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c"># Gyrometers calibration parameters</span>
+    <span class="n">offset</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">calib_gyr</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">gyr</span><span class="p">)</span>
+    <span class="n">params_gyr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">offset</span><span class="p">],</span> <span class="p">[</span><span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">params_gyr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params_gyr</span><span class="p">,</span> <span class="p">[</span><span class="n">scale</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">params_gyr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params_gyr</span><span class="p">,</span> <span class="p">[</span><span class="n">scale</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">params_acc</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">,</span> <span class="n">params_gyr</span>
+
+</div>
+<div class="viewcode-block" id="save_param"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib.save_param">[docs]</a><span class="k">def</span> <span class="nf">save_param</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">pcalib_acc</span><span class="p">,</span> <span class="n">pcalib_mag</span><span class="p">,</span> <span class="n">pcalib_gyr</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Save IMU calibration parameters</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    filename : string</span>
+<span class="sd">               filename to save</span>
+<span class="sd">    pcalib_acc  : numpy array of float</span>
+<span class="sd">             1x3 offset for accelerometers</span>
+<span class="sd">              = [off_accx off_accy off_accz]</span>
+<span class="sd">              3x3 matrix scale for accelerometers</span>
+<span class="sd">    pcalib_mag  : numpy array of float</span>
+<span class="sd">             1x3 offset for magnetometers</span>
+<span class="sd">             = [off_magx off_magy off_magz]</span>
+<span class="sd">             3x3 matrix scale for magnetometers</span>
+<span class="sd">    pcalib_gyr  : numpy array of float</span>
+<span class="sd">             1x3 offset for gyrometers</span>
+<span class="sd">             = [off_gyrx off_gyry off_gyrz]</span>
+<span class="sd">             3x3 matrix scale for gyrometers</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+    <span class="c"># Write headers</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# FOX calibration parameters (IMU file)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# (c) INRIA 2011-2014</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="s">&quot;# Comments: &quot;</span> <span class="o">+</span> <span class="n">comments</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+
+    <span class="n">lineformat</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span><span class="o">+</span><span class="n">SEP</span><span class="o">+</span><span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span><span class="o">+</span><span class="n">SEP</span><span class="o">+</span><span class="s">&quot;</span><span class="si">%f</span><span class="se">\n</span><span class="s">&quot;</span>
+
+    <span class="c"># Write accelerometers calibration parameters</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# Offset for accelerometers</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="c"># Write accelerometers calibration parameters</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# Scale for accelerometers</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_acc</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="c"># Write magnetometers calibration parameters</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# Offset for magnetometers</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# Scale for magnetometers</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_mag</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="c"># Write gyrometers calibration parameters</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# Offset for gyrometers</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;# Scale for gyrometers</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcalib_gyr</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="load_param"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib.load_param">[docs]</a><span class="k">def</span> <span class="nf">load_param</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Load IMU calibration parameters</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    filename : string</span>
+<span class="sd">               filename to load</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    params   : numpy array of float</span>
+<span class="sd">             [ [off_accx off_accy off_accz], offset for accelerometers</span>
+<span class="sd">             [sca_accx sca_accy sca_accz], scale for accelerometers</span>
+<span class="sd">             [off_magx off_magy off_magz], offset for magnetometers</span>
+<span class="sd">             [sca_magx sca_magy sca_magz], scale for magnetometers</span>
+<span class="sd">             [off_gyrx off_gyry off_gyrz], offset for gyrometers</span>
+<span class="sd">             [sca_gyrx sca_gyry sca_gyrz]] scale for gyrometers</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">SEP</span><span class="p">)</span>
+
+    <span class="n">pcalib_acc</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">pcalib_mag</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span>
+    <span class="n">pcalib_gyr</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">14</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">pcalib_acc</span><span class="p">,</span> <span class="n">pcalib_mag</span><span class="p">,</span> <span class="n">pcalib_gyr</span>
+
+</div>
+<div class="viewcode-block" id="print_param"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib.print_param">[docs]</a><span class="k">def</span> <span class="nf">print_param</span><span class="p">(</span><span class="n">params_acc</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">,</span> <span class="n">params_gyr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Print IMU calibration parameters</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    params : numpy array of float</span>
+<span class="sd">           [ [off_accx off_accy off_accz], offset for accelerometers</span>
+<span class="sd">             [sca_accx sca_accy sca_accz], scale for accelerometers</span>
+<span class="sd">             [off_magx off_magy off_magz], offset for magnetometers</span>
+<span class="sd">             [sca_magx sca_magy sca_magz], scale for magnetometers</span>
+<span class="sd">             [off_gyrx off_gyry off_gyrz], offset for gyrometers</span>
+<span class="sd">             [sca_gyrx sca_gyry sca_gyrz]] scale for gyrometers</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">print</span> <span class="s">&quot;Calibration Parameters&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Accelerometers&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Scale=&quot;</span><span class="p">,</span> <span class="n">params_acc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;Offset=</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">params_acc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">params_acc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">params_acc</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;Magnetometers&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Scale=&quot;</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;Offset=</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;Gyrometers&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Scale=&quot;</span><span class="p">,</span> <span class="n">params_gyr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;Offset=</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">params_gyr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">params_gyr</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">params_gyr</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">return</span>
+</div>
+<span class="n">FILETEST</span> <span class="o">=</span> <span class="s">&quot;../../tests/data/imu08.csv&quot;</span>
+
+
+<div class="viewcode-block" id="test1"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib.test1">[docs]</a><span class="k">def</span> <span class="nf">test1</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Test1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io</span> <span class="kn">import</span> <span class="n">iofox_deprec</span> <span class="k">as</span> <span class="n">fox</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io</span> <span class="kn">import</span> <span class="n">viz</span>
+
+    <span class="k">print</span> <span class="s">&quot;Test Calibration&quot;</span>
+    <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">]</span> <span class="o">=</span> <span class="n">fox</span><span class="o">.</span><span class="n">load_foximu_csvfile</span><span class="p">(</span><span class="n">FILETEST</span><span class="p">)</span>
+    <span class="n">viz</span><span class="o">.</span><span class="n">plot_imu</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;calib&quot;</span><span class="p">,</span> <span class="n">time</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">)</span>
+
+    <span class="n">acc_motionless</span> <span class="o">=</span> <span class="n">acc</span><span class="p">[</span><span class="mi">5500</span><span class="p">:</span><span class="mi">7500</span><span class="p">]</span>
+    <span class="n">gyr_motionless</span> <span class="o">=</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">5500</span><span class="p">:</span><span class="mi">7500</span><span class="p">]</span>
+    <span class="n">mag_motion</span> <span class="o">=</span> <span class="n">mag</span><span class="p">[</span><span class="mi">8000</span><span class="p">:</span><span class="mi">18000</span><span class="p">]</span>
+
+    <span class="n">scale</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">calib_acc</span><span class="o">.</span><span class="n">compute_simple</span><span class="p">(</span><span class="n">acc_motionless</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;Acc&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Scale=&quot;</span><span class="p">,</span> <span class="n">scale</span>
+    <span class="k">print</span> <span class="s">&quot;Offset=&quot;</span><span class="p">,</span> <span class="n">offset</span>
+
+    <span class="n">scale</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">calib_mag</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">mag_motion</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;Mag&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Scale=&quot;</span><span class="p">,</span> <span class="n">scale</span>
+    <span class="k">print</span> <span class="s">&quot;Offset=&quot;</span><span class="p">,</span> <span class="n">offset</span>
+
+    <span class="n">scale</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">calib_gyr</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">gyr_motionless</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;Gyr&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Scale=&quot;</span><span class="p">,</span> <span class="n">scale</span>
+    <span class="k">print</span> <span class="s">&quot;Offset=&quot;</span><span class="p">,</span> <span class="n">offset</span>
+
+    <span class="n">viz</span><span class="o">.</span><span class="n">plot_show</span><span class="p">()</span>
+
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="test2"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib.test2">[docs]</a><span class="k">def</span> <span class="nf">test2</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Test2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io</span> <span class="kn">import</span> <span class="n">iofox_deprec</span> <span class="k">as</span> <span class="n">fox</span>
+
+    <span class="k">print</span> <span class="s">&quot;Test Calibration&quot;</span>
+    <span class="n">data_file</span> <span class="o">=</span> <span class="n">FILETEST</span>
+    <span class="n">param_file</span> <span class="o">=</span> <span class="s">&quot;param-imu08.csv&quot;</span>
+
+    <span class="p">[</span><span class="n">_</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr</span><span class="p">]</span> <span class="o">=</span> <span class="n">fox</span><span class="o">.</span><span class="n">load_foximu_csvfile</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span>
+
+    <span class="n">acc_motionless</span> <span class="o">=</span> <span class="n">acc</span><span class="p">[</span><span class="mi">5500</span><span class="p">:</span><span class="mi">7500</span><span class="p">]</span>
+    <span class="n">gyr_motionless</span> <span class="o">=</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">5500</span><span class="p">:</span><span class="mi">7500</span><span class="p">]</span>
+    <span class="n">mag_motion</span> <span class="o">=</span> <span class="n">mag</span><span class="p">[</span><span class="mi">8000</span><span class="p">:</span><span class="mi">18000</span><span class="p">]</span>
+
+    <span class="n">p_acc</span><span class="p">,</span> <span class="n">p_mag</span><span class="p">,</span> <span class="n">p_gyr</span> <span class="o">=</span> <span class="n">calib_imu</span><span class="p">(</span><span class="n">acc_motionless</span><span class="p">,</span>
+                                    <span class="n">mag_motion</span><span class="p">,</span>
+                                    <span class="n">gyr_motionless</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;----- Parameters computed&quot;</span>
+    <span class="n">print_param</span><span class="p">(</span><span class="n">p_acc</span><span class="p">,</span> <span class="n">p_mag</span><span class="p">,</span> <span class="n">p_gyr</span><span class="p">)</span>
+    <span class="n">save_param</span><span class="p">(</span><span class="n">param_file</span><span class="p">,</span> <span class="n">p_acc</span><span class="p">,</span> <span class="n">p_mag</span><span class="p">,</span> <span class="n">p_gyr</span><span class="p">)</span>
+    <span class="n">p_acc</span> <span class="o">=</span> <span class="n">p_mag</span> <span class="o">=</span> <span class="n">p_gyr</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">p_acc</span><span class="p">,</span> <span class="n">p_mag</span><span class="p">,</span> <span class="n">p_gyr</span> <span class="o">=</span> <span class="n">load_param</span><span class="p">(</span><span class="n">param_file</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;----- Parameters after load/save&quot;</span>
+    <span class="n">print_param</span><span class="p">(</span><span class="n">p_acc</span><span class="p">,</span> <span class="n">p_mag</span><span class="p">,</span> <span class="n">p_gyr</span><span class="p">)</span>
+
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="test3"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib.test3">[docs]</a><span class="k">def</span> <span class="nf">test3</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Test3</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io</span> <span class="kn">import</span> <span class="n">iofox_deprec</span> <span class="k">as</span> <span class="n">fox</span>
+    <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">py</span>
+
+    <span class="k">print</span> <span class="s">&quot;Test Calibration&quot;</span>
+    <span class="p">[</span><span class="n">_</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="n">fox</span><span class="o">.</span><span class="n">load_foximu_csvfile</span><span class="p">(</span><span class="n">FILETEST</span><span class="p">)</span>
+
+    <span class="n">norm_acc</span> <span class="o">=</span> <span class="n">algo</span><span class="o">.</span><span class="n">compute_norm</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
+
+    <span class="n">py</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">norm_acc</span><span class="p">)</span>
+    <span class="n">py</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="compute"><a class="viewcode-back" href="../../../generated/sensbiotk.calib.html#sensbiotk.calib.calib.compute">[docs]</a><span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="n">imuNumber</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Performs IMU calibration parameters,</span>
+<span class="sd">    saves them in a file at the same path than the .csv recording used,</span>
+<span class="sd">    and returns them.</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">    ------------</span>
+<span class="sd">    params : integer</span>
+<span class="sd">           imuNumber, the ID of the IMU to calibrate</span>
+<span class="sd">            filepath</span>
+<span class="sd">            string, the path to the .csv calibration file,</span>
+<span class="sd">            if no path given, a GUI shows up</span>
+<span class="sd">            param</span>
+<span class="sd">            integer, 1 : only returns parameters</span>
+<span class="sd">                     2 : only saves parameters</span>
+<span class="sd">                     3 : saves and returns parameters</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># MAIN PROCESS for loading a calibration recording,</span>
+    <span class="c">#computing the parameters and saving them in a file.</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io.uigetfile</span> <span class="kn">import</span> <span class="n">uigetfile</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.algorithms.basic</span> <span class="kn">import</span> <span class="n">find_static_periods_3D</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io.iofox</span> <span class="kn">import</span> <span class="n">load_foxcsvfile</span>
+    <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">split</span>
+
+    <span class="c"># Select and import IMU DATA</span>
+    <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">uigetfile</span><span class="p">(</span><span class="n">title</span><span class="o">=</span> \
+        <span class="s">&#39;Select the IMU .csv file&#39;</span><span class="p">,</span> <span class="n">filetypes</span><span class="o">=</span><span class="p">[(</span><span class="s">&#39;.csv file&#39;</span><span class="p">,</span> <span class="s">&#39;.csv&#39;</span><span class="p">)])</span>
+    <span class="p">[</span><span class="n">_</span><span class="p">,</span> <span class="n">accx</span><span class="p">,</span> <span class="n">accy</span><span class="p">,</span> <span class="n">accz</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="n">gyrx</span><span class="p">,</span> <span class="n">gyry</span><span class="p">,</span> <span class="n">gyrz</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">load_foxcsvfile</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="mi">200</span>
+
+    <span class="c"># Detects the motionless periods (at least 2s and less than 4deg/s)</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> \
+    <span class="n">find_static_periods_3D</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">gyrx</span><span class="p">,</span> <span class="n">gyry</span><span class="p">,</span> <span class="n">gyrz</span><span class="p">)),</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">freqs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># if no static periods found</span>
+        <span class="k">print</span> <span class="s">&quot;WARNING : NO STATIC PERIOD FOUND&quot;</span>
+
+    <span class="c"># Computes the parameters</span>
+    <span class="n">acc_stat_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">acc_stat_y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">acc_stat_z</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">gyr_stat_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">gyr_stat_y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">gyr_stat_z</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">start</span><span class="p">)):</span>
+        <span class="c"># Mean of each stationary state</span>
+        <span class="n">acc_stat_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">accx</span><span class="p">[</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">acc_stat_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">accy</span><span class="p">[</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">acc_stat_z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">accz</span><span class="p">[</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="c"># All the gyro values for each stationary state</span>
+        <span class="n">gyr_stat_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gyr_stat_x</span><span class="p">),</span>
+                                     <span class="n">gyrx</span><span class="p">[</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">]]))</span>
+        <span class="n">gyr_stat_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gyr_stat_y</span><span class="p">),</span>
+                                     <span class="n">gyry</span><span class="p">[</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">]]))</span>
+        <span class="n">gyr_stat_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gyr_stat_z</span><span class="p">),</span>
+                                     <span class="n">gyrz</span><span class="p">[</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">]]))</span>
+
+    <span class="n">acc_stat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">acc_stat_x</span><span class="p">,</span> <span class="n">acc_stat_y</span><span class="p">,</span> <span class="n">acc_stat_z</span><span class="p">))</span>
+    <span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">))</span>
+    <span class="n">gyr_stat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">gyr_stat_x</span><span class="p">,</span> <span class="n">gyr_stat_y</span><span class="p">,</span> <span class="n">gyr_stat_z</span><span class="p">))</span>
+
+    <span class="p">[</span><span class="n">params_acc</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">,</span> <span class="n">params_gyr</span><span class="p">]</span> <span class="o">=</span> \
+    <span class="n">calib_imu_parameters</span><span class="p">(</span><span class="n">acc_stat</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">gyr_stat</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c">#only returns parameters</span>
+        <span class="k">return</span> <span class="n">params_acc</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">,</span> <span class="n">params_gyr</span>
+    <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="c">#save parameters</span>
+        <span class="n">save_param</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">filepath</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span>\
+            <span class="s">&quot;/CalibrationFileIMU&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">imuNumber</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;.txt&quot;</span><span class="p">,</span>\
+            <span class="n">params_acc</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">,</span> <span class="n">params_gyr</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="c">#save and return parameters</span>
+        <span class="n">save_param</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">filepath</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span>\
+            <span class="s">&quot;/CalibrationFileIMU&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">imuNumber</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;.txt&quot;</span><span class="p">,</span>\
+            <span class="n">params_acc</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">,</span> <span class="n">params_gyr</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">params_acc</span><span class="p">,</span> <span class="n">params_mag</span><span class="p">,</span> <span class="n">params_gyr</span>
+</pre></div></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,34 @@
+sensbiotk package
+=================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    sensbiotk.algorithms
+    sensbiotk.calib
+    sensbiotk.driver
+    sensbiotk.io
+    sensbiotk.tests
+    sensbiotk.transforms3d
+
+Submodules
+----------
+
+sensbiotk.setup module
+----------------------
+
+.. automodule:: sensbiotk.setup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sensbiotk
+    :members:
+    :undoc-members:
+    :show-inheritance:

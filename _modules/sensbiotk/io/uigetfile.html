@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.io.uigetfile &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.io.uigetfile</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.io.uigetfile</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.io.uigetfile</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># This file is a part of sensbiot</span>
+<span class="c"># Contact : sensbiotk@inria.fr</span>
+<span class="c"># Copyright (C) 2015  INRIA</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">MATLAB-like &quot;uigetfile&quot; function.</span>
+<span class="sd">@author: bsijober</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c"># disabling pylint errors &#39;E1101&#39; no-member, false positive from pylint</span>
+<span class="c"># disabling pylint errors &#39;C0103&#39; invalid variable name, for variables : a,b</span>
+<span class="c"># pylint:disable=I0011,E1101,C0103</span>
+
+<div class="viewcode-block" id="uigetfile"><a class="viewcode-back" href="../../../generated/sensbiotk.io.html#sensbiotk.io.uigetfile.uigetfile">[docs]</a><span class="k">def</span> <span class="nf">uigetfile</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filetypes</span><span class="o">=</span><span class="p">[(</span><span class="s">&quot;All files&quot;</span><span class="p">,</span> <span class="s">&quot;*.*&quot;</span><span class="p">)],</span> <span class="n">initialdir</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MATLAB-like &quot;uigetfile&quot; function. Enables the user to</span>
+<span class="sd">    graphically choose a file and get its absolute path.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    title : string</span>
+<span class="sd">     The displayed GUI title</span>
+<span class="sd">    filetypes : tuple</span>
+<span class="sd">     ex : filetypes = [(&quot;All files&quot;, &quot;*.*&quot;)]</span>
+<span class="sd">    initialdir : string</span>
+<span class="sd">           Specifies that the files in directory should be displayed</span>
+<span class="sd">           when the dialog pops up</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    file_path : string</span>
+<span class="sd">     The GUI selected file path</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">Tkinter</span>
+    <span class="kn">import</span> <span class="nn">tkFileDialog</span>
+
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Tk</span><span class="p">()</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="s">&#39;0x0+0+0&#39;</span><span class="p">)</span>
+    <span class="c"># window on top (for Windows only)</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">wm_attributes</span><span class="p">(</span><span class="s">&quot;-topmost&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">tkFileDialog</span><span class="o">.</span><span class="n">askopenfilename</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                                             <span class="n">filetypes</span><span class="o">=</span><span class="n">filetypes</span><span class="p">,</span>
+                                             <span class="n">initialdir</span><span class="o">=</span><span class="n">initialdir</span><span class="p">)</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">uigetfile</span><span class="p">(</span><span class="s">&#39;Titre test&#39;</span><span class="p">)</span>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

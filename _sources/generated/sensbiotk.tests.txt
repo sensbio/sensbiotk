@@ -1,0 +1,110 @@
+sensbiotk.tests package
+=======================
+
+Submodules
+----------
+
+sensbiotk.tests.test_basic module
+---------------------------------
+
+.. automodule:: sensbiotk.tests.test_basic
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_calib module
+---------------------------------
+
+.. automodule:: sensbiotk.tests.test_calib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_euler module
+---------------------------------
+
+.. automodule:: sensbiotk.tests.test_euler
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_integration_gyro module
+--------------------------------------------
+
+.. automodule:: sensbiotk.tests.test_integration_gyro
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_ioahrs module
+----------------------------------
+
+.. automodule:: sensbiotk.tests.test_ioahrs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_iofox module
+---------------------------------
+
+.. automodule:: sensbiotk.tests.test_iofox
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_iofox_deprec module
+----------------------------------------
+
+.. automodule:: sensbiotk.tests.test_iofox_deprec
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_madgwick_ahrs module
+-----------------------------------------
+
+.. automodule:: sensbiotk.tests.test_madgwick_ahrs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_mahony_ahrs module
+---------------------------------------
+
+.. automodule:: sensbiotk.tests.test_mahony_ahrs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_markley module
+-----------------------------------
+
+.. automodule:: sensbiotk.tests.test_markley
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_martin_ahrs module
+---------------------------------------
+
+.. automodule:: sensbiotk.tests.test_martin_ahrs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sensbiotk.tests.test_quaternions module
+---------------------------------------
+
+.. automodule:: sensbiotk.tests.test_quaternions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sensbiotk.tests
+    :members:
+    :undoc-members:
+    :show-inheritance:

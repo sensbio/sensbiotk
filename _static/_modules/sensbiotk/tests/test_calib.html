@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk.tests.test_calib &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="../../../index.html"
+          title="back to the documentation overview"><span>sensbiotk.tests.test_calib</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="#">sensbiotk.tests.test_calib</a>
+      </div>
+      <div id="contentwrapper">
+        
+  <h1>Source code for sensbiotk.tests.test_calib</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8; -*-</span>
+<span class="c"># This file is a part of sensbiotk</span>
+<span class="c"># Contact : sensbio@inria.fr</span>
+<span class="c"># Copyright (C) 2014  INRIA (Contact: sensbiotk@inria.fr)</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tests Unit for sensbiotk/calib</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># pylint:disable= I0011, E1101, E0611</span>
+<span class="c"># E1101 no-member false positif</span>
+<span class="c"># E0611 no-name false positif</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+
+
+<div class="viewcode-block" id="test_calib_acc"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_calib.test_calib_acc">[docs]</a><span class="k">def</span> <span class="nf">test_calib_acc</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Test calib_acc function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">sensbiotk.algorithms.basic</span> <span class="kn">import</span> <span class="n">find_static_periods_3D</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io.iofox</span> <span class="kn">import</span> <span class="n">load_foxcsvfile</span>
+    <span class="kn">import</span> <span class="nn">sensbiotk.calib.calib_acc</span> <span class="kn">as</span> <span class="nn">calib_acc</span>
+
+    <span class="c"># Load the recording with motionless periods</span>
+    <span class="p">[</span><span class="n">_</span><span class="p">,</span> <span class="n">accx</span><span class="p">,</span> <span class="n">accy</span><span class="p">,</span> <span class="n">accz</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">gyrx</span><span class="p">,</span> <span class="n">gyry</span><span class="p">,</span> <span class="n">gyrz</span><span class="p">]</span> <span class="o">=</span> \
+        <span class="n">load_foxcsvfile</span><span class="p">(</span><span class="s">&quot;data/calib_accelerometer/IMU4/HKB0_02.csv&quot;</span><span class="p">)</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="c"># Detects the motionless periods</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">find_static_periods_3D</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">gyrx</span><span class="p">,</span> <span class="n">gyry</span><span class="p">,</span> <span class="n">gyrz</span><span class="p">)),</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="n">acc_stat_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">acc_stat_y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">acc_stat_z</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">start</span><span class="p">)):</span>
+        <span class="n">acc_stat_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">acc_stat_x</span><span class="p">),</span>
+                                     <span class="n">accx</span><span class="p">[</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">acc_stat_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">acc_stat_y</span><span class="p">),</span>
+                                     <span class="n">accy</span><span class="p">[</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">acc_stat_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">acc_stat_z</span><span class="p">),</span>
+                                     <span class="n">accz</span><span class="p">[</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="n">acc_stat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">acc_stat_x</span><span class="p">,</span> <span class="n">acc_stat_y</span><span class="p">,</span> <span class="n">acc_stat_z</span><span class="p">))</span>
+    <span class="c"># Compute the offset and scale</span>
+    <span class="n">offset</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">calib_acc</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">acc_stat</span><span class="p">)</span>
+
+    <span class="n">acc_imu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">accx</span><span class="p">),</span>
+                                      <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">accy</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">accz</span><span class="p">))))</span>
+
+    <span class="c"># if the IMU is well calibrated, the norm&#39;s acceleration is equal</span>
+    <span class="c"># to 9.81 along a motionless period</span>
+    <span class="c">#g_before_calib = np.sqrt(np.mean(acc_imu[range(start[0], end[0]), 0])**2</span>
+    <span class="c">#                       + np.mean(acc_imu[range(start[0], end[0]), 1])**2</span>
+    <span class="c">#                       + np.mean(acc_imu[range(start[0], end[0]), 2])**2)</span>
+
+    <span class="c"># Applies the offset and scale to the data</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">acc_imu</span><span class="p">)):</span>
+        <span class="n">acc_imu</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="n">acc_imu</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">offset</span><span class="p">)))))</span>
+
+    <span class="c"># Computes the norm on the motionless periods.</span>
+    <span class="c"># It has to be close to 9.81 if the computed parameters are satisfying.</span>
+    <span class="n">g_after_calib</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc_imu</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
+                            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc_imu</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
+                            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc_imu</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">2</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">g_after_calib</span>
+
+    <span class="k">if</span> <span class="n">g_after_calib</span> <span class="o">&lt;</span> <span class="mf">9.91</span> <span class="ow">and</span> <span class="n">g_after_calib</span> <span class="o">&gt;</span> <span class="mf">9.71</span><span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">yield</span> <span class="n">assert_equal</span><span class="p">,</span> <span class="n">resp</span><span class="p">,</span> <span class="bp">True</span>
+
+</div>
+<div class="viewcode-block" id="test_calib_mag"><a class="viewcode-back" href="../../../generated/sensbiotk.tests.html#sensbiotk.tests.test_calib.test_calib_mag">[docs]</a><span class="k">def</span> <span class="nf">test_calib_mag</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Test calib_mag function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">sensbiotk.io.iofox</span> <span class="kn">import</span> <span class="n">load_foxcsvfile</span>
+    <span class="kn">import</span> <span class="nn">sensbiotk.calib.calib_mag</span> <span class="kn">as</span> <span class="nn">calib_mag</span>
+
+    <span class="c"># Load the recording</span>
+    <span class="p">[</span><span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">m_x</span><span class="p">,</span> <span class="n">m_y</span><span class="p">,</span> <span class="n">m_z</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="p">]</span> <span class="o">=</span>\
+        <span class="n">load_foxcsvfile</span><span class="p">(</span><span class="s">&quot;data/calib_accelerometer/IMU4/HKB0_02.csv&quot;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">m_x</span><span class="p">,</span> <span class="n">m_y</span><span class="p">,</span> <span class="n">m_z</span><span class="p">))</span>
+    <span class="n">offset</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">calib_mag</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c"># Applies the offset and scale to the data</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">offset</span><span class="p">)))))</span>
+
+    <span class="c"># Computes the norm on 3D signals.</span>
+    <span class="n">norm_mag_after_calib</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                                           <span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                                           <span class="n">data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="c"># It has to be close to 1.0 if the computed parameters are satisfying.</span>
+    <span class="k">if</span> <span class="n">norm_mag_after_calib</span> <span class="o">&lt;</span> <span class="mf">1.2</span> <span class="ow">and</span> <span class="n">norm_mag_after_calib</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">yield</span> <span class="n">assert_equal</span><span class="p">,</span> <span class="n">resp</span><span class="p">,</span> <span class="bp">True</span></div>
+</pre></div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
