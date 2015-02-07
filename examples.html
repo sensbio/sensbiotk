@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sensbiotk examples &mdash; sensbiotk  2.0.svn-1250 documentation</title>
+    
+    <link rel="stylesheet" href="_static/scrolls.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.svn-1250',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="sensbiotk  2.0.svn-1250 documentation" href="index.html" />
+    <link rel="next" title="API" href="api.html" />
+    <link rel="prev" title="sensbiotk" href="readme.html" /> 
+  </head>
+  <body>
+    <div id="content">
+      <div class="header">
+        <h1 class="heading"><a href="index.html"
+          title="back to the documentation overview"><span>sensbiotk examples</span></a></h1>
+      </div>
+      <div class="relnav">
+        <a href="readme.html">&laquo; sensbiotk</a> |
+        <a href="#">sensbiotk examples</a>
+        | <a href="api.html">API &raquo;</a>
+      </div>
+      <div id="contentwrapper">
+        <div id="toc">
+          <h3>Table Of Contents</h3>
+          <ul>
+<li><a class="reference internal" href="#">sensbiotk examples</a><ul>
+<li><a class="reference internal" href="#basics">basics</a></li>
+<li><a class="reference internal" href="#compass">compass</a></li>
+<li><a class="reference internal" href="#doors">doors</a></li>
+<li><a class="reference internal" href="#goniometer">goniometer</a></li>
+<li><a class="reference internal" href="#heelon">heelon</a></li>
+<li><a class="reference internal" href="#hemi-gait-vicon">hemi_gait_vicon</a></li>
+<li><a class="reference internal" href="#pedometer">pedometer</a></li>
+<li><a class="reference internal" href="#real-time-ahrs">real_time_ahrs</a></li>
+<li><a class="reference internal" href="#id1">basics</a></li>
+<li><a class="reference internal" href="#simple-rotation">simple_rotation</a></li>
+<li><a class="reference internal" href="#vicon3dvalidation">vicon3Dvalidation</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+        
+  <div class="section" id="sensbiotk-examples">
+<h1>sensbiotk examples<a class="headerlink" href="#sensbiotk-examples" title="Permalink to this headline">¶</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Release:</th><td class="field-body">2.0.svn-1250</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Date:</th><td class="field-body">February 07, 2015</td>
+</tr>
+</tbody>
+</table>
+<p>Some sensbiotk examples are provide in <cite>examples</cite></p>
+<div class="section" id="basics">
+<h2>basics<a class="headerlink" href="#basics" title="Permalink to this headline">¶</a></h2>
+<p>Some basics examples using the toolbox.</p>
+<blockquote>
+<div><ul class="simple">
+<li><cite>example_find_static.py</cite>: find a stationnary signal</li>
+<li><cite>maycalib.py</cite>: compute the calibration parameters of an IMU Fox</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="compass">
+<h2>compass<a class="headerlink" href="#compass" title="Permalink to this headline">¶</a></h2>
+<p>Simple compass application using magnetometer data.</p>
+</div>
+<div class="section" id="doors">
+<h2>doors<a class="headerlink" href="#doors" title="Permalink to this headline">¶</a></h2>
+<p>open door detection using a Fox fixed on it. This principle was used
+on the Aribo project.</p>
+</div>
+<div class="section" id="goniometer">
+<h2>goniometer<a class="headerlink" href="#goniometer" title="Permalink to this headline">¶</a></h2>
+<p>Computes the knee angle between two IMUs located on the thigh and the shank.</p>
+</div>
+<div class="section" id="heelon">
+<h2>heelon<a class="headerlink" href="#heelon" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>heel on detection in pyhton and matlab with a Fox fixed on a human shank</div></blockquote>
+</div>
+<div class="section" id="hemi-gait-vicon">
+<h2>hemi_gait_vicon<a class="headerlink" href="#hemi-gait-vicon" title="Permalink to this headline">¶</a></h2>
+<p>Contains three scripts for computing and visualizing quaternions from IMU using AHRS sensbiotk algorithms and comparing it to Vicon measurements.</p>
+<p>The data are from hemiparetic subjects.</p>
+</div>
+<div class="section" id="pedometer">
+<h2>pedometer<a class="headerlink" href="#pedometer" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>step counter and freefall detection with an IMU Fox fixed on a human.</div></blockquote>
+</div>
+<div class="section" id="real-time-ahrs">
+<h2>real_time_ahrs<a class="headerlink" href="#real-time-ahrs" title="Permalink to this headline">¶</a></h2>
+<p>Contains three scripts for real time computing and visualizing quaternions from IMU using VPython api and AHRS sensbiotk algorithms.</p>
+</div>
+<div class="section" id="id1">
+<h2>basics<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>Fox IMU fixed on the leg and records a running</div></blockquote>
+</div>
+<div class="section" id="simple-rotation">
+<h2>simple_rotation<a class="headerlink" href="#simple-rotation" title="Permalink to this headline">¶</a></h2>
+<p>Contains a script for computing and visualizing quaternions from IMU using AHRS sensbiotk algorithms.</p>
+</div>
+<div class="section" id="vicon3dvalidation">
+<h2>vicon3Dvalidation<a class="headerlink" href="#vicon3dvalidation" title="Permalink to this headline">¶</a></h2>
+<p>The folder SCRIPTS contains Matlab compliant scripts to compute from Vicon software (Tracker) quaternions and rotation angles and export them to .txt file.</p>
+<p>The folder DATA contains three set of data recorded using both IMU and motion capture data, with the related export .txt files and the video.</p>
+</div>
+</div>
+
+
+      </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, INRIA Demar/SED.
+      Last updated on Feb 07, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
