@@ -6,6 +6,8 @@ rsync $HTML/searchindex.js .
 rsync _sources/ .
 rsync  _static/ .
 rsync _modules/ .
-rsync-r generated/ .
+rsync generated/ .
+git status
+
 
 
