@@ -4,6 +4,7 @@ import threading
 import time
 import math
 import logging
+import platform
 from serial.tools import list_ports
 
 class FoxSink():
@@ -50,9 +51,14 @@ class FoxSink():
 
         timeout = 2 #sec
 
+        if (platform.system() == 'Windows'):
+            port_keyname = 'COM'
+        else:
+            port_keyname = 'USB'
+
         for port in list_ports.comports():
             try:
-                if 'COM5' in port[0]:
+                if port_keyname in port[0]:
                     baudrate = 500000
                     self.ser = serial.Serial(port[0], baudrate = baudrate, timeout = timeout)
                     # Send a init/reset cmd to found the fox on the serial line
