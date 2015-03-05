@@ -18,20 +18,23 @@ function [data]=fox_client_http
 
 %% Initializes variables
 global HOST_IP
-HOST_IP = 'localhost' ;
+HOST_IP = 'localhost';
 global PORT
 PORT = '8000' ;
 global Period
 Period = 0.001 ;
-global data
+global data;
 data = [];
 global time_init
 global t1
 global figure_handle
 global plot_handle
+global measure_type
 
 %% Initializes initial time
 time_init = clock; % the computer initial time
+
+measure_type = 'angle';
 
 %% Creates a timer object and starts it
 % Create a timer called every (Period+TimerFcn time), and
@@ -40,10 +43,14 @@ t1 = timer('Period', Period, 'ExecutionMode', 'fixedSpacing','BusyMode','Queue',
 start(t1)
 
 %% Creates and show a dialog box to stop the timer
-h = msgbox('Stop datastream client');
-movegui(h,'northeast'); 
-set(h,'DeleteFcn',{@stop_stream})
+mbox1 = msgbox('Stop datastream client');
+movegui(mbox1,'northeast'); 
+set(mbox1,'DeleteFcn',{@stop_stream})
 
+%% Creates and show a dialog box to init the position
+mbox2 = msgbox('Init frame');
+movegui(mbox2,'east'); 
+set(mbox2,'DeleteFcn',{@init_frame})
 
 %% Initializes and creates the figure for live plotting
  init_plot();
@@ -61,15 +68,40 @@ global HOST_IP
 global PORT
 global data
 global time_init
-[data_url, status] = urlread(...
-    ['http://' HOST_IP ':' PORT]);
-% str = urlread(['http://' HOST_IP ':' PORT],'Get',{'request','init'});
-if status
-    time_read = clock;
-    elapsed_time = etime(time_read, time_init)*1000; % elapsed time in ms
-    data = [data; [elapsed_time sscanf(data_url,'%f',[1,9])]];
+global measure_type
+
+switch measure_type
+    case 'raw'
+        [data_url, status] = urlread(...
+            ['http://' HOST_IP ':' PORT]);
+        if status
+            time_read = clock;
+            elapsed_time = etime(time_read, time_init)*1000; % elapsed time in ms
+            data = [data; [elapsed_time sscanf(data_url,'%f',[1,9])]];
+        end
+        
+        
+    case 'angle'
+        [data_url, status] = urlread(...
+            ['http://' HOST_IP ':' PORT]);
+        if status
+            time_read = clock;
+            elapsed_time = etime(time_read, time_init)*1000; % elapsed time in ms
+            data = [data; [elapsed_time sscanf(data_url,'%f',[1,7])]];
+        end
 end
 end
+
+function init_frame(obj, event, string_arg)
+global HOST_IP
+global PORT
+%% Send a http request for initializing the frame
+urlread(['http://' HOST_IP ':' PORT],'Get',{'request','init'});
+mbox2 = msgbox('Init frame');
+movegui(mbox2,'east'); 
+set(mbox2,'DeleteFcn',{@init_frame})
+end
+
 
 function stop_stream(obj, event, string_arg)
 %% Stops the data stream and closes everything
@@ -83,6 +115,8 @@ end
 function init_plot
 global figure_handle
 global plot_handle
+global measure_type
+
 figure_handle = figure('NumberTitle','off',...
     'Name','IMU DATA',...
     'Color',[0 0 0],'Visible','on','DeleteFcn',{@stop_stream});
@@ -98,7 +132,12 @@ plot_handle = plot(axes_handle,0,0,'Marker','.','LineWidth',1,'Color',[0 1 0]);
 % Create xlabel
 xlabel('Time (ms)','FontWeight','bold','FontSize',14,'Color',[1 1 0]);
 % Create ylabel
-ylabel('ACC DATA','FontWeight','bold','FontSize',14,'Color',[0.5 0.5 1]);
+switch measure_type
+    case 'raw'
+        ylabel('ACC DATA','FontWeight','bold','FontSize',14,'Color',[0.5 0.5 1]);
+    case 'angle'
+        ylabel('EULER ANGLES','FontWeight','bold','FontSize',14,'Color',[0.5 0.5 1]);
+end
 % Create title
 title('IMU DATA','FontSize',15,'Color',[0 1 1]);
 end

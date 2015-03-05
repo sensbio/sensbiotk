@@ -7,7 +7,6 @@ Created on Tue Feb 10 19:06:44 2015
 
 import time
 import BaseHTTPServer
-import numpy as np
 from sensbiotk.driver import fox_dongle as fdongle
 
 HOST_NAME = 'localhost' 
@@ -24,7 +23,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.send_response(200)
         s.send_header("Content-type", "text/html")
         s.end_headers()
-        print(str(s.path))
+#        print(str(s.path))
         if foxdongle.is_running():
             data = foxdongle.read()
             if len(data) != 0:
@@ -61,3 +60,5 @@ if __name__ == '__main__':
         pass
     httpd.server_close()
     print time.asctime(), "Server Stops - %s:%s" % (HOST_NAME, PORT_NUMBER)
+    
+    
