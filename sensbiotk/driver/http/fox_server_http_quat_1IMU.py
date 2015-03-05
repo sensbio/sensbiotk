@@ -24,6 +24,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.send_response(200)
         s.send_header("Content-type", "text/html")
         s.end_headers()
+        print(str(s.path))
         if foxdongle.is_running():
             data = foxdongle.read()
             if len(data) != 0:

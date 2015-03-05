@@ -46,13 +46,13 @@ set(h,'DeleteFcn',{@stop_stream})
 
 
 %% Initializes and creates the figure for live plotting
-% init_plot();
+ init_plot();
 
 
 %% Here the script for processing the stream data
-% while strcmp(get(t1,'Running'),'on')
-%      update_plot
-% end
+while strcmp(get(t1,'Running'),'on')
+     update_plot
+end
 end
 
 function read_data(obj, event, string_arg)
@@ -63,6 +63,7 @@ global data
 global time_init
 [data_url, status] = urlread(...
     ['http://' HOST_IP ':' PORT]);
+% str = urlread(['http://' HOST_IP ':' PORT],'Get',{'request','init'});
 if status
     time_read = clock;
     elapsed_time = etime(time_read, time_init)*1000; % elapsed time in ms
