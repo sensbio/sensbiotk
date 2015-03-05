@@ -82,7 +82,6 @@ class FoxDongle():
     def close_dongle(self):
         """ Close the serial link of the Fox pedometer dongle
         """
-
         if not self.sinknode is None:
             self.sinknode.fox_close()
         return
@@ -271,7 +270,6 @@ def test2():
         except Exception as e:
             logging.error('exception reached:' + str(e))
            
-
     # must close to kill read thread (fox_sink)
     foxdongle.close_dongle()
            
