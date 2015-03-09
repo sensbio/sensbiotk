@@ -22,7 +22,7 @@ HOST_IP = 'localhost';
 global PORT
 PORT = '8000' ;
 global Period
-Period = 0.001 ;
+Period = 0.01 ;
 global data;
 data = [];
 global time_init
@@ -39,18 +39,18 @@ measure_type = 'angle';
 %% Creates a timer object and starts it
 % Create a timer called every (Period+TimerFcn time), and
 % associated to the read_data function.
-t1 = timer('Period', Period, 'ExecutionMode', 'fixedSpacing','BusyMode','Queue', 'TimerFcn', {@read_data});
+t1 = timer('Period', Period, 'ExecutionMode', 'fixedRate','BusyMode','Queue', 'TimerFcn', {@read_data});
 start(t1)
 
-%% Creates and show a dialog box to stop the timer
-mbox1 = msgbox('Stop datastream client');
-movegui(mbox1,'northeast'); 
-set(mbox1,'DeleteFcn',{@stop_stream})
-
-%% Creates and show a dialog box to init the position
-mbox2 = msgbox('Init frame');
-movegui(mbox2,'east'); 
-set(mbox2,'DeleteFcn',{@init_frame})
+% %% Creates and show a dialog box to stop the timer
+% mbox1 = msgbox('Stop datastream client');
+% movegui(mbox1,'northeast'); 
+% set(mbox1,'DeleteFcn',{@stop_stream})
+% 
+% %% Creates and show a dialog box to init the position
+% mbox2 = msgbox('Init frame');
+% movegui(mbox2,'east'); 
+% set(mbox2,'DeleteFcn',{@init_frame})
 
 %% Initializes and creates the figure for live plotting
  init_plot();
@@ -97,9 +97,7 @@ global HOST_IP
 global PORT
 %% Send a http request for initializing the frame
 urlread(['http://' HOST_IP ':' PORT],'Get',{'request','init'});
-mbox2 = msgbox('Init frame');
-movegui(mbox2,'east'); 
-set(mbox2,'DeleteFcn',{@init_frame})
+disp('INIT');
 end
 
 
@@ -117,9 +115,23 @@ global figure_handle
 global plot_handle
 global measure_type
 
+% GUI
+%  Create and then hide the UI as it is being constructed.
+controls = figure('Visible','on','Position',[0,0,225,225],'MenuBar', 'none');
+% Construct the components.
+stop_stream_b = uicontrol('Style','pushbutton',...
+             'String','STOP STREAM','Position',[50,50,140,25]);
+init_frame_b = uicontrol('Style','pushbutton',...
+             'String','INIT FRAME','Position',[50,100,140,25],'Callback',{@init_frame});
+movegui(controls, 'east')
+% hcontour = uicontrol('Style','pushbutton',...
+%              'String','Countour','Position',[315,135,70,25]);
+%    align([hsurf,hmesh,hcontour,htext,hpopup],'Center','None');
+
+
 figure_handle = figure('NumberTitle','off',...
     'Name','IMU DATA',...
-    'Color',[0 0 0],'Visible','on','DeleteFcn',{@stop_stream});
+    'Color',[0 0 0],'Visible','on','DeleteFcn',{@stop_stream},'MenuBar', 'none');
 % Set axes
 axes_handle = axes('Parent',figure_handle,...
     'YGrid','on',...
@@ -146,6 +158,8 @@ function update_plot(obj, event, string_arg)
 %% Update the plot for real time visualization
 global data
 global plot_handle
+global figure_handle
+% set(figure_handle, 'Visible', 'off');
 if size(data,1)>300
     set(gca,'xlim',[data(end-300,1) data(end,1)]);
     set(plot_handle,'YData', data(end-300:end,2),'XData',data(end-300:end,1),'Color',[1 0 0]);
@@ -157,6 +171,6 @@ else
     set(copyobj(plot_handle,gca) ,'YData', data(:,3),'XData',data(:,1),'Color',[0 1 0]);
     set(copyobj(plot_handle,gca) ,'YData', data(:,4),'XData',data(:,1),'Color',[0 0 1]);
 end
-drawnow;
+set(figure_handle, 'Visible', 'on');
 end
 

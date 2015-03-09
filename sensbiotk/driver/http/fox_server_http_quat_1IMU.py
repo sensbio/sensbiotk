@@ -14,6 +14,7 @@ from sensbiotk.transforms3d.eulerangles import quat2euler
 from sensbiotk.transforms3d import quaternions as nq
 import sensbiotk.algorithms.martin_ahrs as martin
 from sensbiotk.calib import calib_mag
+from threading import Thread
 
 HOST_NAME = 'localhost' 
 PORT_NUMBER = 8000 
@@ -30,18 +31,14 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.send_header("Content-type", "text/html")
         s.end_headers()
         if str(s.path) == '?request=init':
-            rt.init_frame
-        if foxdongle.is_running():
-            data = foxdongle.read()
-            if data is not None and data.shape == (11,):
-                data = data.reshape(1,11)
-                data[0, 5:8] = np.transpose(np.dot(rt.scale,np.transpose((data[0, 5:8]-np.transpose(rt.offset)))))
-                rt.update(data)
-                quat = rt.quaternion
-                euler = rt.euler
-                s.wfile.write(str(euler[2]*180/np.pi) +' '+str(euler[1]*180/np.pi) +' '+
-                str(euler[0]*180/np.pi) +' '+ str(quat[0]) +' '+ str(quat[1]) +' '+
-                str(quat[2]) +' '+ str(quat[3]))
+            rt.init_frame()
+        quat = rt.quaternion
+        euler = rt.euler
+        s.wfile.write(str(euler[2]*180/np.pi) +' '+str(euler[1]*180/np.pi) +' '+
+        str(euler[0]*180/np.pi) +' '+ str(quat[0]) +' '+ str(quat[1]) +' '+
+        str(quat[2]) +' '+ str(quat[3]))
+        
+                
             
         
 class RT_Martin():
@@ -95,7 +92,7 @@ class RT_Martin():
 
     def update(self, data):
 
-        self.quaternion = nq.mult(self.quat_offset, self.observer.update(data[0, 2:12], 0.005))
+        self.quaternion = nq.mult(self.quat_offset, self.observer.update(data[0, 2:12], 0.010))
         self.euler = np.array(quat2euler(self.quaternion))
 
         print 'Quaternion : ' + str(self.quaternion) +'\n' + 'Rz : '+'%0.2f' %((self.euler[0])*180/np.pi)+' '+u'°' +\
@@ -122,9 +119,17 @@ class RT_Martin():
 
     def init_frame(self):
         self.quat_offset = nq.conjugate(self.quaternion)
-        print('GROS PRINT !!!!!!!!!!!!!!!!!!!!!!!!!!')
+        print('!!!!!!!!!!!!!!!!!!!!! GROS PRINT !!!!!!!!!!!!!!!!!!!!!!!!!!')
 #        self.init_frame_bool = True
 
+    def thread_data(self):
+        if foxdongle.is_running():
+            data = foxdongle.read()
+            if data is not None and data.shape == (11,):
+                data = data.reshape(1,11)
+                data[0, 5:8] = np.transpose(np.dot(rt.scale,np.transpose((data[0, 5:8]-np.transpose(rt.offset)))))
+                rt.update(data)
+                
 
 if __name__ == '__main__':
     server_class = BaseHTTPServer.HTTPServer
@@ -143,6 +148,9 @@ if __name__ == '__main__':
     rt.init_observer()
     # init frame
     rt.init_frame()                 
+    #init thread for reading/updating data
+    t = Thread(target=rt.thread_data, args=())
+    t.start()
     
     # inits server
     try:
