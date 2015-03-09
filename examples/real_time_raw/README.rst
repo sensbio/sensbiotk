@@ -6,7 +6,7 @@
 * imu node (banet_imu.elf) for logging IMU values and send to sink node each 40 ms
 
 # Launch record
-> python fox_dongle.py
+> python fox_console.py
 
 Enter acquisition loop (type ^C to stop and save tmp_imu.csv).
 Device is connected to /dev/ttyUSB1.

@@ -2,7 +2,7 @@ import logging
 import time
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import fox_dongle
+import sensbiotk.driver.fox_dongle as fox_dongle
 
 
 def test_acq_callback(obj):
