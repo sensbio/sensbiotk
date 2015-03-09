@@ -1,4 +1,4 @@
-function [data]=fox_client_http
+function fox_client_http
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% FOX NODE HTTP CLIENT %%%%%%%
@@ -15,21 +15,21 @@ function [data]=fox_client_http
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+matlabpool
 %% Initializes variables
-global HOST_IP
+global HOST_IP;
 HOST_IP = 'localhost';
-global PORT
+global PORT;
 PORT = '8000' ;
-global Period
-Period = 0.01 ;
+global Period;
+Period = 0.010 ;
 global data;
 data = [];
-global time_init
-global t1
-global figure_handle
-global plot_handle
-global measure_type
+global time_init;
+global t1;
+global figure_handle;
+global plot_handle;
+global measure_type;
 
 %% Initializes initial time
 time_init = clock; % the computer initial time
@@ -39,8 +39,8 @@ measure_type = 'angle';
 %% Creates a timer object and starts it
 % Create a timer called every (Period+TimerFcn time), and
 % associated to the read_data function.
-t1 = timer('Period', Period, 'ExecutionMode', 'fixedRate','BusyMode','Queue', 'TimerFcn', {@read_data});
-start(t1)
+t1 = timer('Period', Period, 'ExecutionMode', 'fixedRate','BusyMode','queue', 'TimerFcn', {@read_data},'ErrorFcn',{@init_frame});
+start(t1);
 
 % %% Creates and show a dialog box to stop the timer
 % mbox1 = msgbox('Stop datastream client');
@@ -58,7 +58,7 @@ start(t1)
 
 %% Here the script for processing the stream data
 while strcmp(get(t1,'Running'),'on')
-     update_plot
+     update_plot();
 end
 end
 
@@ -93,34 +93,36 @@ end
 end
 
 function init_frame(obj, event, string_arg)
-global HOST_IP
-global PORT
+global HOST_IP;
+global PORT;
 %% Send a http request for initializing the frame
 urlread(['http://' HOST_IP ':' PORT],'Get',{'request','init'});
-disp('INIT');
+disp('INIT OK');
 end
 
 
 function stop_stream(obj, event, string_arg)
 %% Stops the data stream and closes everything
-global t1
-global data
+global t1;
+global data;
 stop(t1);
-real_fs = size(data,1)/(data(end,1)/1000)
+real_fs = size(data,1)/(data(end,1)/1000);
+disp(real_fs)
 close all
+matlabpool close
 end
 
 function init_plot
-global figure_handle
-global plot_handle
-global measure_type
+global figure_handle;
+global plot_handle;
+global measure_type;
 
 % GUI
 %  Create and then hide the UI as it is being constructed.
 controls = figure('Visible','on','Position',[0,0,225,225],'MenuBar', 'none');
 % Construct the components.
 stop_stream_b = uicontrol('Style','pushbutton',...
-             'String','STOP STREAM','Position',[50,50,140,25]);
+             'String','STOP STREAM','Position',[50,50,140,25],'Callback',{@stop_stream});
 init_frame_b = uicontrol('Style','pushbutton',...
              'String','INIT FRAME','Position',[50,100,140,25],'Callback',{@init_frame});
 movegui(controls, 'east')
@@ -156,9 +158,9 @@ end
 
 function update_plot(obj, event, string_arg)
 %% Update the plot for real time visualization
-global data
-global plot_handle
-global figure_handle
+global data;
+global plot_handle;
+global figure_handle;
 % set(figure_handle, 'Visible', 'off');
 if size(data,1)>300
     set(gca,'xlim',[data(end-300,1) data(end,1)]);

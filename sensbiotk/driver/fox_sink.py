@@ -52,7 +52,7 @@ class FoxSink():
         timeout = 2 #sec
 
         if (platform.system() == 'Windows'):
-            port_keyname = 'COM'
+            port_keyname = 'COM5'
         else:
             port_keyname = 'USB'
 
