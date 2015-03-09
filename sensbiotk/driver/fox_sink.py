@@ -131,12 +131,13 @@ class FoxSink():
         #cmd_ok = self.__fox_write_command("FI\n", "FOX_BANET:init_ok")
 
         # **close** serial line
+        
+        self.stop_read()
         try:
             self.ser.close()
         except Exception as e:
             pass
 
-        self.run = False
         return True
         #return cmd_ok
 
@@ -201,7 +202,8 @@ class FoxSink():
             logging.error(str(e))
 
         self.run = False
-        logging.error('>>> thread terminated')
+        logging.info('>>> thread terminated')
+
         return
 
 
@@ -225,7 +227,7 @@ class FoxSink():
             self.t_task.join(5)
             logging.debug('OK: thread stopped')
         else:
-            logging.debug('ERROR: Thread sink node stopping failed')
+            logging.debug('WARNING: Thread sink node already stopped')
 
 
 def test3():

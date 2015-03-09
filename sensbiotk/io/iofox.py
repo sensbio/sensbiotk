@@ -1078,7 +1078,6 @@ def save_foxsignals_csvfile(time, acc, mag, gyr, filename):
     status : str
              'OK' or 'ERROR'
     """
-
     out = open(filename[:-3] + 'csv', 'w')
     _write_header(out, "sensbiotk output")
 
