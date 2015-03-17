@@ -58,7 +58,9 @@ class RT_Martin():
         self.init_obs = False
         self.init_frame_bool = False
 
+        self.quat_origin_ned = [1, 0, 0, 0] #the initial quat orientation       
         self.quat_offset = [1, 0, 0, 0] #the quat transformation from NEDown frame to the original one
+        self.raw_quat = [1, 0, 0, 0] #the quat in the NEDown frame
 
         self.observer = martin.martin_ahrs()
 
@@ -92,7 +94,8 @@ class RT_Martin():
 
     def update(self, data):
 
-        self.quaternion = nq.mult(self.quat_offset, self.observer.update(data[0, 2:12], 0.005))
+        self.raw_quat = self.observer.update(data[0, 2:12], 0.010)
+        self.quaternion = nq.mult(nq.conjugate(self.quat_origin_ned), self.raw_quat)
         self.euler = np.array(quat2euler(self.quaternion))
 
         print 'Quaternion : ' + str(self.quaternion) +'\n' + 'Rz : '+'%0.2f' %((self.euler[0])*180/np.pi)+' '+u'°' +\
@@ -118,8 +121,12 @@ class RT_Martin():
         self.quaternion = self.observer.init_observer(data_init[2:8])
 
     def init_frame(self):
-        self.quat_offset = nq.conjugate(self.quaternion)
-#        self.init_frame_bool = True
+#        if not self.init_frame_bool:
+            self.quat_origin_ned = self.raw_quat
+#            self.quat_offset = self.quaternion
+#            self.init_frame_bool = True
+#        else:
+#            self.quat_offset = nq.mult(nq.conjugate(self.quat_origin_ned), self.quaternion)
 
     def thread_data(self):
         while True: 
@@ -129,6 +136,7 @@ class RT_Martin():
                     data = data.reshape(1,11)
                     data[0, 5:8] = np.transpose(np.dot(self.scale,np.transpose((data[0, 5:8]-np.transpose(self.offset)))))
                     self.update(data)
+                    time.sleep(0.010)
                 
 
 if __name__ == '__main__':

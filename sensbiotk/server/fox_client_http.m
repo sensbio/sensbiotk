@@ -9,12 +9,18 @@ function fox_client_http
 % The request reads real time data
 % from one IMU connected to the
 % FOX sink node.
+% Either the HTTP server type chosen,
+% it will enable the user to plot angles,
+% initialize the frame, and stop the stream.
+% Or just plot the raw accelerometer data.
+
 
 % Author : Benoît SIJOBERT
 % Copyright : INRIA 2015 (sensbiotk.v2)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 matlabpool
 %% Initializes variables
 global HOST_IP;
@@ -34,27 +40,17 @@ global measure_type;
 %% Initializes initial time
 time_init = clock; % the computer initial time
 
-measure_type = 'angle';
+%% Choose server type (angle or raw values)
+measure_type = 'angle'; % type angle or raw regarding the python server used
 
 %% Creates a timer object and starts it
 % Create a timer called every (Period+TimerFcn time), and
 % associated to the read_data function.
-t1 = timer('Period', Period, 'ExecutionMode', 'fixedRate','BusyMode','queue', 'TimerFcn', {@read_data},'ErrorFcn',{@init_frame});
+t1 = timer('Period', Period, 'ExecutionMode', 'fixedRate','BusyMode','queue', 'TimerFcn', {@read_data});
 start(t1);
 
-% %% Creates and show a dialog box to stop the timer
-% mbox1 = msgbox('Stop datastream client');
-% movegui(mbox1,'northeast'); 
-% set(mbox1,'DeleteFcn',{@stop_stream})
-% 
-% %% Creates and show a dialog box to init the position
-% mbox2 = msgbox('Init frame');
-% movegui(mbox2,'east'); 
-% set(mbox2,'DeleteFcn',{@init_frame})
-
 %% Initializes and creates the figure for live plotting
- init_plot();
-
+init_plot();
 
 %% Here the script for processing the stream data
 while strcmp(get(t1,'Running'),'on')
@@ -69,7 +65,6 @@ global PORT
 global data
 global time_init
 global measure_type
-
 switch measure_type
     case 'raw'
         [data_url, status] = urlread(...
@@ -97,9 +92,8 @@ global HOST_IP;
 global PORT;
 %% Send a http request for initializing the frame
 urlread(['http://' HOST_IP ':' PORT],'Get',{'request','init'});
-disp('INIT OK');
+disp('--- FRAME INITIALIZED ---');
 end
-
 
 function stop_stream(obj, event, string_arg)
 %% Stops the data stream and closes everything
@@ -107,29 +101,27 @@ global t1;
 global data;
 stop(t1);
 real_fs = size(data,1)/(data(end,1)/1000);
-disp(real_fs)
+disp(['Rate :' num2str(real_fs) 'Hz'])
 close all
 matlabpool close
 end
 
 function init_plot
+%% Inits the plot figure
 global figure_handle;
 global plot_handle;
 global measure_type;
 
 % GUI
-%  Create and then hide the UI as it is being constructed.
 controls = figure('Visible','on','Position',[0,0,225,225],'MenuBar', 'none');
 % Construct the components.
 stop_stream_b = uicontrol('Style','pushbutton',...
-             'String','STOP STREAM','Position',[50,50,140,25],'Callback',{@stop_stream});
-init_frame_b = uicontrol('Style','pushbutton',...
-             'String','INIT FRAME','Position',[50,100,140,25],'Callback',{@init_frame});
+    'String','STOP STREAM','Position',[50,50,140,25],'Callback',{@stop_stream});
+if measure_type == 'angle'
+    init_frame_b = uicontrol('Style','pushbutton',...
+        'String','INIT FRAME','Position',[50,100,140,25],'Callback',{@init_frame});
+end
 movegui(controls, 'east')
-% hcontour = uicontrol('Style','pushbutton',...
-%              'String','Countour','Position',[315,135,70,25]);
-%    align([hsurf,hmesh,hcontour,htext,hpopup],'Center','None');
-
 
 figure_handle = figure('NumberTitle','off',...
     'Name','IMU DATA',...
@@ -161,7 +153,6 @@ function update_plot(obj, event, string_arg)
 global data;
 global plot_handle;
 global figure_handle;
-% set(figure_handle, 'Visible', 'off');
 if size(data,1)>300
     set(gca,'xlim',[data(end-300,1) data(end,1)]);
     set(plot_handle,'YData', data(end-300:end,2),'XData',data(end-300:end,1),'Color',[1 0 0]);
