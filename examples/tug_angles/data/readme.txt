@@ -1,0 +1,9 @@
+1	TUG SLOW
+2	TUG LESS SLOW
+3	TUG VALID RIGHT LEG FIRST
+4	IDEM3 BUT LEFT LEG FIRST
+5	IDEM3
+6	LONG TUG (6 meters and 3 u-turn)
+7	TUG (u-turn from right)
+8	TUG (u-turn from right)
+9	CALIB MAGNETOMETERS
