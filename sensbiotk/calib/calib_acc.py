@@ -273,7 +273,7 @@ def compute(data):
         r_old = r_new
 
     if r_new > 2:
-        print "Important error, WARNING : WRONG CALIBRATION PARAMETERS"
+        print "Important error, WARNING : WRONG ACCELERATION CALIBRATION PARAMETERS"
         
         
     # Save Outputs
