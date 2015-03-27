@@ -34,11 +34,11 @@ import shutil
 
 #the path to the data folders
 RAW_DATA_LOCATION = \
-    'C:/Users/bsijober/Desktop/data'
+    'C:/Users/'
 
 for root, dirs, files in os.walk(RAW_DATA_LOCATION):
     for name_dir in dirs:
-        ImuNumber = name_dir[0]
+        ImuNumber = name_dir[0:name_dir.find('_')]
         ImuLocation = name_dir[name_dir.find('_')+1:]
         fileNumber = 1
         os.chdir(RAW_DATA_LOCATION + '/' + name_dir)
