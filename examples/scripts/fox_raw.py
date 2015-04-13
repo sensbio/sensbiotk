@@ -66,12 +66,13 @@ def getnamefiles(filename, newbasename, diroutput):
         facc = diroutput + "/" + basefile + "_acc.csv"
         fmag = diroutput + "/" + basefile + "_mag.csv"
         fgyr = diroutput + "/" + basefile + "_gyr.csv"
+        fimu = diroutput + "/" + basefile + "_imu.csv"
     else:
         print "error: bad output directory"
         usage()
         sys.exit(2)
 
-    return basefile, facc, fmag, fgyr
+    return basefile, facc, fmag, fgyr, fimu
 
 
 def plotsig(time, data, title, labely):
@@ -199,7 +200,7 @@ def main(argv):
     for filename in filenames:
         print "Conversion:", filename
         # Get names file
-        basefile, fileacc, filemag, filegyr =\
+        basefile, fileacc, filemag, filegyr, fileimu =\
             getnamefiles(filename, newbasename, diroutput)
         # Read and convert file
         answer = iofox.convert_sensors_rawfile(filename,
@@ -212,6 +213,7 @@ def main(argv):
         # Load ascii files converted
         [myt, acc, mag, gyr] = \
             iofox.load_foximu_csvfile(fileacc, filemag, filegyr, period, 1)
+        iofox.save_foxsignals_csvfile(myt, acc, mag, gyr,* fileimu)
         # Plot if necessary
         if "-p" in options:
             label = basefile + " IMU"
@@ -229,6 +231,10 @@ def main(argv):
             [myt, acc] = iofox.load_foxacc_csvfile(fileacc)
             label = basefile + " time verif."
             veriftime(label, myt[:, 0])
+        # Clean temp files
+        os.remove(fileacc)
+        os.remove(filemag)
+        os.remove(filegyr)
 
     plt.show()
 
