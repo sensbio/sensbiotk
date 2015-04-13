@@ -27,6 +27,8 @@ Some sensbiotk examples are provide in `examples`
 
 .. include:: ../examples/simple_rotation/README.rst
 
+.. include:: ../examples/scripts/README.rst
+
 .. include:: ../examples/vicon3Dvalidation/README.rst
 
 

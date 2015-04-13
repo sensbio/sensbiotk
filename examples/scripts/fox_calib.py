@@ -21,35 +21,51 @@
 # E1101 no-member false positif
 
 """
-IMU sensors calibration
+Fox IMU sensors calibration
 """
-
-import numpy as np
-from sensbiotk.io.iofox import load_foxcsvfile
+import sys
+import argparse
 import sensbiotk.calib.calib as calib
-import matplotlib.pyplot as plt
 
-DATACALIBFILE = "data/calib01_imu.csv"
-CALIBFILE= "data/calib_imu1.txt"
+DEF_CALIBFILE = "calib_imu.txt"
 
-def calib_param( datacalibfile, calibfile, comments=""):
+
+def param(datacalibfile, calibfile, comments=""):
     """ Load or compute calibration parameters
     """
     [params_acc, params_mag, params_gyr] = \
-        calib.compute(imuNumber=5 ,filepath=DATACALIBFILE, param = 3)
-    calib.save_param(calibfile, 
+        calib.compute(imuNumber=5, filepath=datacalibfile, param=3)
+    calib.save_param(calibfile,
                      params_acc, params_mag, params_gyr, comments)
 
     return [params_acc, params_mag, params_gyr]
 
 
 def launch():
-    """ run example : "martin"
+    """ Launch the process taking into account arguments
     """
-    # Compute (True) or load (False
-    [params_acc, params_mag, params_gyr] = calib_param(DATACALIBFILE, CALIBFILE)
-   
+    # create parser
+    parser = argparse.ArgumentParser(description="Fox IMU Calibration")
+    # add arguments
+    parser.add_argument('datafile', metavar='fox_imu_data.csv',
+                        type=str, nargs=1,
+                        help="Input motion dedicated to calibration")
+    parser.add_argument('-o', '--output', type=str,
+                        help="Fox IMU calibration parameters")
+    args = parser.parse_args()
+    # Arguments verification
+    if len(args.datafile) != 1:
+        parser.print_help()
+        sys.exit()
+    inputfile = args.datafile[0]
+    if args.output is None:
+        args.output = DEF_CALIBFILE
+    outputfile = args.output
+
+    # Launch the process
+    print "CALIB", inputfile, outputfile
+    [_, _, _] = param(inputfile, outputfile)
+
 
 if __name__ == '__main__':
-    launch() 
-    plt.show()
+    launch()

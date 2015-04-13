@@ -37,3 +37,38 @@ for plot magneto raw data --mag or -m
 for plot gyro raw data --gyr or -g
 for help use --help or -h
 ```
+
+### ``fox_calib.py``
+
+```
+usage: fox_calib.py [-h] [-o OUTPUT] fox_imu_data.csv
+
+Fox IMU Calibration
+
+positional arguments:
+  fox_imu_data.csv      Input motion dedicated to calibration
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        Fox IMU calibration parameters
+```
+
+### ``fox_calib.py``
+
+```
+usage: fox_attitude.py [-h] [-o OUTPUT] [-c CALIB] [-p] fox_imu_data.csv
+
+Fox IMU Attitude Computation
+
+positional arguments:
+  fox_imu_data.csv      IMU sensors values to be computed
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        Fox IMU attitude values (quaternion/euler)
+  -c CALIB, --calib CALIB
+                        Fox IMU calibration parameters file
+  -p, --plot            Fox IMU calibration parameters file
+```
