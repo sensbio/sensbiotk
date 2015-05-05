@@ -31,8 +31,8 @@ class RT_Martin():
         self.rot_x_offset = 0
         self.rot_y_offset = 0
         self.rot_z_offset = 0
-
-        self.quat_offset = [1, 0, 0, 0] #the quat transformation from NEDown frame to the original one
+#the quat transformation from NEDown frame to the original one
+        self.quat_offset = [1, 0, 0, 0] 
 
         return
 

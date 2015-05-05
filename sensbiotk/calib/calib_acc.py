@@ -135,7 +135,7 @@ def compute(data):
     
     # For the solution converges, the recording has to be done in each axis direction. If it is not the case
     # we add the missing direction to the data
-    missing_axis = np.array([0.0,0.0,0.0])    
+    missing_axis = np.array([0.0,0.0,0.0])   
     for i in range (0,3):    
         if np.max(np.abs(data[:,i]))<9:
             missing_axis[i] = 9.81            
