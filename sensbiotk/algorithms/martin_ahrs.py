@@ -26,6 +26,12 @@ of a low-cost observer-based attitude and heading reference system.
 Control Engineering Practice, 2010. 18(7): p. 712-722.
 
 It enables the computation of a quaternion from magneto-inertial measurements.
+
+The provided quaternion is expressed regarding the NED (North East Down) frame.
+Once the observer initialized, please take note that the algorithm needs few seconds
+to converge toward its correct attitude and heading.
+
+
 """
 
 # disabling pylint errors 'C0103' invalid variable name, for variables : a,b
