@@ -46,7 +46,7 @@ usage: fox_calib.py [-h] [-o OUTPUT] fox_imu_data.csv
 Fox IMU Calibration
 
 positional arguments:
-  fox_imu_data.csv      Input motion dedicated to calibration
+  fox_imu_data.csv      Input motion dedicated to calibration (this file has to be a record of at least 9 different static positions, without high acceleration or rotaton amplitude)
 
 optional arguments:
   -h, --help            show this help message and exit
