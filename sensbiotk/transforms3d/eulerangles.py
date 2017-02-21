@@ -304,6 +304,48 @@ def euler2quat(z=0, y=0, x=0):
              cx*sy*sz + cy*cz*sx,
              cx*cz*sy - sx*cy*sz,
              cx*cy*sz + sx*cz*sy])
+    
+def euler2quat2(yaw=0, pitch=0, roll=0):
+    ''' Return quaternion corresponding to these Euler angles
+
+    Uses the z, then y, then x convention above
+
+    Parameters
+    ----------
+    z : scalar
+       Rotation angle in radians around z-axis (performed first)
+    y : scalar
+       Rotation angle in radians around y-axis
+    x : scalar
+       Rotation angle in radians around x-axis (performed last)
+
+    Returns
+    -------
+    quat : array shape (4,)
+       Quaternion in w, x, y z (real, then vector) format
+
+    Notes
+    -----
+    From:
+    http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/
+    '''
+
+     c1 = math.cos(yaw / 2)
+     c2 = math.cos(pitch / 2)
+     c3 = math.cos(roll / 2)
+     s1 = math.sin(yaw / 2)
+     s2 = math.sin(pitch / 2)
+     s3 = math.sin(roll / 2)
+
+     c1c2 = c1 * c2
+     s1s2 = s1 * s2
+
+     q1 = c1c2 * c3 - s1s2 * s3
+     q2 = c1c2 * s3 + s1s2 * c3
+     q3 = s1 * c2 * c3 + c1 * s2 * s3
+     q4 = c1 * s2 * c3 - s1 * c2 * s3
+
+     return [q1,q2,q3,q4]
 
 
 def quat2euler(q):
@@ -357,13 +399,132 @@ def quat2euler2(q):
     Simple implementation using :
     http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
     '''
-    phi = math.atan2(2* (q[0] * q[1] + q[2] * q[3]),\
+    yaw = math.atan2(2* (q[0] * q[1] + q[2] * q[3]),\
                          1 - 2 * (q[1] * q[1] + q[2] * q[2]))
-    theta = -math.asin(2 * (q[1] * q[3] - q[0] * q[2]))
-    psi = math.atan2(2 * (q[0] * q[3] + q[1] * q[2]),\
+    pitch = math.asin(2 * (q[0] * q[2] - q[3] * q[1]))
+    roll = math.atan2(2 * (q[0] * q[3] + q[1] * q[2]),\
                          1 - 2 * (q[2] * q[2] + q[3] * q[3]))
     
-    return [phi, theta, psi]
+    return [yaw, pitch, roll]
+    
+def quat2euler3(q):
+    ''' Return Euler angles corresponding to quaternion `q`
+
+    Parameters
+    ----------
+    q : 4 element sequence
+       w, x, y, z of quaternion
+
+    Returns
+    -------
+    z : scalar
+       Rotation angle in radians around z-axis (performed first)
+    y : scalar
+       Rotation angle in radians around y-axis
+    x : scalar
+       Rotation angle in radians around x-axis (performed last)
+
+    Notes
+    -----
+    Simple implementation using :
+    http://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Euler_angles_.E2.86.94_quaternion
+    '''
+    yaw = math.atan2((q[0] * q[2] - q[1] * q[3]),\
+                         q[1] * q[2] + q[0] * q[3])
+    pitch = math.cos(-q[0] * q[0] - q[1] * q[1] + q[2] * q[2] + q[3] * q[3])
+    roll = math.atan2((q[0] * q[2] + q[1] * q[3]),\
+                         -(q[1] * q[2] - q[0] * q[3]))
+    return [yaw, pitch, roll]
+
+    
+def quat2euler4(q):
+    ''' Return Euler angles corresponding to quaternion `q`
+
+    Parameters
+    ----------
+    q : 4 element sequence
+       w, x, y, z of quaternion
+
+    Returns
+    -------
+    z : scalar
+       Rotation angle in radians around z-axis (performed first)
+    y : scalar
+       Rotation angle in radians around y-axis
+    x : scalar
+       Rotation angle in radians around x-axis (performed last)
+
+    Notes
+    -----
+    Implementation using :
+    http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+    '''
+    test = q[1]*q[2] + q[3]*q[0]
+    if test > 0.499:  # singularity at north pole
+         yaw = 2 * math.atan2(q[1],q[0])
+         pitch = np.pi/2
+         roll = 0
+    elif test < -0.499:  # singularity at south pole
+         yaw = -2 * math.atan2(q[1],q[0])
+         pitch = - np.pi/2
+         roll = 0
+    else:    
+         sqx = q[1] * q[1]
+         sqy = q[2] * q[2]
+         sqz = q[3] * q[3]
+         
+         yaw = math.atan2(2 * q[2] * q[0] - 2 * q[1] * q[3], 1 - 2 * sqy - 2 * sqz)
+         pitch = math.asin(2 * test)
+         roll = math.atan2(2 * q[1] * q[0] - 2 * q[2] * q[3] , 1 - 2 * sqx - 2 * sqz)
+         
+    return [yaw, pitch, roll] 
+
+def quat2euler5(q):
+    ''' Return Euler angles corresponding to quaternion `q`
+
+    Parameters
+    ----------
+    q : 4 element sequence
+       w, x, y, z of quaternion
+
+    Returns
+    -------
+    z : scalar
+       Rotation angle in radians around z-axis (performed first)
+    y : scalar
+       Rotation angle in radians around y-axis
+    x : scalar
+       Rotation angle in radians around x-axis (performed last)
+
+    Notes
+    -----
+    Equivalent to quat2euler4 except q could be a non-normalised quaternion   
+    Implementation using :
+    http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+    '''
+    
+    sqw = q[0] * q[0]
+    sqx = q[1] * q[1]
+    sqy = q[2] * q[2]
+    sqz = q[3] * q[3]
+    unit = sqx + sqy + sqz + sqw
+    
+    test = q[1]*q[2] + q[3]*q[0]
+    if test > 0.499 * unit:  # singularity at north pole
+         yaw = 2 * math.atan2(q[1],q[0])
+         pitch = np.pi/2
+         roll = 0
+    elif test < -0.499 * unit:  # singularity at south pole
+         yaw = -2 * math.atan2(q[1],q[0])
+         pitch = - np.pi/2
+         roll = 0
+    else:    
+         
+         yaw = math.atan2(2 * q[2] * q[0] - 2 * q[1] * q[3], sqx - sqy - sqz + sqw)
+         pitch = math.asin(2 * test/unit)
+         roll = math.atan2(2 * q[1] * q[0] - 2 * q[2] * q[3] , -sqx + sqy -sqz + sqw)
+         
+    return [yaw, pitch, roll]     
 
 def euler2angle_axis(z=0, y=0, x=0):
     ''' Return angle, axis corresponding to these Euler angles
