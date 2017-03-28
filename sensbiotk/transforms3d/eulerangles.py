@@ -330,22 +330,22 @@ def euler2quat2(yaw=0, pitch=0, roll=0):
     http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/
     '''
 
-     c1 = math.cos(yaw / 2)
-     c2 = math.cos(pitch / 2)
-     c3 = math.cos(roll / 2)
-     s1 = math.sin(yaw / 2)
-     s2 = math.sin(pitch / 2)
-     s3 = math.sin(roll / 2)
+    c1 = math.cos(yaw / 2)
+    c2 = math.cos(pitch / 2)
+    c3 = math.cos(roll / 2)
+    s1 = math.sin(yaw / 2)
+    s2 = math.sin(pitch / 2)
+    s3 = math.sin(roll / 2)
 
-     c1c2 = c1 * c2
-     s1s2 = s1 * s2
+    c1c2 = c1 * c2
+    s1s2 = s1 * s2
 
-     q1 = c1c2 * c3 - s1s2 * s3
-     q2 = c1c2 * s3 + s1s2 * c3
-     q3 = s1 * c2 * c3 + c1 * s2 * s3
-     q4 = c1 * s2 * c3 - s1 * c2 * s3
-
-     return [q1,q2,q3,q4]
+    q1 = c1c2 * c3 - s1s2 * s3
+    q2 = c1c2 * s3 + s1s2 * c3
+    q3 = s1 * c2 * c3 + c1 * s2 * s3
+    q4 = c1 * s2 * c3 - s1 * c2 * s3
+    
+    return [q1,q2,q3,q4]
 
 
 def quat2euler(q):
